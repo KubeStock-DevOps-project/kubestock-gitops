@@ -1,0 +1,86 @@
+---
+# ms-identity Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-identity
+  labels:
+    app: ms-identity
+    app.kubernetes.io/name: ms-identity
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-identity
+  template:
+    metadata:
+      labels:
+        app: ms-identity
+        app.kubernetes.io/name: ms-identity
+    spec:
+      containers:
+        - name: ms-identity
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity:latest
+          ports:
+            - containerPort: 3006
+              name: http
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3006"
+            # Asgardeo configuration - from secrets
+            - name: ASGARDEO_ORG_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: org_name
+            - name: ASGARDEO_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: base_url
+            - name: ASGARDEO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: client_id
+            - name: ASGARDEO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: client_secret
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3006
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3006
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-identity
+  labels:
+    app: ms-identity
+spec:
+  ports:
+    - port: 3006
+      targetPort: 3006
+      name: http
+  selector:
+    app: ms-identity

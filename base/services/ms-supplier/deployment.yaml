@@ -1,0 +1,85 @@
+---
+# ms-supplier Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-supplier
+  labels:
+    app: ms-supplier
+    app.kubernetes.io/name: ms-supplier
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-supplier
+  template:
+    metadata:
+      labels:
+        app: ms-supplier
+        app.kubernetes.io/name: ms-supplier
+    spec:
+      containers:
+        - name: ms-supplier
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-supplier:latest
+          ports:
+            - containerPort: 3004
+              name: http
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3004"
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: supplier_db
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: PRODUCT_CATALOG_SERVICE_URL
+              value: http://ms-product:3002
+            - name: INVENTORY_SERVICE_URL
+              value: http://ms-inventory:3003
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-supplier
+  labels:
+    app: ms-supplier
+spec:
+  ports:
+    - port: 3004
+      targetPort: 3004
+      name: http
+  selector:
+    app: ms-supplier

@@ -1,0 +1,109 @@
+---
+# ArgoCD Project - Production Environment
+# Supports Blue-Green deployment strategy
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kubestock-production
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: KubeStock Production Environment - Blue-Green Deployment
+
+  # Source repositories allowed (restricted to org repos only)
+  sourceRepos:
+    - 'https://github.com/KubeStock-DevOps-project/kubestock-core.git'
+
+  # Destination clusters and namespaces
+  destinations:
+    # Production namespace for live traffic
+    - namespace: 'kubestock-production'
+      server: https://kubernetes.default.svc
+    # Blue deployment namespace
+    - namespace: 'kubestock-blue'
+      server: https://kubernetes.default.svc
+    # Green deployment namespace
+    - namespace: 'kubestock-green'
+      server: https://kubernetes.default.svc
+    - namespace: 'argocd'
+      server: https://kubernetes.default.svc
+
+  # Cluster-scoped resources allowed
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: 'storage.k8s.io'
+      kind: StorageClass
+
+  # Namespace-scoped resources allowed
+  namespaceResourceWhitelist:
+    - group: 'apps'
+      kind: Deployment
+    - group: 'apps'
+      kind: StatefulSet
+    - group: 'apps'
+      kind: ReplicaSet
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: ServiceAccount
+    - group: ''
+      kind: PersistentVolumeClaim
+    - group: 'networking.k8s.io'
+      kind: Ingress
+    - group: 'networking.k8s.io'
+      kind: NetworkPolicy
+    - group: 'autoscaling'
+      kind: HorizontalPodAutoscaler
+    - group: 'policy'
+      kind: PodDisruptionBudget
+
+  # Sync windows - restricted for production
+  syncWindows:
+    # Deny deployments during night hours (10 PM - 6 AM)
+    - kind: deny
+      schedule: '0 22 * * *'
+      duration: 8h
+      applications:
+        - '*'
+      manualSync: true  # Allow manual sync override
+    # Allow deployments during business hours (Monday-Friday)
+    - kind: allow
+      schedule: '0 6 * * 1-5'
+      duration: 16h
+      applications:
+        - '*'
+
+  # Orphaned resources warning (don't auto-delete)
+  orphanedResources:
+    warn: true
+
+  # Roles for RBAC
+  roles:
+    - name: production-admin
+      description: Full access to production project (requires approval)
+      policies:
+        - p, proj:kubestock-production:production-admin, applications, *, kubestock-production/*, allow
+      groups:
+        - admin
+
+    - name: production-deployer
+      description: Can sync but not delete production apps
+      policies:
+        - p, proj:kubestock-production:production-deployer, applications, get, kubestock-production/*, allow
+        - p, proj:kubestock-production:production-deployer, applications, sync, kubestock-production/*, allow
+      groups:
+        - deployer
+
+    - name: production-viewer
+      description: Read-only access to production
+      policies:
+        - p, proj:kubestock-production:production-viewer, applications, get, kubestock-production/*, allow
+      groups:
+        - viewer
+        - developer

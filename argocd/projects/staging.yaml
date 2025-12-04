@@ -1,0 +1,87 @@
+---
+# ArgoCD Project - Staging Environment
+# Allows deployments to kubestock-staging namespace
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kubestock-staging
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: KubeStock Staging Environment - For testing before production
+
+  # Source repositories allowed
+  sourceRepos:
+    - 'https://github.com/KubeStock-DevOps-project/kubestock-core.git'
+    - 'https://github.com/KubeStock-DevOps-project/*'
+
+  # Destination clusters and namespaces
+  destinations:
+    - namespace: 'kubestock-staging'
+      server: https://kubernetes.default.svc
+    - namespace: 'argocd'
+      server: https://kubernetes.default.svc
+
+  # Cluster-scoped resources allowed
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: 'storage.k8s.io'
+      kind: StorageClass
+
+  # Namespace-scoped resources allowed
+  namespaceResourceWhitelist:
+    - group: 'apps'
+      kind: Deployment
+    - group: 'apps'
+      kind: StatefulSet
+    - group: 'apps'
+      kind: ReplicaSet
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: ServiceAccount
+    - group: ''
+      kind: PersistentVolumeClaim
+    - group: 'networking.k8s.io'
+      kind: Ingress
+    - group: 'networking.k8s.io'
+      kind: NetworkPolicy
+    - group: 'autoscaling'
+      kind: HorizontalPodAutoscaler
+    - group: 'policy'
+      kind: PodDisruptionBudget
+    - group: 'batch'
+      kind: Job
+    - group: 'batch'
+      kind: CronJob
+
+  # Sync windows - allow anytime for staging
+  syncWindows:
+    - kind: allow
+      schedule: '* * * * *'
+      duration: 24h
+      applications:
+        - '*'
+
+  # Roles for RBAC
+  roles:
+    - name: staging-admin
+      description: Full access to staging project
+      policies:
+        - p, proj:kubestock-staging:staging-admin, applications, *, kubestock-staging/*, allow
+      groups:
+        - admin
+        - developer
+
+    - name: staging-viewer
+      description: Read-only access to staging
+      policies:
+        - p, proj:kubestock-staging:staging-viewer, applications, get, kubestock-staging/*, allow
+      groups:
+        - viewer

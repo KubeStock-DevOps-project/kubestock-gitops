@@ -1,0 +1,36 @@
+# Production Main Overlay
+# Shared resources: PostgreSQL, Traffic Router Service
+# Blue-Green traffic routing is controlled via this overlay
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubestock-production
+
+resources:
+  - ../../base/namespaces/production.yaml
+  - ../../base/postgres
+  - traffic-router.yaml
+
+# Common labels
+commonLabels:
+  environment: production
+  app.kubernetes.io/part-of: kubestock
+
+# Production database configuration
+patches:
+  - target:
+      kind: StatefulSet
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "10Gi"
+
+# Production secrets
+secretGenerator:
+  - name: postgres-secret
+    behavior: replace
+    literals:
+      - POSTGRES_USER=kubestock
+      - POSTGRES_PASSWORD=PRODUCTION_PASSWORD_CHANGE_ME
+      - POSTGRES_DB=kubestock

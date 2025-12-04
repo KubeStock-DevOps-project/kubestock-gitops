@@ -1,0 +1,63 @@
+---
+# Production Namespace (main - for shared resources like DB)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubestock-production
+  labels:
+    environment: production
+    app.kubernetes.io/part-of: kubestock
+    argocd.argoproj.io/managed-by: argocd
+---
+# Blue Namespace (Blue-Green deployment)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubestock-blue
+  labels:
+    environment: production
+    deployment-slot: blue
+    app.kubernetes.io/part-of: kubestock
+    argocd.argoproj.io/managed-by: argocd
+---
+# Green Namespace (Blue-Green deployment)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubestock-green
+  labels:
+    environment: production
+    deployment-slot: green
+    app.kubernetes.io/part-of: kubestock
+    argocd.argoproj.io/managed-by: argocd
+---
+# Resource Quota for Production
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: production-quota
+  namespace: kubestock-production
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "16"
+    limits.memory: 32Gi
+    persistentvolumeclaims: "20"
+    requests.storage: 100Gi
+---
+# Limit Range for Production
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: production-limits
+  namespace: kubestock-production
+spec:
+  limits:
+    - default:
+        cpu: 1000m
+        memory: 1Gi
+      defaultRequest:
+        cpu: 200m
+        memory: 256Mi
+      type: Container

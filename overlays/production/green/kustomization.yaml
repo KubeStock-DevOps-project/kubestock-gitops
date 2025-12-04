@@ -1,0 +1,81 @@
+# Production Green Overlay
+# Green deployment slot for blue-green strategy
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubestock-green
+
+resources:
+  - ../../base/services/ms-product
+  - ../../base/services/ms-inventory
+  - ../../base/services/ms-supplier
+  - ../../base/services/ms-order-management
+  - ../../base/services/ms-identity
+  - ../../base/services/frontend
+
+# Common labels for green deployment
+commonLabels:
+  environment: production
+  deployment-slot: green
+  app.kubernetes.io/part-of: kubestock
+
+# Name suffix for green resources
+nameSuffix: -green
+
+# Image tags for production green (new version to deploy)
+images:
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-product
+    newTag: v1.1.0  # New version being deployed
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-inventory
+    newTag: v1.1.0
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-supplier
+    newTag: v1.1.0
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-order-management
+    newTag: v1.1.0
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity
+    newTag: v1.1.0
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/kubestock-frontend
+    newTag: v1.1.0
+
+# Production resource limits
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "256Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "100m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "512Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "500m"
+  # Point to production database
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: postgres.kubestock-production.svc.cluster.local
+
+# Secrets for green slot (same production secrets)
+secretGenerator:
+  - name: postgres-secret
+    behavior: replace
+    literals:
+      - POSTGRES_USER=kubestock
+      - POSTGRES_PASSWORD=PRODUCTION_PASSWORD_CHANGE_ME
+      - POSTGRES_DB=kubestock
+  - name: asgardeo-secret
+    literals:
+      - org_name=kubestock
+      - base_url=https://api.asgardeo.io/t/kubestock
+      - client_id=PRODUCTION_CLIENT_ID
+      - client_secret=PRODUCTION_CLIENT_SECRET

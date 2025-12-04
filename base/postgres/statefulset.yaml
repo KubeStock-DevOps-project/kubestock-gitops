@@ -1,0 +1,148 @@
+---
+# PostgreSQL Secret (base - will be patched per environment)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+type: Opaque
+stringData:
+  POSTGRES_USER: kubestock
+  POSTGRES_PASSWORD: CHANGE_ME_IN_OVERLAY
+  POSTGRES_DB: kubestock
+---
+# Headless Service for StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+spec:
+  ports:
+    - port: 5432
+      name: postgres
+  clusterIP: None
+  selector:
+    app: postgres
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - kubestock
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - kubestock
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: postgres-init
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ebs-gp3
+        resources:
+          requests:
+            storage: 5Gi
+---
+# Init ConfigMap for database creation
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+data:
+  init.sql: |
+    -- Create databases for each microservice
+    CREATE DATABASE product_catalog_db;
+    CREATE DATABASE inventory_db;
+    CREATE DATABASE supplier_db;
+    CREATE DATABASE order_db;
+    
+    -- Grant privileges
+    GRANT ALL PRIVILEGES ON DATABASE product_catalog_db TO kubestock;
+    GRANT ALL PRIVILEGES ON DATABASE inventory_db TO kubestock;
+    GRANT ALL PRIVILEGES ON DATABASE supplier_db TO kubestock;
+    GRANT ALL PRIVILEGES ON DATABASE order_db TO kubestock;
+    
+    -- Add uuid-ossp extension
+    \c product_catalog_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    
+    \c inventory_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    
+    \c supplier_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    
+    \c order_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
