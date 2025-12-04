@@ -1,9 +1,8 @@
 # =============================================================================
 # Kong Declarative Configuration
 # =============================================================================
-# Base config - CORS origins will be patched per environment
-# Staging: * (wildcard)
-# Production: kubestock.dpiyumal.me, api.dpiyumal.me
+# Simple routing: /api/{service}/* → strips prefix → backend service
+# Base config - CORS origins patched per environment (staging: *, prod: domain)
 # =============================================================================
 apiVersion: v1
 kind: ConfigMap
@@ -17,20 +16,20 @@ data:
     # ==========================================================================
     # Services - Backend Microservices
     # ==========================================================================
+    # Routing pattern: /api/{service}/* → service (prefix stripped)
+    # ==========================================================================
 
     services:
       # ------------------------------------------------------------------------
-      # Product Catalog Service
+      # Product Catalog Service: /api/product/*
       # ------------------------------------------------------------------------
       - name: ms-product
         url: http://ms-product.kubestock-staging.svc.kubestock:3002
         routes:
           - name: product-routes
             paths:
-              - /api/products
-              - /api/categories
-              - /api/pricing
-            strip_path: false
+              - /api/product
+            strip_path: true
             protocols:
               - http
               - https
@@ -60,7 +59,7 @@ data:
           - name: prometheus
 
       # ------------------------------------------------------------------------
-      # Inventory Service
+      # Inventory Service: /api/inventory/*
       # ------------------------------------------------------------------------
       - name: ms-inventory
         url: http://ms-inventory.kubestock-staging.svc.kubestock:3003
@@ -68,9 +67,7 @@ data:
           - name: inventory-routes
             paths:
               - /api/inventory
-              - /api/stock
-              - /api/alerts
-            strip_path: false
+            strip_path: true
             protocols:
               - http
               - https
@@ -100,16 +97,15 @@ data:
           - name: prometheus
 
       # ------------------------------------------------------------------------
-      # Supplier Service
+      # Supplier Service: /api/supplier/*
       # ------------------------------------------------------------------------
       - name: ms-supplier
         url: http://ms-supplier.kubestock-staging.svc.kubestock:3004
         routes:
           - name: supplier-routes
             paths:
-              - /api/suppliers
-              - /api/purchase-orders
-            strip_path: false
+              - /api/supplier
+            strip_path: true
             protocols:
               - http
               - https
@@ -139,15 +135,15 @@ data:
           - name: prometheus
 
       # ------------------------------------------------------------------------
-      # Order Management Service
+      # Order Management Service: /api/order/*
       # ------------------------------------------------------------------------
       - name: ms-order-management
         url: http://ms-order-management.kubestock-staging.svc.kubestock:3005
         routes:
           - name: order-routes
             paths:
-              - /api/orders
-            strip_path: false
+              - /api/order
+            strip_path: true
             protocols:
               - http
               - https
@@ -177,7 +173,7 @@ data:
           - name: prometheus
 
       # ------------------------------------------------------------------------
-      # Identity Service (Asgardeo SCIM2 Proxy)
+      # Identity Service: /api/identity/*
       # ------------------------------------------------------------------------
       - name: ms-identity
         url: http://ms-identity.kubestock-staging.svc.kubestock:3006
@@ -185,10 +181,7 @@ data:
           - name: identity-routes
             paths:
               - /api/identity
-              - /api/users
-              - /api/groups
-              - /api/roles
-            strip_path: false
+            strip_path: true
             protocols:
               - http
               - https
@@ -218,7 +211,7 @@ data:
           - name: prometheus
 
       # ------------------------------------------------------------------------
-      # Frontend Static Assets
+      # Frontend Static Assets: /*
       # ------------------------------------------------------------------------
       - name: frontend
         url: http://frontend.kubestock-staging.svc.kubestock:80
@@ -234,7 +227,7 @@ data:
           - name: prometheus
 
       # ------------------------------------------------------------------------
-      # Health Check Endpoint
+      # Health Check Endpoint: /health
       # ------------------------------------------------------------------------
       - name: health
         url: http://localhost:8001/status
