@@ -15,9 +15,9 @@ metadata:
 spec:
   project: kubestock-staging
   source:
-    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-core.git
-    targetRevision: k8s-depl
-    path: gitops/overlays/staging
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    targetRevision: main
+    path: overlays/staging
   destination:
     server: https://kubernetes.default.svc
     namespace: kubestock-staging

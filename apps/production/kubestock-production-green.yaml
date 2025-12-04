@@ -15,9 +15,9 @@ metadata:
 spec:
   project: kubestock-production
   source:
-    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-core.git
-    targetRevision: k8s-depl
-    path: gitops/overlays/production/green
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    targetRevision: main
+    path: overlays/production/green
   destination:
     server: https://kubernetes.default.svc
     namespace: kubestock-production
