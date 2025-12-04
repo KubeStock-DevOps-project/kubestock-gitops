@@ -1,5 +1,6 @@
----
-# ms-inventory Deployment
+# =============================================================================
+# ms-inventory - Inventory Service
+# =============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,11 +18,11 @@ spec:
     metadata:
       labels:
         app: ms-inventory
-        app.kubernetes.io/name: ms-inventory
     spec:
       containers:
         - name: ms-inventory
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-inventory:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-inventory:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3003
               name: http
@@ -30,6 +31,8 @@ spec:
               value: production
             - name: PORT
               value: "3003"
+            - name: HOST
+              value: "0.0.0.0"
             - name: DB_HOST
               value: postgres
             - name: DB_PORT
@@ -59,7 +62,7 @@ spec:
             httpGet:
               path: /health
               port: 3003
-            initialDelaySeconds: 10
+            initialDelaySeconds: 15
             periodSeconds: 5
           livenessProbe:
             httpGet:
@@ -67,17 +70,3 @@ spec:
               port: 3003
             initialDelaySeconds: 30
             periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ms-inventory
-  labels:
-    app: ms-inventory
-spec:
-  ports:
-    - port: 3003
-      targetPort: 3003
-      name: http
-  selector:
-    app: ms-inventory

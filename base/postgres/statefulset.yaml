@@ -1,16 +1,11 @@
+# =============================================================================
+# PostgreSQL StatefulSet for KubeStock
+# =============================================================================
+# Single PostgreSQL instance with multiple databases for each microservice.
+# Databases: product_catalog_db, inventory_db, supplier_db, order_db
+# =============================================================================
 ---
-# PostgreSQL Secret (base - will be patched per environment)
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-secret
-type: Opaque
-stringData:
-  POSTGRES_USER: kubestock
-  POSTGRES_PASSWORD: CHANGE_ME_IN_OVERLAY
-  POSTGRES_DB: kubestock
----
-# Headless Service for StatefulSet
+# Headless Service for StatefulSet DNS
 apiVersion: v1
 kind: Service
 metadata:
@@ -47,7 +42,6 @@ spec:
       labels:
         app: postgres
         app.kubernetes.io/name: postgres
-        app.kubernetes.io/component: database
     spec:
       containers:
         - name: postgres
@@ -67,10 +61,7 @@ spec:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_DB
+              value: postgres
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           volumeMounts:
@@ -90,15 +81,15 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - kubestock
-            initialDelaySeconds: 5
-            periodSeconds: 10
+                - postgres
+            initialDelaySeconds: 10
+            periodSeconds: 5
           livenessProbe:
             exec:
               command:
                 - pg_isready
                 - -U
-                - kubestock
+                - postgres
             initialDelaySeconds: 30
             periodSeconds: 10
       volumes:
@@ -113,36 +104,4 @@ spec:
         storageClassName: ebs-gp3
         resources:
           requests:
-            storage: 5Gi
----
-# Init ConfigMap for database creation
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgres-init
-data:
-  init.sql: |
-    -- Create databases for each microservice
-    CREATE DATABASE product_catalog_db;
-    CREATE DATABASE inventory_db;
-    CREATE DATABASE supplier_db;
-    CREATE DATABASE order_db;
-    
-    -- Grant privileges
-    GRANT ALL PRIVILEGES ON DATABASE product_catalog_db TO kubestock;
-    GRANT ALL PRIVILEGES ON DATABASE inventory_db TO kubestock;
-    GRANT ALL PRIVILEGES ON DATABASE supplier_db TO kubestock;
-    GRANT ALL PRIVILEGES ON DATABASE order_db TO kubestock;
-    
-    -- Add uuid-ossp extension
-    \c product_catalog_db;
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-    
-    \c inventory_db;
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-    
-    \c supplier_db;
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-    
-    \c order_db;
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+            storage: 10Gi

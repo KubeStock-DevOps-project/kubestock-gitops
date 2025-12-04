@@ -1,79 +1,51 @@
-# Staging Overlay
-# Deploys all services to kubestock-staging namespace
+# =============================================================================
+# Staging Overlay - kubestock-staging namespace
+# =============================================================================
+# Uses 'latest' tag for staging (acceptable for non-prod)
+# CORS: * (wildcard)
+# =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: kubestock-staging
 
 resources:
-  - ../../base/namespaces/staging.yaml
-  - ../../base/postgres
-  - ../../base/services/ms-product
-  - ../../base/services/ms-inventory
-  - ../../base/services/ms-supplier
-  - ../../base/services/ms-order-management
-  - ../../base/services/ms-identity
-  - ../../base/services/frontend
+  - ../../base/postgres/
+  - ../../base/services/ms-product/
+  - ../../base/services/ms-inventory/
+  - ../../base/services/ms-supplier/
+  - ../../base/services/ms-order-management/
+  - ../../base/services/ms-identity/
+  - ../../base/services/frontend/
+  - namespace.yaml
+  - secrets.yaml
 
-# Common labels for all resources
-commonLabels:
-  environment: staging
-  app.kubernetes.io/part-of: kubestock
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: false
 
-# Image tags for staging (can use :staging or specific tags)
+# Image tags - using latest for staging
 images:
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-product
-    newTag: staging
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-inventory
-    newTag: staging
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-supplier
-    newTag: staging
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-order-management
-    newTag: staging
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity
-    newTag: staging
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/kubestock-frontend
-    newTag: staging
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-inventory
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend
+    newTag: latest
 
 # Patches for staging-specific configuration
 patches:
-  # Reduce replica count for staging (cost savings)
-  - target:
-      kind: Deployment
-    patch: |-
+  # Reduce replicas for staging
+  - patch: |-
       - op: replace
         path: /spec/replicas
         value: 1
-  # Reduce resource limits for staging
-  - target:
+    target:
       kind: Deployment
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/resources/limits/memory
-        value: "256Mi"
-      - op: replace
-        path: /spec/template/spec/containers/0/resources/limits/cpu
-        value: "200m"
-  # Reduce PG storage for staging
-  - target:
-      kind: StatefulSet
-      name: postgres
-    patch: |-
-      - op: replace
-        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
-        value: "2Gi"
-
-# Secret generator for staging credentials
-secretGenerator:
-  - name: postgres-secret
-    behavior: replace
-    literals:
-      - POSTGRES_USER=kubestock
-      - POSTGRES_PASSWORD=staging-password-change-me
-      - POSTGRES_DB=kubestock
-  - name: asgardeo-secret
-    literals:
-      - org_name=kubestock
-      - base_url=https://api.asgardeo.io/t/kubestock
-      - client_id=STAGING_CLIENT_ID
-      - client_secret=STAGING_CLIENT_SECRET

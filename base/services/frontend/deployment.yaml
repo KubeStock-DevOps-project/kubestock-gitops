@@ -1,5 +1,6 @@
----
-# Frontend Deployment
+# =============================================================================
+# frontend - KubeStock Frontend (React/Vite with Nginx)
+# =============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +8,7 @@ metadata:
   labels:
     app: frontend
     app.kubernetes.io/name: frontend
-    app.kubernetes.io/component: ui
+    app.kubernetes.io/component: web
 spec:
   replicas: 1
   selector:
@@ -17,11 +18,11 @@ spec:
     metadata:
       labels:
         app: frontend
-        app.kubernetes.io/name: frontend
     spec:
       containers:
         - name: frontend
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/kubestock-frontend:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http
@@ -44,18 +45,3 @@ spec:
               port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-  labels:
-    app: frontend
-spec:
-  type: ClusterIP
-  ports:
-    - port: 80
-      targetPort: 80
-      name: http
-  selector:
-    app: frontend

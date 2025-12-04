@@ -1,124 +1,102 @@
+# =============================================================================
+# Production Traffic Router - Blue/Green Switching
+# =============================================================================
+# These services route to either blue or green deployment slots.
+# To switch traffic: update the selector from slot: blue to slot: green
+# =============================================================================
 ---
-# Traffic Router Services for Blue-Green Deployment
-# These services route traffic to either blue or green deployments
-# To switch traffic, update the selector from 'blue' to 'green' or vice versa
-
-# Frontend Traffic Router
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-  namespace: kubestock-production
-  labels:
-    app: frontend
-    type: traffic-router
-  annotations:
-    description: "Routes traffic to active deployment slot (blue/green)"
-spec:
-  type: NodePort
-  ports:
-    - port: 80
-      targetPort: 80
-      nodePort: 30080
-      name: http
-  # Change selector to switch traffic between blue and green
-  selector:
-    app: frontend
-    deployment-slot: blue  # Change to 'green' to switch traffic
----
-# API Gateway / Backend Traffic Router
-apiVersion: v1
-kind: Service
-metadata:
-  name: api-gateway
-  namespace: kubestock-production
-  labels:
-    type: traffic-router
-  annotations:
-    description: "Routes API traffic to active deployment slot"
-spec:
-  type: ClusterIP
-  ports:
-    - name: ms-product
-      port: 3002
-      targetPort: 3002
-    - name: ms-inventory
-      port: 3003
-      targetPort: 3003
-    - name: ms-supplier
-      port: 3004
-      targetPort: 3004
-    - name: ms-order-management
-      port: 3005
-      targetPort: 3005
-    - name: ms-identity
-      port: 3006
-      targetPort: 3006
-  selector:
-    deployment-slot: blue  # Change to 'green' to switch traffic
----
-# Individual service routers (for direct access)
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-product
   namespace: kubestock-production
+  labels:
+    app: ms-product
+    app.kubernetes.io/name: ms-product
 spec:
+  type: ClusterIP
   ports:
     - port: 3002
       targetPort: 3002
+      protocol: TCP
+      name: http
+  # Change selector to switch between blue/green
   selector:
     app: ms-product
-    deployment-slot: blue
+    slot: blue
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-inventory
   namespace: kubestock-production
+  labels:
+    app: ms-inventory
+    app.kubernetes.io/name: ms-inventory
 spec:
+  type: ClusterIP
   ports:
     - port: 3003
       targetPort: 3003
+      protocol: TCP
+      name: http
   selector:
     app: ms-inventory
-    deployment-slot: blue
+    slot: blue
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-supplier
   namespace: kubestock-production
+  labels:
+    app: ms-supplier
+    app.kubernetes.io/name: ms-supplier
 spec:
+  type: ClusterIP
   ports:
     - port: 3004
       targetPort: 3004
+      protocol: TCP
+      name: http
   selector:
     app: ms-supplier
-    deployment-slot: blue
+    slot: blue
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-order-management
   namespace: kubestock-production
+  labels:
+    app: ms-order-management
+    app.kubernetes.io/name: ms-order-management
 spec:
+  type: ClusterIP
   ports:
     - port: 3005
       targetPort: 3005
+      protocol: TCP
+      name: http
   selector:
     app: ms-order-management
-    deployment-slot: blue
+    slot: blue
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ms-identity
   namespace: kubestock-production
+  labels:
+    app: ms-identity
+    app.kubernetes.io/name: ms-identity
 spec:
+  type: ClusterIP
   ports:
     - port: 3006
       targetPort: 3006
+      protocol: TCP
+      name: http
   selector:
     app: ms-identity
-    deployment-slot: blue
+    slot: blue

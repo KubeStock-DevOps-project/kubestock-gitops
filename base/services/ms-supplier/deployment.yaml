@@ -1,5 +1,6 @@
----
-# ms-supplier Deployment
+# =============================================================================
+# ms-supplier - Supplier Service
+# =============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,11 +18,11 @@ spec:
     metadata:
       labels:
         app: ms-supplier
-        app.kubernetes.io/name: ms-supplier
     spec:
       containers:
         - name: ms-supplier
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-supplier:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3004
               name: http
@@ -30,6 +31,8 @@ spec:
               value: production
             - name: PORT
               value: "3004"
+            - name: HOST
+              value: "0.0.0.0"
             - name: DB_HOST
               value: postgres
             - name: DB_PORT
@@ -61,7 +64,7 @@ spec:
             httpGet:
               path: /health
               port: 3004
-            initialDelaySeconds: 10
+            initialDelaySeconds: 15
             periodSeconds: 5
           livenessProbe:
             httpGet:
@@ -69,17 +72,3 @@ spec:
               port: 3004
             initialDelaySeconds: 30
             periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ms-supplier
-  labels:
-    app: ms-supplier
-spec:
-  ports:
-    - port: 3004
-      targetPort: 3004
-      name: http
-  selector:
-    app: ms-supplier

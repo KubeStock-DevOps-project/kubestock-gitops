@@ -1,5 +1,6 @@
----
-# ms-order-management Deployment
+# =============================================================================
+# ms-order-management - Order Management Service
+# =============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,11 +18,11 @@ spec:
     metadata:
       labels:
         app: ms-order-management
-        app.kubernetes.io/name: ms-order-management
     spec:
       containers:
         - name: ms-order-management
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-order-management:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3005
               name: http
@@ -30,6 +31,8 @@ spec:
               value: production
             - name: PORT
               value: "3005"
+            - name: HOST
+              value: "0.0.0.0"
             - name: DB_HOST
               value: postgres
             - name: DB_PORT
@@ -61,7 +64,7 @@ spec:
             httpGet:
               path: /health
               port: 3005
-            initialDelaySeconds: 10
+            initialDelaySeconds: 15
             periodSeconds: 5
           livenessProbe:
             httpGet:
@@ -69,17 +72,3 @@ spec:
               port: 3005
             initialDelaySeconds: 30
             periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ms-order-management
-  labels:
-    app: ms-order-management
-spec:
-  ports:
-    - port: 3005
-      targetPort: 3005
-      name: http
-  selector:
-    app: ms-order-management

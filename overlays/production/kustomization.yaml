@@ -1,36 +1,58 @@
-# Production Main Overlay
-# Shared resources: PostgreSQL, Traffic Router Service
-# Blue-Green traffic routing is controlled via this overlay
+# =============================================================================
+# Production Overlay - kubestock-production namespace
+# =============================================================================
+# Blue-Green Deployment Strategy
+# - Shared resources: postgres, frontend, kong config
+# - Blue/Green slots for microservices
+# CORS: kubestock.dpiyumal.me, api.dpiyumal.me
+# =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: kubestock-production
 
 resources:
-  - ../../base/namespaces/production.yaml
-  - ../../base/postgres
+  - ../../base/postgres/
+  - ../../base/services/frontend/
+  - namespace.yaml
+  - secrets.yaml
   - traffic-router.yaml
 
-# Common labels
-commonLabels:
-  environment: production
-  app.kubernetes.io/part-of: kubestock
+labels:
+  - pairs:
+      environment: production
+    includeSelectors: false
 
-# Production database configuration
+# Production replicas patch
 patches:
-  - target:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+  # Increase PostgreSQL resources for production
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "512Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "200m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "1Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "1000m"
+    target:
       kind: StatefulSet
       name: postgres
-    patch: |-
+  # Increase PVC size for production
+  - patch: |-
       - op: replace
         path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
-        value: "10Gi"
-
-# Production secrets
-secretGenerator:
-  - name: postgres-secret
-    behavior: replace
-    literals:
-      - POSTGRES_USER=kubestock
-      - POSTGRES_PASSWORD=PRODUCTION_PASSWORD_CHANGE_ME
-      - POSTGRES_DB=kubestock
+        value: "50Gi"
+    target:
+      kind: StatefulSet
+      name: postgres

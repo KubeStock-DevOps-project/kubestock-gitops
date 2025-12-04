@@ -1,0 +1,234 @@
+# =============================================================================
+# Kong Configuration for Production - Specific CORS Domains
+# =============================================================================
+# Domains: kubestock.dpiyumal.me, api.dpiyumal.me
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-declarative-config
+  namespace: kong
+data:
+  kong.yml: |
+    _format_version: "3.0"
+
+    # ==========================================================================
+    # Services - Backend Microservices (Production)
+    # ==========================================================================
+
+    services:
+      # ------------------------------------------------------------------------
+      # Product Catalog Service
+      # ------------------------------------------------------------------------
+      - name: ms-product
+        url: http://ms-product.kubestock-production.svc.cluster.local:3002
+        routes:
+          - name: product-routes
+            paths:
+              - /api/products
+              - /api/categories
+            strip_path: false
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 200
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "https://kubestock.dpiyumal.me"
+                - "https://api.dpiyumal.me"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # ------------------------------------------------------------------------
+      # Inventory Service
+      # ------------------------------------------------------------------------
+      - name: ms-inventory
+        url: http://ms-inventory.kubestock-production.svc.cluster.local:3003
+        routes:
+          - name: inventory-routes
+            paths:
+              - /api/inventory
+              - /api/stock
+            strip_path: false
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 200
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "https://kubestock.dpiyumal.me"
+                - "https://api.dpiyumal.me"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # ------------------------------------------------------------------------
+      # Supplier Service
+      # ------------------------------------------------------------------------
+      - name: ms-supplier
+        url: http://ms-supplier.kubestock-production.svc.cluster.local:3004
+        routes:
+          - name: supplier-routes
+            paths:
+              - /api/suppliers
+              - /api/purchase-orders
+            strip_path: false
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "https://kubestock.dpiyumal.me"
+                - "https://api.dpiyumal.me"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # ------------------------------------------------------------------------
+      # Order Management Service
+      # ------------------------------------------------------------------------
+      - name: ms-order-management
+        url: http://ms-order-management.kubestock-production.svc.cluster.local:3005
+        routes:
+          - name: order-routes
+            paths:
+              - /api/orders
+            strip_path: false
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 150
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "https://kubestock.dpiyumal.me"
+                - "https://api.dpiyumal.me"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # ------------------------------------------------------------------------
+      # Identity Service (Asgardeo SCIM2 Proxy)
+      # ------------------------------------------------------------------------
+      - name: ms-identity
+        url: http://ms-identity.kubestock-production.svc.cluster.local:3006
+        routes:
+          - name: identity-routes
+            paths:
+              - /api/users
+              - /api/groups
+              - /api/roles
+            strip_path: false
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "https://kubestock.dpiyumal.me"
+                - "https://api.dpiyumal.me"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # ------------------------------------------------------------------------
+      # Frontend Static Assets
+      # ------------------------------------------------------------------------
+      - name: frontend
+        url: http://frontend.kubestock-production.svc.cluster.local:80
+        routes:
+          - name: frontend-routes
+            paths:
+              - /
+            strip_path: false
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: prometheus

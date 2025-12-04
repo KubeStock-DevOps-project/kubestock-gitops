@@ -1,5 +1,6 @@
----
-# ms-identity Deployment
+# =============================================================================
+# ms-identity - Identity Service (Asgardeo SCIM2 Proxy)
+# =============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,11 +18,11 @@ spec:
     metadata:
       labels:
         app: ms-identity
-        app.kubernetes.io/name: ms-identity
     spec:
       containers:
         - name: ms-identity
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3006
               name: http
@@ -30,27 +31,63 @@ spec:
               value: production
             - name: PORT
               value: "3006"
-            # Asgardeo configuration - from secrets
+            - name: HOST
+              value: "0.0.0.0"
             - name: ASGARDEO_ORG_NAME
               valueFrom:
                 secretKeyRef:
                   name: asgardeo-secret
-                  key: org_name
+                  key: ASGARDEO_ORG_NAME
             - name: ASGARDEO_BASE_URL
               valueFrom:
                 secretKeyRef:
                   name: asgardeo-secret
-                  key: base_url
+                  key: ASGARDEO_BASE_URL
             - name: ASGARDEO_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: asgardeo-secret
-                  key: client_id
+                  key: ASGARDEO_M2M_CLIENT_ID
             - name: ASGARDEO_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: asgardeo-secret
-                  key: client_secret
+                  key: ASGARDEO_M2M_CLIENT_SECRET
+            - name: ASGARDEO_TOKEN_URL
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_TOKEN_URL
+            - name: ASGARDEO_SCIM2_URL
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_SCIM2_URL
+            - name: ASGARDEO_JWKS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_JWKS_URL
+            - name: ASGARDEO_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_ISSUER
+            - name: ASGARDEO_GROUP_ID_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_GROUP_ID_ADMIN
+            - name: ASGARDEO_GROUP_ID_SUPPLIER
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_GROUP_ID_SUPPLIER
+            - name: ASGARDEO_GROUP_ID_WAREHOUSE_STAFF
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_GROUP_ID_WAREHOUSE_STAFF
           resources:
             requests:
               memory: "128Mi"
@@ -70,17 +107,3 @@ spec:
               port: 3006
             initialDelaySeconds: 30
             periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ms-identity
-  labels:
-    app: ms-identity
-spec:
-  ports:
-    - port: 3006
-      targetPort: 3006
-      name: http
-  selector:
-    app: ms-identity
