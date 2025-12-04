@@ -29,6 +29,7 @@ data:
             paths:
               - /api/products
               - /api/categories
+              - /api/pricing
             strip_path: false
             protocols:
               - http
@@ -68,6 +69,7 @@ data:
             paths:
               - /api/inventory
               - /api/stock
+              - /api/alerts
             strip_path: false
             protocols:
               - http
@@ -182,6 +184,7 @@ data:
         routes:
           - name: identity-routes
             paths:
+              - /api/identity
               - /api/users
               - /api/groups
               - /api/roles
