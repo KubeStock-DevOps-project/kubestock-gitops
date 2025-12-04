@@ -13,9 +13,9 @@ metadata:
 spec:
   project: kubestock-staging  # Kong serves both staging and prod
   source:
-    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-core.git
-    targetRevision: k8s-depl
-    path: gitops/base/kong
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    targetRevision: main
+    path: base/kong
   destination:
     server: https://kubernetes.default.svc
     namespace: kong
