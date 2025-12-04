@@ -1,0 +1,42 @@
+# =============================================================================
+# PostgreSQL Init Script - Creates databases for each microservice
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  labels:
+    app: postgres
+data:
+  01-init.sql: |
+    -- =============================================================================
+    -- KubeStock - Database Initialization Script
+    -- =============================================================================
+    
+    -- Create databases for each microservice
+    CREATE DATABASE product_catalog_db;
+    CREATE DATABASE inventory_db;
+    CREATE DATABASE supplier_db;
+    CREATE DATABASE order_db;
+    
+    -- Add uuid-ossp extension to each database
+    \c product_catalog_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    
+    \c inventory_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    
+    \c supplier_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    
+    \c order_db;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    
+    -- Return to default database
+    \c postgres;
+    
+    -- Log completion
+    DO $$
+    BEGIN
+      RAISE NOTICE 'KubeStock databases initialized successfully!';
+    END $$;

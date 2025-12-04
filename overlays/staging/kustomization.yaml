@@ -1,0 +1,51 @@
+# =============================================================================
+# Staging Overlay - kubestock-staging namespace
+# =============================================================================
+# Uses 'latest' tag for staging (acceptable for non-prod)
+# CORS: * (wildcard)
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubestock-staging
+
+resources:
+  - ../../base/postgres/
+  - ../../base/services/ms-product/
+  - ../../base/services/ms-inventory/
+  - ../../base/services/ms-supplier/
+  - ../../base/services/ms-order-management/
+  - ../../base/services/ms-identity/
+  - ../../base/services/frontend/
+  - namespace.yaml
+  - secrets.yaml
+
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: false
+
+# Image tags - using latest for staging
+images:
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-inventory
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
+    newTag: latest
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend
+    newTag: latest
+
+# Patches for staging-specific configuration
+patches:
+  # Reduce replicas for staging
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment

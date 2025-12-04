@@ -1,0 +1,31 @@
+# =============================================================================
+# ArgoCD Application - Production Shared Resources
+# =============================================================================
+# Deploys shared resources: PostgreSQL, Frontend, Traffic Router
+# Blue-green switching done via traffic-router.yaml service selectors
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubestock-production-shared
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: kubestock-production
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-core.git
+    targetRevision: k8s-depl
+    path: gitops/overlays/production
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubestock-production
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+    # Manual sync - auto-sync disabled per requirements
+    # automated:
+    #   prune: true
+    #   selfHeal: true

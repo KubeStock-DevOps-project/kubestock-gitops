@@ -1,0 +1,29 @@
+# =============================================================================
+# ArgoCD Application - Kong API Gateway
+# =============================================================================
+# Deploys Kong gateway in kong namespace
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kong-gateway
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: kubestock-staging  # Kong serves both staging and prod
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-core.git
+    targetRevision: k8s-depl
+    path: gitops/base/kong
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kong
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    # Manual sync - auto-sync disabled per requirements
+    # automated:
+    #   prune: true
+    #   selfHeal: true

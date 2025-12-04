@@ -1,0 +1,32 @@
+# =============================================================================
+# ArgoCD Application - Production Green Slot
+# =============================================================================
+# Deploys microservices with slot: green label
+# Uses specific SHA image tags (no 'latest')
+# Initially disabled - enable when deploying new version
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubestock-production-green
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: kubestock-production
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-core.git
+    targetRevision: k8s-depl
+    path: gitops/overlays/production/green
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubestock-production
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+    # Manual sync - auto-sync disabled per requirements
+    # automated:
+    #   prune: true
+    #   selfHeal: true

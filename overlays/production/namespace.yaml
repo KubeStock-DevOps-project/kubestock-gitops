@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubestock-production
+  labels:
+    environment: production
+    app.kubernetes.io/part-of: kubestock

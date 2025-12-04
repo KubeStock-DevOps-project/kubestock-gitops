@@ -1,0 +1,32 @@
+# =============================================================================
+# ArgoCD Application - Staging Environment
+# =============================================================================
+# Deploys all services to kubestock-staging namespace
+# Uses 'latest' image tags
+# Manual sync (auto-sync disabled)
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubestock-staging
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: kubestock-staging
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-core.git
+    targetRevision: k8s-depl
+    path: gitops/overlays/staging
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubestock-staging
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+    # Manual sync - auto-sync disabled per requirements
+    # automated:
+    #   prune: true
+    #   selfHeal: true

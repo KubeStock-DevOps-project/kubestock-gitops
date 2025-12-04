@@ -1,0 +1,102 @@
+# =============================================================================
+# Production Traffic Router - Blue/Green Switching
+# =============================================================================
+# These services route to either blue or green deployment slots.
+# To switch traffic: update the selector from slot: blue to slot: green
+# =============================================================================
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-product
+  namespace: kubestock-production
+  labels:
+    app: ms-product
+    app.kubernetes.io/name: ms-product
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3002
+      targetPort: 3002
+      protocol: TCP
+      name: http
+  # Change selector to switch between blue/green
+  selector:
+    app: ms-product
+    slot: blue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-inventory
+  namespace: kubestock-production
+  labels:
+    app: ms-inventory
+    app.kubernetes.io/name: ms-inventory
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3003
+      targetPort: 3003
+      protocol: TCP
+      name: http
+  selector:
+    app: ms-inventory
+    slot: blue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-supplier
+  namespace: kubestock-production
+  labels:
+    app: ms-supplier
+    app.kubernetes.io/name: ms-supplier
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3004
+      targetPort: 3004
+      protocol: TCP
+      name: http
+  selector:
+    app: ms-supplier
+    slot: blue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-order-management
+  namespace: kubestock-production
+  labels:
+    app: ms-order-management
+    app.kubernetes.io/name: ms-order-management
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3005
+      targetPort: 3005
+      protocol: TCP
+      name: http
+  selector:
+    app: ms-order-management
+    slot: blue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-identity
+  namespace: kubestock-production
+  labels:
+    app: ms-identity
+    app.kubernetes.io/name: ms-identity
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3006
+      targetPort: 3006
+      protocol: TCP
+      name: http
+  selector:
+    app: ms-identity
+    slot: blue
