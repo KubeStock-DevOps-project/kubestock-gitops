@@ -21,7 +21,7 @@ data:
       # Product Catalog Service
       # ------------------------------------------------------------------------
       - name: ms-product
-        url: http://ms-product.kubestock-production.svc.cluster.local:3002
+        url: http://ms-product.kubestock-production.svc.kubestock:3002
         routes:
           - name: product-routes
             paths:
@@ -61,7 +61,7 @@ data:
       # Inventory Service
       # ------------------------------------------------------------------------
       - name: ms-inventory
-        url: http://ms-inventory.kubestock-production.svc.cluster.local:3003
+        url: http://ms-inventory.kubestock-production.svc.kubestock:3003
         routes:
           - name: inventory-routes
             paths:
@@ -101,7 +101,7 @@ data:
       # Supplier Service
       # ------------------------------------------------------------------------
       - name: ms-supplier
-        url: http://ms-supplier.kubestock-production.svc.cluster.local:3004
+        url: http://ms-supplier.kubestock-production.svc.kubestock:3004
         routes:
           - name: supplier-routes
             paths:
@@ -141,7 +141,7 @@ data:
       # Order Management Service
       # ------------------------------------------------------------------------
       - name: ms-order-management
-        url: http://ms-order-management.kubestock-production.svc.cluster.local:3005
+        url: http://ms-order-management.kubestock-production.svc.kubestock:3005
         routes:
           - name: order-routes
             paths:
@@ -180,7 +180,7 @@ data:
       # Identity Service (Asgardeo SCIM2 Proxy)
       # ------------------------------------------------------------------------
       - name: ms-identity
-        url: http://ms-identity.kubestock-production.svc.cluster.local:3006
+        url: http://ms-identity.kubestock-production.svc.kubestock:3006
         routes:
           - name: identity-routes
             paths:
@@ -221,7 +221,7 @@ data:
       # Frontend Static Assets
       # ------------------------------------------------------------------------
       - name: frontend
-        url: http://frontend.kubestock-production.svc.cluster.local:80
+        url: http://frontend.kubestock-production.svc.kubestock:80
         routes:
           - name: frontend-routes
             paths:
