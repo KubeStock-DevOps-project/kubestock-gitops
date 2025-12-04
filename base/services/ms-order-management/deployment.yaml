@@ -7,13 +7,16 @@ metadata:
   name: ms-order-management
   labels:
     app: ms-order-management
-    app.kubernetes.io/name: ms-order-management
-    app.kubernetes.io/component: api
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: ms-order-management
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -25,16 +28,16 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3005
-              name: http
           env:
             - name: NODE_ENV
               value: production
             - name: PORT
               value: "3005"
-            - name: HOST
-              value: "0.0.0.0"
             - name: DB_HOST
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_HOST
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
@@ -42,17 +45,17 @@ spec:
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_USER
+                  name: db-secret
+                  key: DB_USER
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_PASSWORD
-            - name: PRODUCT_CATALOG_SERVICE_URL
-              value: http://ms-product:3002
+                  name: db-secret
+                  key: DB_PASSWORD
             - name: INVENTORY_SERVICE_URL
               value: http://ms-inventory:3003
+            - name: PRODUCT_SERVICE_URL
+              value: http://ms-product:3002
           resources:
             requests:
               memory: "128Mi"
@@ -64,11 +67,11 @@ spec:
             httpGet:
               path: /health
               port: 3005
-            initialDelaySeconds: 15
+            initialDelaySeconds: 10
             periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /health
               port: 3005
-            initialDelaySeconds: 30
+            initialDelaySeconds: 20
             periodSeconds: 10

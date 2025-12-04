@@ -1,6 +1,8 @@
 # =============================================================================
 # Staging Overlay - kubestock-staging namespace
 # =============================================================================
+# Rolling Update Deployment Strategy
+# Uses RDS PostgreSQL for database
 # Uses 'latest' tag for staging (acceptable for non-prod)
 # CORS: * (wildcard)
 # =============================================================================
@@ -10,7 +12,6 @@ kind: Kustomization
 namespace: kubestock-staging
 
 resources:
-  - ../../base/postgres/
   - ../../base/services/ms-product/
   - ../../base/services/ms-inventory/
   - ../../base/services/ms-supplier/
@@ -37,7 +38,7 @@ images:
     newTag: latest
   - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
     newTag: latest
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/frontend
     newTag: latest
 
 # Patches for staging-specific configuration

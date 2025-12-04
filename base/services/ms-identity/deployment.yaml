@@ -7,13 +7,16 @@ metadata:
   name: ms-identity
   labels:
     app: ms-identity
-    app.kubernetes.io/name: ms-identity
-    app.kubernetes.io/component: api
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: ms-identity
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -25,14 +28,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3006
-              name: http
           env:
             - name: NODE_ENV
               value: production
             - name: PORT
               value: "3006"
-            - name: HOST
-              value: "0.0.0.0"
             - name: ASGARDEO_ORG_NAME
               valueFrom:
                 secretKeyRef:
@@ -43,12 +43,12 @@ spec:
                 secretKeyRef:
                   name: asgardeo-secret
                   key: ASGARDEO_BASE_URL
-            - name: ASGARDEO_CLIENT_ID
+            - name: ASGARDEO_M2M_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: asgardeo-secret
                   key: ASGARDEO_M2M_CLIENT_ID
-            - name: ASGARDEO_CLIENT_SECRET
+            - name: ASGARDEO_M2M_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: asgardeo-secret
@@ -63,16 +63,6 @@ spec:
                 secretKeyRef:
                   name: asgardeo-secret
                   key: ASGARDEO_SCIM2_URL
-            - name: ASGARDEO_JWKS_URL
-              valueFrom:
-                secretKeyRef:
-                  name: asgardeo-secret
-                  key: ASGARDEO_JWKS_URL
-            - name: ASGARDEO_ISSUER
-              valueFrom:
-                secretKeyRef:
-                  name: asgardeo-secret
-                  key: ASGARDEO_ISSUER
             - name: ASGARDEO_GROUP_ID_ADMIN
               valueFrom:
                 secretKeyRef:
@@ -105,5 +95,5 @@ spec:
             httpGet:
               path: /health
               port: 3006
-            initialDelaySeconds: 30
+            initialDelaySeconds: 20
             periodSeconds: 10

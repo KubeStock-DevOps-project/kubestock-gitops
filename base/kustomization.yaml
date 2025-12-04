@@ -3,7 +3,6 @@ kind: Kustomization
 
 resources:
   - namespaces/
-  - postgres/
   - kong/
   - services/ms-product/
   - services/ms-inventory/

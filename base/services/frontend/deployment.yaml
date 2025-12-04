@@ -1,5 +1,5 @@
 # =============================================================================
-# frontend - KubeStock Frontend (React/Vite with Nginx)
+# frontend - React Frontend
 # =============================================================================
 apiVersion: apps/v1
 kind: Deployment
@@ -7,13 +7,16 @@ metadata:
   name: frontend
   labels:
     app: frontend
-    app.kubernetes.io/name: frontend
-    app.kubernetes.io/component: web
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -21,11 +24,10 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
-              name: http
           resources:
             requests:
               memory: "64Mi"

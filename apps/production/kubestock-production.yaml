@@ -1,31 +1,34 @@
 # =============================================================================
-# ArgoCD Application - Production Blue Slot
+# ArgoCD Application - Kubestock Production
 # =============================================================================
-# Deploys microservices with slot: blue label
-# Uses specific SHA image tags (no 'latest')
+# Deploys all production services using rolling update strategy
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kubestock-production-blue
+  name: kubestock-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: kubestock-production
+  project: default
   source:
-    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    repoURL: https://github.com/dpiyumal2319/kubestock-core.git
     targetRevision: main
-    path: overlays/production/blue
+    path: gitops/overlays/production
   destination:
     server: https://kubernetes.default.svc
     namespace: kubestock-production
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - PruneLast=true
       - ApplyOutOfSyncOnly=true
-    # Manual sync - auto-sync disabled per requirements
-    # automated:
-    #   prune: true
-    #   selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

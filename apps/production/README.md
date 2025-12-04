@@ -1,18 +1,25 @@
-# ArgoCD Applications for Production
-# Blue-Green deployment strategy
+# Production ArgoCD Applications
 
-# Application structure:
-# - kubestock-production.yaml - Shared resources (DB, traffic router)
-# - kubestock-blue.yaml - Blue deployment slot
-# - kubestock-green.yaml - Green deployment slot
+## kubestock-production.yaml
 
-# Deployment workflow:
-# 1. Deploy to inactive slot (e.g., green if blue is active)
-# 2. Run smoke tests against green
-# 3. Update traffic-router.yaml selector from 'blue' to 'green'
-# 4. ArgoCD syncs the change, traffic switches to green
-# 5. Blue remains as rollback target
+Single application that deploys all production services:
+- ms-product
+- ms-inventory  
+- ms-supplier
+- ms-order-management
+- ms-identity
+- frontend
 
-# Rollback:
-# 1. Update traffic-router.yaml selector back to 'blue'
-# 2. ArgoCD syncs, traffic switches back to blue
+### Deployment Strategy
+- Rolling update with `maxSurge: 1` and `maxUnavailable: 0`
+- Zero-downtime deployments
+- Automatic rollback on failure
+
+### Database
+- Uses AWS RDS PostgreSQL (managed)
+- Connection via `db-secret`
+
+### To Apply
+```bash
+kubectl apply -f kubestock-production.yaml
+```
