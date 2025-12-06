@@ -42,7 +42,7 @@ images:
   newTag: c80a464
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
-  newTag: bf69b19
+  newTag: 3e6cb46
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
   newTag: 03539d3
