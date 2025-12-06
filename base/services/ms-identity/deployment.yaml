@@ -31,6 +31,8 @@ spec:
           env:
             - name: NODE_ENV
               value: production
+            - name: HOST
+              value: "0.0.0.0"
             - name: PORT
               value: "3006"
             - name: ASGARDEO_ORG_NAME
