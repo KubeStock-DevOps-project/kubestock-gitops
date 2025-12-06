@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: ms-order-management
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-order-management:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3005
