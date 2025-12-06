@@ -12,41 +12,41 @@ kind: Kustomization
 namespace: kubestock-staging
 
 resources:
-  - ../../base/services/ms-product/
-  - ../../base/services/ms-inventory/
-  - ../../base/services/ms-supplier/
-  - ../../base/services/ms-order-management/
-  - ../../base/services/ms-identity/
-  - ../../base/services/frontend/
-  - namespace.yaml
-  - external-secrets.yaml
+- ../../base/services/ms-product/
+- ../../base/services/ms-inventory/
+- ../../base/services/ms-supplier/
+- ../../base/services/ms-order-management/
+- ../../base/services/ms-identity/
+- ../../base/services/frontend/
+- namespace.yaml
+- external-secrets.yaml
 
 labels:
-  - pairs:
-      environment: staging
-    includeSelectors: false
+- pairs:
+    environment: staging
 
 # Image tags - using specific SHA tags (updated by CI/CD)
 images:
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
-    newTag: 3572f2c
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-inventory
-    newTag: 97bf880
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
-    newTag: 95e4c49
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
-    newTag: b145d7c
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
-    newTag: 278f029
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/frontend
-    newTag: latest
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/frontend
+  newTag: latest
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
+  newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
+  newTag: "4431792"
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-inventory
+  newTag: 97bf880
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
+  newTag: b145d7c
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
+  newTag: 3572f2c
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
+  newTag: 95e4c49
 
 # Patches for staging-specific configuration
-patches:
   # Reduce replicas for staging
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-    target:
-      kind: Deployment
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+  target:
+    kind: Deployment
