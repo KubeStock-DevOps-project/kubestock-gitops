@@ -39,7 +39,8 @@ images:
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
   newTag: c80a464
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
-  newTag: 3572f2c
+  newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
+  newTag: bf69b19
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
   newTag: "5699976"
