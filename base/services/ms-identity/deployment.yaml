@@ -63,6 +63,16 @@ spec:
                 secretKeyRef:
                   name: asgardeo-secret
                   key: ASGARDEO_SCIM2_URL
+            - name: ASGARDEO_JWKS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_JWKS_URL
+            - name: ASGARDEO_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_ISSUER
             - name: ASGARDEO_GROUP_ID_ADMIN
               valueFrom:
                 secretKeyRef:
