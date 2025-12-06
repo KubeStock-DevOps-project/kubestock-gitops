@@ -31,7 +31,7 @@ images:
   newTag: latest
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
-  newTag: "4431792"
+  newTag: 6ffe730
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-inventory
   newTag: 97bf880
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
