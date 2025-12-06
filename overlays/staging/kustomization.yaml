@@ -37,7 +37,7 @@ images:
   newTag: f7d1163
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
-  newTag: 8d9e3c1
+  newTag: c80a464
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
   newTag: 3572f2c
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
