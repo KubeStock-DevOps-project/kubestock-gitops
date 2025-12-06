@@ -5,3 +5,4 @@ resources:
   - staging.yaml
   - production.yaml
   - kong.yaml
+  - external-secrets.yaml

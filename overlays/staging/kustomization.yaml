@@ -19,7 +19,7 @@ resources:
   - ../../base/services/ms-identity/
   - ../../base/services/frontend/
   - namespace.yaml
-  - secrets.yaml
+  - external-secrets.yaml
 
 labels:
   - pairs:

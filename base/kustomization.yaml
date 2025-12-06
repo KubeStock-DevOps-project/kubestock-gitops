@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - namespaces/
+  - external-secrets/
   - kong/
   - services/ms-product/
   - services/ms-inventory/

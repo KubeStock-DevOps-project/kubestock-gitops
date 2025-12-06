@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80

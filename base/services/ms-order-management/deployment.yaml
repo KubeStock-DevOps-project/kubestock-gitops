@@ -41,7 +41,7 @@ spec:
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
-              value: order_db
+              value: "order_db"
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
