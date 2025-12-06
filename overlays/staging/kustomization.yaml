@@ -29,6 +29,8 @@ labels:
 images:
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/frontend
   newTag: latest
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend
+  newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock-frontend
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
   newTag: "5721636"
