@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ms-identity
+  labels:
+    app: ms-identity
+spec:
+  hosts:
+  - ms-identity
+  http:
+  - route:
+    - destination:
+        host: ms-identity
+        port:
+          number: 3006
+      weight: 100
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s

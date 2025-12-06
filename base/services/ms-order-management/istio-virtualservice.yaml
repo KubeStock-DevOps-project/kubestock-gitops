@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ms-order-management
+  labels:
+    app: ms-order-management
+spec:
+  hosts:
+  - ms-order-management
+  http:
+  - route:
+    - destination:
+        host: ms-order-management
+        port:
+          number: 3002
+      weight: 100
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s

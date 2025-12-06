@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ms-supplier-destination
+  labels:
+    app: ms-supplier
+spec:
+  host: ms-supplier
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

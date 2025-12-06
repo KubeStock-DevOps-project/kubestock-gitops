@@ -11,3 +11,4 @@ resources:
   - services/ms-order-management/
   - services/ms-identity/
   - services/frontend/
+  - istio/

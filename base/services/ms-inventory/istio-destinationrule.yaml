@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ms-inventory-destination
+  labels:
+    app: ms-inventory
+spec:
+  host: ms-inventory
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

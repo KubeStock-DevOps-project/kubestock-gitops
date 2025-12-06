@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ms-product-destination
+  labels:
+    app: ms-product
+spec:
+  host: ms-product
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ms-identity-destination
+  labels:
+    app: ms-identity
+spec:
+  host: ms-identity
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

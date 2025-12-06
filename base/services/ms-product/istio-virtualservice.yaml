@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ms-product
+  labels:
+    app: ms-product
+spec:
+  hosts:
+  - ms-product
+  http:
+  - route:
+    - destination:
+        host: ms-product
+        port:
+          number: 3003
+      weight: 100
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s

@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ms-order-management-destination
+  labels:
+    app: ms-order-management
+spec:
+  host: ms-order-management
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

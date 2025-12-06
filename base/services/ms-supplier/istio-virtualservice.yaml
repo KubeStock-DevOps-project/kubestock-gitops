@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ms-supplier
+  labels:
+    app: ms-supplier
+spec:
+  hosts:
+  - ms-supplier
+  http:
+  - route:
+    - destination:
+        host: ms-supplier
+        port:
+          number: 3004
+      weight: 100
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s

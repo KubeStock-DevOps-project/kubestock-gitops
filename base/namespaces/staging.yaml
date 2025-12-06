@@ -8,6 +8,7 @@ metadata:
     environment: staging
     app.kubernetes.io/part-of: kubestock
     argocd.argoproj.io/managed-by: argocd
+    istio-injection: enabled
 ---
 # Resource Quota for Staging (cost control)
 apiVersion: v1
