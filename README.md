@@ -82,7 +82,27 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 ## Access Staging Environment
 
-### Via kubectl port-forward
+From your local machine, SSH tunnel through bastion to any worker node (Kong API Gateway):
+```bash
+# HTTP tunnel using first worker node (10.0.11.68)
+ssh -L 5173:10.0.11.68:30080 -i ~/.ssh/kubestock-key ubuntu@13.201.115.44
+
+# Or second worker node (10.0.12.167)
+ssh -L 5173:10.0.12.167:30080 -i ~/.ssh/kubestock-key ubuntu@13.201.115.44
+
+# Access staging frontend at http://localhost:5173 in your browser
+# All API requests will route through Kong Gateway to backend services
+```
+
+For HTTPS access:
+```bash
+# HTTPS tunnel (NodePort 30444)
+ssh -L 5173:10.0.11.68:30444 -i ~/.ssh/kubestock-key ubuntu@13.201.115.44
+
+# Access at https://localhost:5173 (accept self-signed cert warning)
+```
+
+### Via kubectl port-forward (alternative method)
 
 Forward frontend to localhost:
 ```bash
