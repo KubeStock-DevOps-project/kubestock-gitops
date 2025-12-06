@@ -1,6 +1,6 @@
 ---
 # ArgoCD Project - Production Environment
-# Supports Blue-Green deployment strategy
+# Uses rolling update deployment strategy
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -9,7 +9,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  description: KubeStock Production Environment - Blue-Green Deployment
+  description: KubeStock Production Environment
 
   # Source repositories allowed (restricted to org repos only)
   sourceRepos:
@@ -19,12 +19,6 @@ spec:
   destinations:
     # Production namespace for live traffic
     - namespace: 'kubestock-production'
-      server: https://kubernetes.default.svc
-    # Blue deployment namespace
-    - namespace: 'kubestock-blue'
-      server: https://kubernetes.default.svc
-    # Green deployment namespace
-    - namespace: 'kubestock-green'
       server: https://kubernetes.default.svc
     - namespace: 'argocd'
       server: https://kubernetes.default.svc

@@ -97,6 +97,8 @@ POST https://kubestock.dpiyumal.me/api/inventory → ms-inventory service
 
 ## Production Environment Characteristics
 
+## Production Environment Characteristics
+
 1. **High Availability**: 2+ replicas of each service
 2. **Performance Optimized**: Adequate resource allocation
 3. **Security Focused**: Encrypted secrets, strict CORS, rate limiting
@@ -106,19 +108,11 @@ POST https://kubestock.dpiyumal.me/api/inventory → ms-inventory service
 
 ## Production Safeguards
 
-```
-Code Change
-    ↓
-Staging Deployment (tested here)
-    ↓
-Code Review & Approval (required)
-    ↓
-Manual Production Sync (careful rollout)
-    ↓
-Health Checks & Monitoring
-    ↓
-Production Live
-```
+- **Zero-downtime updates**: Rolling deployment strategy
+- **RBAC**: Strict access control via AppProject
+- **Monitoring**: Continuous monitoring of application health
+- **Automatic rollback**: Failed deployments automatically roll back
+- **Health checks**: Liveness and readiness probes on all services
 
 ## Key Production Settings
 

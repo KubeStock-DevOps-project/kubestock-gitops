@@ -53,11 +53,10 @@ This directory contains namespace definitions that logically separate resources 
 ## Namespace Isolation Benefits
 
 1. **Resource isolation**: Each namespace has separate resource quotas
-2. **RBAC separation**: Different access policies per namespace
-3. **Network policies**: Can restrict traffic between namespaces
-4. **Easier management**: Services with same names can exist in different namespaces
-5. **Cost tracking**: Can track resource usage per namespace
-6. **Blue-green deployments**: Can use separate namespaces for zero-downtime updates
+4. **RBAC separation**: Different access policies per namespace
+5. **Network policies**: Can restrict traffic between namespaces
+6. **Easier management**: Services with same names can exist in different namespaces
+7. **Cost tracking**: Can track resource usage per namespace
 
 ## Viewing Namespaces
 

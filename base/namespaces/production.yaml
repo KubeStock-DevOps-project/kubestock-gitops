@@ -1,33 +1,11 @@
 ---
-# Production Namespace (main - for shared resources like DB)
+# Production Namespace
 apiVersion: v1
 kind: Namespace
 metadata:
   name: kubestock-production
   labels:
     environment: production
-    app.kubernetes.io/part-of: kubestock
-    argocd.argoproj.io/managed-by: argocd
----
-# Blue Namespace (Blue-Green deployment)
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: kubestock-blue
-  labels:
-    environment: production
-    deployment-slot: blue
-    app.kubernetes.io/part-of: kubestock
-    argocd.argoproj.io/managed-by: argocd
----
-# Green Namespace (Blue-Green deployment)
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: kubestock-green
-  labels:
-    environment: production
-    deployment-slot: green
     app.kubernetes.io/part-of: kubestock
     argocd.argoproj.io/managed-by: argocd
 ---
