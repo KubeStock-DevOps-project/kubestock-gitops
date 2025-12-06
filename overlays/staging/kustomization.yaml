@@ -43,7 +43,7 @@ images:
   newTag: bf69b19
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
   newName: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
-  newTag: "5699976"
+  newTag: 03539d3
 
 # Patches for staging-specific configuration
   # Reduce replicas for staging
