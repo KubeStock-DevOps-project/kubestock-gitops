@@ -28,6 +28,17 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          env:
+            - name: VITE_ASGARDEO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_SPA_CLIENT_ID
+            - name: VITE_ASGARDEO_ORG_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: asgardeo-secret
+                  key: ASGARDEO_ORG_NAME
           resources:
             requests:
               memory: "64Mi"
