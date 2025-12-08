@@ -29,6 +29,12 @@ spec:
       kind: Namespace
     - group: 'storage.k8s.io'
       kind: StorageClass
+    - group: 'external-secrets.io'
+      kind: ClusterSecretStore
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRole
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRoleBinding
 
   # Namespace-scoped resources allowed
   namespaceResourceWhitelist:
@@ -56,6 +62,10 @@ spec:
       kind: HorizontalPodAutoscaler
     - group: 'policy'
       kind: PodDisruptionBudget
+    - group: 'external-secrets.io'
+      kind: ExternalSecret
+    - group: 'generators.external-secrets.io'
+      kind: ECRAuthorizationToken
 
   # Sync windows - restricted for production
   syncWindows:

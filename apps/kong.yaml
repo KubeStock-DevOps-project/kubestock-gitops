@@ -2,6 +2,7 @@
 # ArgoCD Application - Kong API Gateway
 # =============================================================================
 # Deploys Kong gateway in kong namespace
+# Auto-sync enabled for GitOps best practices
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -23,7 +24,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - PruneLast=true
-    # Manual sync - auto-sync disabled per requirements
-    # automated:
-    #   prune: true
-    #   selfHeal: true
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
