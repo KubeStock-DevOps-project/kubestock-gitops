@@ -1,6 +1,12 @@
 # =============================================================================
 # Base Kustomization for Observability Stack
 # =============================================================================
+# Components:
+# - Prometheus: Metrics collection and alerting
+# - Grafana: Visualization dashboards
+# - Loki: Log aggregation
+# - Promtail: Log collection agent (DaemonSet)
+# =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -9,6 +15,8 @@ resources:
   - storageclass.yaml
   - prometheus/
   - grafana/
+  - loki/
+  - promtail/
 
 # Add common labels to all resources
 commonLabels:

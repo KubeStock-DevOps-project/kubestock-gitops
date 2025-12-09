@@ -1,22 +1,22 @@
 # =============================================================================
-# ArgoCD Application - Observability Stack (Staging)
+# ArgoCD Application - Observability Stack (Production)
 # =============================================================================
-# Deploys Prometheus and Grafana to observability namespace
-# Uses staging overlay for environment-specific configuration
+# Deploys Prometheus, Grafana, and Alertmanager to observability namespace
+# Uses production overlay with alerting and longer retention
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: observability-staging
+  name: observability-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: kubestock-staging
+  project: kubestock-production
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: overlays/staging/observability
+    path: overlays/production/observability
   destination:
     server: https://kubernetes.default.svc
     namespace: observability
@@ -25,8 +25,16 @@ spec:
       - CreateNamespace=true
       - PruneLast=true
       - ApplyOutOfSyncOnly=true
-    # Manual sync for staging observability
-    # Uncomment for auto-sync:
+      - RespectIgnoreDifferences=true
+    # Manual sync for production observability
+    # Requires explicit approval for changes
     # automated:
     #   prune: true
     #   selfHeal: true
+  # Ignore differences in dynamic fields
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: prometheus-config
+      jsonPointers:
+        - /data

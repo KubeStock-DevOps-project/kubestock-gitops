@@ -4,100 +4,162 @@
 
 # Observability Stack for KubeStock
 
-Modern Prometheus and Grafana setup aligned with current GitOps architecture.
+Modern observability stack providing metrics, logs, and alerting capabilities.
 
 ## Components
 
-### Prometheus
+### Prometheus (Metrics)
 - **Version**: v2.48.0
-- **Namespace**: observability
-- **Storage**: 10Gi PVC with 15-day retention
+- **Purpose**: Metrics collection, storage, and alerting rules
+- **Storage**: 10Gi PVC with configurable retention
 - **Port**: 9090
 
-### Grafana
+### Grafana (Visualization)
 - **Version**: v10.2.3
-- **Namespace**: observability
+- **Purpose**: Dashboards and visualization
 - **Storage**: 5Gi PVC
 - **Port**: 3000
 - **Default Credentials**: admin / kubestock@2025
 
-## Monitored Services
+### Loki (Logs)
+- **Version**: 2.9.3
+- **Purpose**: Log aggregation and querying
+- **Storage**: 10Gi PVC (S3 backend in production for long-term)
+- **Port**: 3100
 
-Prometheus scrapes metrics from:
-- **ms-product** (kubestock-staging:3002)
-- **ms-inventory** (kubestock-staging:3003)
-- **ms-supplier** (kubestock-staging:3004)
-- **ms-order-management** (kubestock-staging:3005)
-- **ms-identity** (kubestock-staging:3006)
-- **kong-gateway** (kong namespace)
-- **Kubernetes nodes and pods**
+### Promtail (Log Collector)
+- **Version**: 2.9.3
+- **Purpose**: DaemonSet that ships logs to Loki
+- **Deployment**: Runs on every node
+
+### Alertmanager (Production only)
+- **Version**: v0.26.0
+- **Purpose**: Alert routing and notifications
+- **Port**: 9093
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Grafana                                  │
+│                    (Visualization)                               │
+└───────────────────────┬─────────────────────────────────────────┘
+                        │
+          ┌─────────────┴─────────────┐
+          │                           │
+          ▼                           ▼
+┌─────────────────┐         ┌─────────────────┐
+│   Prometheus    │         │      Loki       │
+│   (Metrics)     │         │     (Logs)      │
+└────────┬────────┘         └────────┬────────┘
+         │                           │
+         │                           │
+         ▼                           ▼
+┌─────────────────┐         ┌─────────────────┐
+│  Microservices  │         │    Promtail     │
+│   /metrics      │         │   (DaemonSet)   │
+└─────────────────┘         └─────────────────┘
+```
+
+## Environment Differences
+
+### Staging
+- 7-day local retention
+- Smaller resource limits
+- No Alertmanager
+- Scrapes `kubestock-staging` namespace
+
+### Production  
+- 15-day local retention + S3 for long-term
+- Higher resource limits
+- Alertmanager enabled with alert rules
+- Scrapes `kubestock-production` namespace
 
 ## Deployment
 
-Deploy via ArgoCD:
+Deploy via ArgoCD (recommended):
 
 ```bash
-kubectl apply -f ../../apps/staging/observability-staging.yaml
+# Staging
+kubectl apply -f apps/staging/observability-staging.yaml
+
+# Production
+kubectl apply -f apps/production/observability-production.yaml
 ```
 
-Or manually:
+Or manually with Kustomize:
 
 ```bash
-kubectl apply -k .
+# Staging
+kubectl apply -k overlays/staging/observability/
+
+# Production  
+kubectl apply -k overlays/production/observability/
 ```
 
 ## Access
 
 ### Prometheus UI
-
 ```bash
 kubectl port-forward -n observability svc/prometheus 9090:9090
 # Access: http://localhost:9090
 ```
 
 ### Grafana UI
-
 ```bash
 kubectl port-forward -n observability svc/grafana 3000:3000
 # Access: http://localhost:3000
 # Login: admin / kubestock@2025
 ```
 
+### Loki (via Grafana)
+Loki is accessed through Grafana's Explore feature using the Loki datasource.
+
+## AWS Infrastructure
+
+The observability stack uses AWS resources provisioned by Terraform:
+
+- **S3 Buckets**: Long-term storage for metrics (Thanos) and logs (Loki)
+- **IAM Policies**: Access permissions for S3 buckets
+- **EBS Volumes**: Dynamic provisioning via ebs-sc StorageClass
+
+See `infrastructure/terraform/prod/modules/observability/` for details.
+
 ## Adding Metrics to Microservices
 
-Your Node.js services need to expose `/metrics` endpoint.
-
-### Install prom-client
-
-```bash
-npm install prom-client
-```
-
-### Add to server.js
+Your Node.js services need to expose `/metrics` endpoint:
 
 ```javascript
 const promClient = require('prom-client');
 
-// Create registry
 const register = new promClient.Registry();
-
-// Collect default metrics
 promClient.collectDefaultMetrics({ register });
 
-// Custom metrics example
-const httpRequestDuration = new promClient.Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'route', 'status_code'],
-  registers: [register]
-});
-
-// Metrics endpoint
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
 });
 ```
+
+## Configuring Alerts
+
+Edit `overlays/production/observability/prometheus-config.yaml` to add custom alerts:
+
+```yaml
+groups:
+  - name: custom-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+```
+
+Configure alert receivers in `alertmanager/configmap.yaml` (Slack, Email, PagerDuty, etc.).
+
 
 ## Grafana Dashboards
 

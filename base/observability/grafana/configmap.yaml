@@ -1,5 +1,5 @@
 # =============================================================================
-# Grafana - ConfigMap for Datasource
+# Grafana - ConfigMap for Datasources
 # =============================================================================
 apiVersion: v1
 kind: ConfigMap
@@ -12,6 +12,7 @@ data:
   datasources.yaml: |
     apiVersion: 1
     datasources:
+      # Prometheus - Metrics
       - name: Prometheus
         type: prometheus
         access: proxy
@@ -21,3 +22,17 @@ data:
         jsonData:
           timeInterval: 30s
           queryTimeout: 60s
+
+      # Loki - Logs
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+        editable: true
+        jsonData:
+          maxLines: 1000
+          derivedFields:
+            - datasourceUid: prometheus
+              matcherRegex: "trace_id=(\\w+)"
+              name: TraceID
+              url: "$${__value.raw}"
