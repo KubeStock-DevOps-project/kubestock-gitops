@@ -50,18 +50,5 @@ patches:
     target:
       kind: Deployment
   
-  # Frontend environment variables for staging (internal access via bastion)
-  - patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: VITE_APP_URL
-          value: "http://localhost:5173"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: VITE_API_GATEWAY_URL
-          value: ""
-    target:
-      kind: Deployment
-      name: frontend
+  # No frontend-specific environment variables needed for staging
+  # All configuration is handled at runtime via window.location.origin

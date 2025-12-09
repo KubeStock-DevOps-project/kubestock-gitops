@@ -35,21 +35,8 @@ patches:
     target:
       kind: Deployment
   
-  # Frontend environment variables for production
-  - patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: VITE_APP_URL
-          value: "https://kubestock.dpiyumal.me"
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: VITE_API_GATEWAY_URL
-          value: "https://kubestock.dpiyumal.me"
-    target:
-      kind: Deployment
-      name: frontend
+  # No frontend-specific environment variables needed for production
+  # All configuration is handled at runtime via window.location.origin
 
 # Image tags - managed by CI/CD pipeline
 images:
