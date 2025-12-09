@@ -62,17 +62,25 @@ gitops/
 
 ## Access ArgoCD UI
 
-From your local machine, SSH tunnel through bastion to any worker node:
-```bash
-# Example using first worker node (10.0.11.68)
-ssh -L 8443:10.0.11.68:30443 -i ~/.ssh/kubestock-key ubuntu@13.201.115.44
+From your local machine, SSH tunnel through bastion to the NLB:
 
-# Or second worker node (10.0.12.167)
-ssh -L 8443:10.0.12.167:30443 -i ~/.ssh/kubestock-key ubuntu@13.201.115.44
+```bash
+# Get NLB DNS from Terraform output
+cd infrastructure/terraform/prod
+terraform output -raw nlb_dns_name
+
+# SSH tunnel to ArgoCD UI (port 8443 on NLB routes to NodePort 30443)
+ssh -L 8443:<NLB_DNS>:8443 -i ~/.ssh/kubestock-key ubuntu@<BASTION_IP>
 
 # Access UI at https://localhost:8443 in your browser
 # Username: admin
 # Password: 1qK4StYU6Fs0W2l3
+```
+
+**Or use the tunnel script:**
+```bash
+# Edit infrastructure/scripts/ssh-tunnels/tunnel-argocd.sh with your NLB DNS and bastion IP
+./infrastructure/scripts/ssh-tunnels/tunnel-argocd.sh
 ```
 
 To retrieve admin password:
@@ -82,7 +90,31 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 ## Access Staging Environment
 
-### Via kubectl port-forward
+From your local machine, SSH tunnel through bastion to the NLB:
+
+```bash
+# Get NLB DNS from Terraform output
+cd infrastructure/terraform/prod
+terraform output -raw nlb_dns_name
+
+# SSH tunnel for HTTP (port 80 on NLB routes to NodePort 30080)
+ssh -L 5173:<NLB_DNS>:80 -i ~/.ssh/kubestock-key ubuntu@<BASTION_IP>
+
+# OR for HTTPS (port 443 on NLB routes to NodePort 30444)
+ssh -L 5173:<NLB_DNS>:443 -i ~/.ssh/kubestock-key ubuntu@<BASTION_IP>
+
+# Access staging frontend at http://localhost:5173 or https://localhost:5173
+# All API requests will route through Kong Gateway to backend services
+```
+
+**Or use the tunnel scripts:**
+```bash
+# Edit infrastructure/scripts/ssh-tunnels/tunnel-staging-frontend.sh with your NLB DNS and bastion IP
+./infrastructure/scripts/ssh-tunnels/tunnel-staging-frontend.sh         # For HTTP
+./infrastructure/scripts/ssh-tunnels/tunnel-staging-frontend-https.sh  # For HTTPS
+```
+
+### Via kubectl port-forward (alternative method)
 
 Forward frontend to localhost:
 ```bash
@@ -127,6 +159,57 @@ kubectl exec -n kubestock-staging deploy/ms-identity -- curl -s http://localhost
 | Production  | ❌ Off    | ❌ Off | ❌ Off    | Required |
 
 > **Note**: Staging has auto-sync enabled for rapid iteration. Production requires manual approval for safety.
+
+## Cluster Bootstrap: Required Secrets
+
+Before deploying applications, certain secrets must be created manually as they cannot be stored in Git:
+
+### 1. AWS External Secrets Credentials
+
+The External Secrets Operator requires AWS credentials to fetch secrets from AWS Secrets Manager and generate ECR tokens. These credentials must be created in each application namespace:
+
+```bash
+# Get the access key from Terraform outputs or AWS IAM
+# The IAM user is: kubestock-external-secrets
+
+# Create secret in kubestock-staging namespace
+kubectl create secret generic aws-external-secrets-creds \
+  --namespace=kubestock-staging \
+  --from-literal=access-key-id=<AWS_ACCESS_KEY_ID> \
+  --from-literal=secret-access-key=<AWS_SECRET_ACCESS_KEY>
+
+# Create secret in kubestock-production namespace
+kubectl create secret generic aws-external-secrets-creds \
+  --namespace=kubestock-production \
+  --from-literal=access-key-id=<AWS_ACCESS_KEY_ID> \
+  --from-literal=secret-access-key=<AWS_SECRET_ACCESS_KEY>
+
+# Create secret in external-secrets namespace (for ClusterSecretStore)
+kubectl create secret generic aws-external-secrets-creds \
+  --namespace=external-secrets \
+  --from-literal=access-key-id=<AWS_ACCESS_KEY_ID> \
+  --from-literal=secret-access-key=<AWS_SECRET_ACCESS_KEY>
+```
+
+**Required IAM Permissions for the user:**
+- `secretsmanager:GetSecretValue`
+- `secretsmanager:DescribeSecret` 
+- `ecr:GetAuthorizationToken`
+- `ecr:BatchGetImage`
+- `ecr:GetDownloadUrlForLayer`
+- `ecr:BatchCheckLayerAvailability`
+
+### 2. Bootstrap Sequence
+
+When setting up a new cluster:
+
+1. Deploy External Secrets Operator to `external-secrets` namespace
+2. Create `aws-external-secrets-creds` secrets in all three namespaces
+3. Deploy ArgoCD and configure projects
+4. Deploy applications - they will automatically:
+   - Fetch secrets from AWS Secrets Manager
+   - Generate ECR authentication tokens
+   - Pull container images from ECR
 
 This repository follows GitOps principles:
 - All Kubernetes manifests are version controlled

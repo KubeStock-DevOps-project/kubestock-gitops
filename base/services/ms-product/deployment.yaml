@@ -22,9 +22,11 @@ spec:
       labels:
         app: ms-product
     spec:
+      imagePullSecrets:
+        - name: ecr-cred
       containers:
         - name: ms-product
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product:latest
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-product:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3002

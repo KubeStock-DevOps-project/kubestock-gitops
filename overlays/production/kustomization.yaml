@@ -3,7 +3,7 @@
 # =============================================================================
 # Rolling Update Deployment Strategy
 # Uses RDS PostgreSQL for database
-# CORS: kubestock.dpiyumal.me
+# Domain: kubestock.dpiyumal.me
 # =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -27,9 +27,28 @@ labels:
 
 # Production replicas patch
 patches:
+  # Set replicas to 2 for all deployments
   - patch: |-
       - op: replace
         path: /spec/replicas
         value: 2
     target:
       kind: Deployment
+  
+  # No frontend-specific environment variables needed for production
+  # All configuration is handled at runtime via window.location.origin
+
+# Image tags - managed by CI/CD pipeline
+images:
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/web
+    newTag: f810825
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity
+    newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-inventory
+    newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-order-management
+    newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-product
+    newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-supplier
+    newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750

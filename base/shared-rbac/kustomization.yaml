@@ -1,0 +1,11 @@
+# =============================================================================
+# Shared RBAC Resources
+# =============================================================================
+# This kustomization manages cluster-scoped RBAC resources that are shared
+# across multiple applications (staging and production).
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - kong-rbac.yaml

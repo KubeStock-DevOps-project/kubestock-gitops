@@ -13,12 +13,15 @@ spec:
 
   # Source repositories allowed (restricted to org repos only)
   sourceRepos:
-    - 'https://github.com/KubeStock-DevOps-project/kubestock-core.git'
+    - 'https://github.com/KubeStock-DevOps-project/kubestock-gitops.git'
 
   # Destination clusters and namespaces
   destinations:
     # Production namespace for live traffic
     - namespace: 'kubestock-production'
+      server: https://kubernetes.default.svc
+    # Kong gateway namespace for production
+    - namespace: 'kong'
       server: https://kubernetes.default.svc
     - namespace: 'argocd'
       server: https://kubernetes.default.svc
@@ -29,6 +32,12 @@ spec:
       kind: Namespace
     - group: 'storage.k8s.io'
       kind: StorageClass
+    - group: 'external-secrets.io'
+      kind: ClusterSecretStore
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRole
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRoleBinding
 
   # Namespace-scoped resources allowed
   namespaceResourceWhitelist:
@@ -56,6 +65,10 @@ spec:
       kind: HorizontalPodAutoscaler
     - group: 'policy'
       kind: PodDisruptionBudget
+    - group: 'external-secrets.io'
+      kind: ExternalSecret
+    - group: 'generators.external-secrets.io'
+      kind: ECRAuthorizationToken
 
   # Sync windows - restricted for production
   syncWindows:

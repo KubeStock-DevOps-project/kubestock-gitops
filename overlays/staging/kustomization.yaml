@@ -4,7 +4,7 @@
 # Rolling Update Deployment Strategy
 # Uses RDS PostgreSQL for database
 # Uses specific SHA tags managed by CI/CD pipeline
-# CORS: * (wildcard)
+# CORS: * (wildcard for staging)
 # =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -12,34 +12,33 @@ kind: Kustomization
 namespace: kubestock-staging
 
 resources:
-  - ../../base/services/ms-product/
-  - ../../base/services/ms-inventory/
-  - ../../base/services/ms-supplier/
-  - ../../base/services/ms-order-management/
-  - ../../base/services/ms-identity/
-  - ../../base/services/frontend/
-  - namespace.yaml
-  - external-secrets.yaml
+- ../../base/services/ms-product/
+- ../../base/services/ms-inventory/
+- ../../base/services/ms-supplier/
+- ../../base/services/ms-order-management/
+- ../../base/services/ms-identity/
+- ../../base/services/frontend/
+- namespace.yaml
+- external-secrets.yaml
 
 labels:
-  - pairs:
-      environment: staging
-    includeSelectors: false
+- pairs:
+    environment: staging
 
 # Image tags - using specific SHA tags (updated by CI/CD)
 images:
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-product
-    newTag: 3572f2c
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-inventory
-    newTag: 97bf880
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-supplier
-    newTag: 95e4c49
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-order-management
-    newTag: b145d7c
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/ms-identity
-    newTag: 278f029
-  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/frontend
-    newTag: latest
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/web
+  newTag: f810825
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity
+  newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-inventory
+  newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-order-management
+  newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-product
+  newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+- name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-supplier
+  newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
 
 # Patches for staging-specific configuration
 patches:
@@ -50,3 +49,6 @@ patches:
         value: 1
     target:
       kind: Deployment
+  
+  # No frontend-specific environment variables needed for staging
+  # All configuration is handled at runtime via window.location.origin
