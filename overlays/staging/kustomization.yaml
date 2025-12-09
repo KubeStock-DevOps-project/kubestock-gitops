@@ -56,7 +56,7 @@ patches:
         path: /spec/template/spec/containers/0/env/-
         value:
           name: VITE_APP_URL
-          value: ""
+          value: "http://localhost:5173"
       - op: add
         path: /spec/template/spec/containers/0/env/-
         value:
