@@ -13,12 +13,15 @@ spec:
 
   # Source repositories allowed (restricted to org repos only)
   sourceRepos:
-    - 'https://github.com/KubeStock-DevOps-project/kubestock-core.git'
+    - 'https://github.com/KubeStock-DevOps-project/kubestock-gitops.git'
 
   # Destination clusters and namespaces
   destinations:
     # Production namespace for live traffic
     - namespace: 'kubestock-production'
+      server: https://kubernetes.default.svc
+    # Kong gateway namespace for production
+    - namespace: 'kong'
       server: https://kubernetes.default.svc
     - namespace: 'argocd'
       server: https://kubernetes.default.svc

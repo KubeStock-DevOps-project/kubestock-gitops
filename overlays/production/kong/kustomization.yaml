@@ -13,4 +13,7 @@ resources:
 
 patches:
   # Replace the Kong ConfigMap with production configuration
-  - path: kong-config.yaml
+  - target:
+      kind: ConfigMap
+      name: kong-declarative-config
+    path: kong-config.yaml
