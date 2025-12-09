@@ -1,0 +1,40 @@
+# =============================================================================
+# ArgoCD Application - Observability Stack (Production)
+# =============================================================================
+# Deploys Prometheus, Grafana, and Alertmanager to observability namespace
+# Uses production overlay with alerting and longer retention
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability-production
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: kubestock-production
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    targetRevision: main
+    path: overlays/production/observability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+    # Manual sync for production observability
+    # Requires explicit approval for changes
+    # automated:
+    #   prune: true
+    #   selfHeal: true
+  # Ignore differences in dynamic fields
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: prometheus-config
+      jsonPointers:
+        - /data

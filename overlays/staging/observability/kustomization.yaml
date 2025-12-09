@@ -1,0 +1,108 @@
+# =============================================================================
+# Observability Overlay - Staging
+# =============================================================================
+# Lightweight configuration for staging environment
+# - Single replica deployments
+# - Shorter retention periods (7 days)
+# - Smaller resource limits
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: observability
+
+resources:
+  - ../../../base/observability/
+
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: false
+
+# Staging-specific patches
+patches:
+  # Prometheus - staging configuration
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--storage.tsdb.retention.time=7d'
+          - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+          - '--web.console.templates=/usr/share/prometheus/consoles'
+          - '--web.enable-lifecycle'
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    target:
+      kind: Deployment
+      name: prometheus
+
+  # Grafana - staging configuration
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+    target:
+      kind: Deployment
+      name: grafana
+
+  # Loki - staging configuration (smaller resources)
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+    target:
+      kind: Deployment
+      name: loki
+
+  # Reduce PVC sizes for staging
+  - patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 5Gi
+    target:
+      kind: PersistentVolumeClaim
+      name: prometheus-storage
+
+  - patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 2Gi
+    target:
+      kind: PersistentVolumeClaim
+      name: grafana-storage
+
+  - patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 5Gi
+    target:
+      kind: PersistentVolumeClaim
+      name: loki-storage
+
+  # Prometheus config - staging namespace scraping
+  - path: prometheus-config.yaml
+    target:
+      kind: ConfigMap
+      name: prometheus-config
+

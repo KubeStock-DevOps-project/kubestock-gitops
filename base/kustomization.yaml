@@ -5,6 +5,7 @@ resources:
   - namespaces/
   - external-secrets/
   - kong/
+  - observability/
   - services/ms-product/
   - services/ms-inventory/
   - services/ms-supplier/
