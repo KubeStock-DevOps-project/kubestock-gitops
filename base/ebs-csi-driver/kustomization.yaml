@@ -1,0 +1,21 @@
+# =============================================================================
+# AWS EBS CSI Driver - Kustomization
+# =============================================================================
+# Installs the AWS EBS CSI Driver for dynamic EBS volume provisioning
+# Required for PersistentVolumeClaims using ebs.csi.aws.com provisioner
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kube-system
+
+resources:
+  - serviceaccount.yaml
+  - controller.yaml
+  - daemonset.yaml
+  - csidriver.yaml
+  - rbac.yaml
+
+commonLabels:
+  app.kubernetes.io/name: aws-ebs-csi-driver
+  app.kubernetes.io/component: csi-driver

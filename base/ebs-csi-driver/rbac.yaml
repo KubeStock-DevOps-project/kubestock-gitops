@@ -1,0 +1,103 @@
+# =============================================================================
+# AWS EBS CSI Driver - RBAC Configuration
+# =============================================================================
+# ClusterRoles and ClusterRoleBindings for controller and node components
+# =============================================================================
+
+# Controller ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ebs-csi-controller-role
+  labels:
+    app.kubernetes.io/name: aws-ebs-csi-driver
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims/status"]
+    verbs: ["update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "watch", "list", "delete", "update", "create"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments/status"]
+    verbs: ["patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents/status"]
+    verbs: ["update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["get", "list", "watch"]
+
+---
+# Controller ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ebs-csi-controller-binding
+  labels:
+    app.kubernetes.io/name: aws-ebs-csi-driver
+subjects:
+  - kind: ServiceAccount
+    name: ebs-csi-controller-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: ebs-csi-controller-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Node ClusterRole (limited permissions)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ebs-csi-node-role
+  labels:
+    app.kubernetes.io/name: aws-ebs-csi-driver
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get"]
+
+---
+# Node ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ebs-csi-node-binding
+  labels:
+    app.kubernetes.io/name: aws-ebs-csi-driver
+subjects:
+  - kind: ServiceAccount
+    name: ebs-csi-node-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: ebs-csi-node-role
+  apiGroup: rbac.authorization.k8s.io

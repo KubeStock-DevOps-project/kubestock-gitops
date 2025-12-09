@@ -1,0 +1,184 @@
+# =============================================================================
+# AWS EBS CSI Driver - Controller Deployment
+# =============================================================================
+# The controller component runs as a Deployment and handles volume operations
+# like CreateVolume, DeleteVolume, AttachVolume, DetachVolume
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ebs-csi-controller
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: aws-ebs-csi-driver
+    app.kubernetes.io/component: controller
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ebs-csi-controller
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: ebs-csi-controller
+        app.kubernetes.io/name: aws-ebs-csi-driver
+    spec:
+      serviceAccountName: ebs-csi-controller-sa
+      priorityClassName: system-cluster-critical
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        # EBS CSI Driver container
+        - name: ebs-plugin
+          image: public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.25.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - controller
+            - --endpoint=$(CSI_ENDPOINT)
+            - --logging-format=text
+            - --v=2
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+            - name: CSI_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secret
+                  key: key_id
+                  optional: true
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secret
+                  key: access_key
+                  optional: true
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+          ports:
+            - name: healthz
+              containerPort: 9808
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 5
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+
+        # CSI Provisioner sidecar
+        - name: csi-provisioner
+          image: public.ecr.aws/eks-distro/kubernetes-csi/external-provisioner:v3.6.2-eks-1-28-11
+          imagePullPolicy: IfNotPresent
+          args:
+            - --csi-address=$(ADDRESS)
+            - --v=2
+            - --feature-gates=Topology=true
+            - --extra-create-metadata
+            - --leader-election=true
+            - --default-fstype=ext4
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+
+        # CSI Attacher sidecar
+        - name: csi-attacher
+          image: public.ecr.aws/eks-distro/kubernetes-csi/external-attacher:v4.4.2-eks-1-28-11
+          imagePullPolicy: IfNotPresent
+          args:
+            - --csi-address=$(ADDRESS)
+            - --v=2
+            - --leader-election=true
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+
+        # CSI Resizer sidecar
+        - name: csi-resizer
+          image: public.ecr.aws/eks-distro/kubernetes-csi/external-resizer:v1.9.2-eks-1-28-11
+          imagePullPolicy: IfNotPresent
+          args:
+            - --csi-address=$(ADDRESS)
+            - --v=2
+            - --leader-election=true
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+
+        # Liveness probe sidecar
+        - name: liveness-probe
+          image: public.ecr.aws/eks-distro/kubernetes-csi/livenessprobe:v2.11.0-eks-1-28-11
+          imagePullPolicy: IfNotPresent
+          args:
+            - --csi-address=/csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+
+      volumes:
+        - name: socket-dir
+          emptyDir: {}

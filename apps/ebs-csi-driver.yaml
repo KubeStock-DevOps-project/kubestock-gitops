@@ -1,0 +1,33 @@
+# =============================================================================
+# ArgoCD Application - AWS EBS CSI Driver
+# =============================================================================
+# Deploys the AWS EBS CSI Driver for dynamic EBS volume provisioning
+# This is a cluster-wide component required for observability and other PVCs
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ebs-csi-driver
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: kubestock-infrastructure
+  
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    targetRevision: main
+    path: base/ebs-csi-driver
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
