@@ -1,22 +1,22 @@
 # =============================================================================
-# ArgoCD Application - Kong API Gateway
+# ArgoCD Application - Kong API Gateway (Production)
 # =============================================================================
-# Deploys Kong gateway in kong namespace
-# Auto-sync enabled for GitOps best practices
+# Deploys Kong gateway in kong namespace for production traffic
+# Exposed to ALB on NodePort 30080
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kong-gateway
+  name: kong-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: kubestock-staging  # Kong serves both staging and prod
+  project: kubestock-production
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: base/kong
+    path: overlays/production/kong
   destination:
     server: https://kubernetes.default.svc
     namespace: kong

@@ -1,6 +1,7 @@
 # =============================================================================
-# Kong Configuration for Staging - Wildcard CORS
+# Kong Configuration for Production
 # =============================================================================
+# Domain: kubestock.dpiyumal.me (single domain for frontend + API)
 # Routing: /api/{service}/* → strips prefix → backend
 # =============================================================================
 apiVersion: v1
@@ -15,7 +16,7 @@ data:
     services:
       # Product: /api/product/* → ms-product
       - name: ms-product
-        url: http://ms-product.kubestock-staging.svc.cluster.local:3002
+        url: http://ms-product.kubestock-production.svc.cluster.local:3002
         routes:
           - name: product-routes
             paths:
@@ -32,7 +33,7 @@ data:
           - name: cors
             config:
               origins:
-                - "*"
+                - "https://kubestock.dpiyumal.me"
               methods:
                 - GET
                 - POST
@@ -51,7 +52,7 @@ data:
 
       # Inventory: /api/inventory/* → ms-inventory
       - name: ms-inventory
-        url: http://ms-inventory.kubestock-staging.svc.cluster.local:3003
+        url: http://ms-inventory.kubestock-production.svc.cluster.local:3003
         routes:
           - name: inventory-routes
             paths:
@@ -68,7 +69,7 @@ data:
           - name: cors
             config:
               origins:
-                - "*"
+                - "https://kubestock.dpiyumal.me"
               methods:
                 - GET
                 - POST
@@ -87,7 +88,7 @@ data:
 
       # Supplier: /api/supplier/* → ms-supplier
       - name: ms-supplier
-        url: http://ms-supplier.kubestock-staging.svc.cluster.local:3004
+        url: http://ms-supplier.kubestock-production.svc.cluster.local:3004
         routes:
           - name: supplier-routes
             paths:
@@ -104,7 +105,7 @@ data:
           - name: cors
             config:
               origins:
-                - "*"
+                - "https://kubestock.dpiyumal.me"
               methods:
                 - GET
                 - POST
@@ -123,7 +124,7 @@ data:
 
       # Order: /api/order/* → ms-order-management
       - name: ms-order-management
-        url: http://ms-order-management.kubestock-staging.svc.cluster.local:3005
+        url: http://ms-order-management.kubestock-production.svc.cluster.local:3005
         routes:
           - name: order-routes
             paths:
@@ -140,7 +141,7 @@ data:
           - name: cors
             config:
               origins:
-                - "*"
+                - "https://kubestock.dpiyumal.me"
               methods:
                 - GET
                 - POST
@@ -159,7 +160,7 @@ data:
 
       # Identity: /api/identity/* → ms-identity
       - name: ms-identity
-        url: http://ms-identity.kubestock-staging.svc.cluster.local:3006
+        url: http://ms-identity.kubestock-production.svc.cluster.local:3006
         routes:
           - name: identity-routes
             paths:
@@ -176,7 +177,7 @@ data:
           - name: cors
             config:
               origins:
-                - "*"
+                - "https://kubestock.dpiyumal.me"
               methods:
                 - GET
                 - POST
@@ -195,7 +196,7 @@ data:
 
       # Frontend: /* → frontend
       - name: frontend
-        url: http://frontend.kubestock-staging.svc.cluster.local:80
+        url: http://frontend.kubestock-production.svc.cluster.local:80
         routes:
           - name: frontend-routes
             paths:

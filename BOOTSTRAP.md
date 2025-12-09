@@ -222,3 +222,74 @@ kubectl get secret ecr-cred -n kubestock-staging -o yaml
 # Describe pod for pull errors
 kubectl describe pod <pod-name> -n kubestock-staging
 ```
+
+---
+
+## Production Setup (HTTPS with ALB + WAF)
+
+### DNS Configuration (Namecheap → Route 53)
+
+Since the domain is hosted at Namecheap, we need to delegate DNS to AWS Route 53:
+
+#### Step 1: Create Route 53 Hosted Zone via Terraform
+
+```bash
+cd infrastructure/terraform/prod
+
+# Apply just the dns module first
+terraform apply -target=module.dns
+
+# This will output the NS records
+```
+
+#### Step 2: Configure Namecheap DNS
+
+1. Log into Namecheap
+2. Go to Domain List → Manage → Domain
+3. Under "Nameservers", select "Custom DNS"
+4. Enter the 4 NS records from Terraform output, e.g.:
+   - ns-1234.awsdns-12.org
+   - ns-567.awsdns-34.net
+   - ns-890.awsdns-56.co.uk
+   - ns-2345.awsdns-78.com
+
+**Note:** DNS propagation can take up to 48 hours, but usually completes within 30 minutes.
+
+#### Step 3: Verify DNS Propagation
+
+```bash
+# Check if NS records are propagated
+dig +short NS kubestock.dpiyumal.me
+
+# Should show AWS nameservers
+```
+
+#### Step 4: Apply Full Infrastructure
+
+Once DNS is propagated, apply the complete infrastructure:
+
+```bash
+cd infrastructure/terraform/prod
+terraform apply
+```
+
+This creates:
+- ACM certificate (auto-validated via Route 53)
+- ALB with HTTPS listener
+- WAF Web ACL with rate limiting
+- A record pointing domain to ALB
+
+### Data Flow
+
+```
+Internet → WAF → ALB (HTTPS:443) → Worker Nodes (port 30080) → Kong Gateway → Pods
+```
+
+### Verification
+
+```bash
+# Test HTTPS access
+curl -I https://kubestock.dpiyumal.me/health
+
+# Expected: 200 OK with SSL certificate info
+```

@@ -4,7 +4,7 @@
 # Rolling Update Deployment Strategy
 # Uses RDS PostgreSQL for database
 # Uses specific SHA tags managed by CI/CD pipeline
-# CORS: * (wildcard)
+# CORS: * (wildcard for staging)
 # =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -41,11 +41,27 @@ images:
   newTag: f66c2e6cb0d5685bb19120e4fce528b379109185
 
 # Patches for staging-specific configuration
-  # Reduce replicas for staging
 patches:
-- patch: |-
-    - op: replace
-      path: /spec/replicas
-      value: 1
-  target:
-    kind: Deployment
+  # Reduce replicas for staging
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+  
+  # Frontend environment variables for staging (internal access via bastion)
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: VITE_APP_URL
+          value: ""
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: VITE_API_GATEWAY_URL
+          value: ""
+    target:
+      kind: Deployment
+      name: frontend

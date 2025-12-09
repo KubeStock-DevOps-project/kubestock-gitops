@@ -1,0 +1,16 @@
+# =============================================================================
+# Production Kong Overlay
+# =============================================================================
+# This overlay applies production-specific Kong configuration
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kong
+
+resources:
+  - ../../../base/kong/
+
+patches:
+  # Replace the Kong ConfigMap with production configuration
+  - path: kong-config.yaml
