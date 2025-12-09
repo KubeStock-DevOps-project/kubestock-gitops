@@ -2,6 +2,7 @@
 # ArgoCD Application - Kubestock Production
 # =============================================================================
 # Deploys all production services using rolling update strategy
+# Auto-sync enabled for GitOps best practices
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -11,11 +12,11 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: kubestock-production
   source:
-    repoURL: https://github.com/dpiyumal2319/kubestock-core.git
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: gitops/overlays/production
+    path: overlays/production
   destination:
     server: https://kubernetes.default.svc
     namespace: kubestock-production
@@ -23,9 +24,11 @@ spec:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: false
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
+      - PruneLast=true
     retry:
       limit: 5
       backoff:
