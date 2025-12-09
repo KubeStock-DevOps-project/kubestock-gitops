@@ -227,12 +227,12 @@ data:
           - name: prometheus
 
       # ------------------------------------------------------------------------
-      # Health Check Endpoint: /health
+      # Health Check Endpoint: /api/gateway/health
       # ------------------------------------------------------------------------
       - name: health
         url: http://localhost:8001/status
         routes:
           - name: health-route
             paths:
-              - /health
+              - /api/gateway/health
             strip_path: true
