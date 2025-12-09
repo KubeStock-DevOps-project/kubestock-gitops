@@ -160,6 +160,57 @@ kubectl exec -n kubestock-staging deploy/ms-identity -- curl -s http://localhost
 
 > **Note**: Staging has auto-sync enabled for rapid iteration. Production requires manual approval for safety.
 
+## Cluster Bootstrap: Required Secrets
+
+Before deploying applications, certain secrets must be created manually as they cannot be stored in Git:
+
+### 1. AWS External Secrets Credentials
+
+The External Secrets Operator requires AWS credentials to fetch secrets from AWS Secrets Manager and generate ECR tokens. These credentials must be created in each application namespace:
+
+```bash
+# Get the access key from Terraform outputs or AWS IAM
+# The IAM user is: kubestock-external-secrets
+
+# Create secret in kubestock-staging namespace
+kubectl create secret generic aws-external-secrets-creds \
+  --namespace=kubestock-staging \
+  --from-literal=access-key-id=<AWS_ACCESS_KEY_ID> \
+  --from-literal=secret-access-key=<AWS_SECRET_ACCESS_KEY>
+
+# Create secret in kubestock-production namespace
+kubectl create secret generic aws-external-secrets-creds \
+  --namespace=kubestock-production \
+  --from-literal=access-key-id=<AWS_ACCESS_KEY_ID> \
+  --from-literal=secret-access-key=<AWS_SECRET_ACCESS_KEY>
+
+# Create secret in external-secrets namespace (for ClusterSecretStore)
+kubectl create secret generic aws-external-secrets-creds \
+  --namespace=external-secrets \
+  --from-literal=access-key-id=<AWS_ACCESS_KEY_ID> \
+  --from-literal=secret-access-key=<AWS_SECRET_ACCESS_KEY>
+```
+
+**Required IAM Permissions for the user:**
+- `secretsmanager:GetSecretValue`
+- `secretsmanager:DescribeSecret` 
+- `ecr:GetAuthorizationToken`
+- `ecr:BatchGetImage`
+- `ecr:GetDownloadUrlForLayer`
+- `ecr:BatchCheckLayerAvailability`
+
+### 2. Bootstrap Sequence
+
+When setting up a new cluster:
+
+1. Deploy External Secrets Operator to `external-secrets` namespace
+2. Create `aws-external-secrets-creds` secrets in all three namespaces
+3. Deploy ArgoCD and configure projects
+4. Deploy applications - they will automatically:
+   - Fetch secrets from AWS Secrets Manager
+   - Generate ECR authentication tokens
+   - Pull container images from ECR
+
 This repository follows GitOps principles:
 - All Kubernetes manifests are version controlled
 - ArgoCD syncs cluster state with this repository
