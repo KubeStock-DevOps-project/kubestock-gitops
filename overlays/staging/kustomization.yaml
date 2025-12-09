@@ -28,7 +28,7 @@ labels:
 # Image tags - using specific SHA tags (updated by CI/CD)
 images:
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/web
-  newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
+  newTag: d9a7d70
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity
   newTag: 8c0e1d8d216f3e132df728c772fc4eb6d7737750
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-inventory
