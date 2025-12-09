@@ -11,6 +11,7 @@ namespace: kong-staging
 
 resources:
   - ../../../base/kong/
+  - rbac-binding.yaml
 
 patches:
   # Override service to use different NodePorts for staging

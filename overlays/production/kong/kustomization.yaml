@@ -10,6 +10,7 @@ namespace: kong
 
 resources:
   - ../../../base/kong/
+  - rbac-binding.yaml
 
 patches:
   # Replace the Kong ConfigMap with production configuration
