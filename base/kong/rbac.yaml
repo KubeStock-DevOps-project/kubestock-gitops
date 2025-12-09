@@ -1,28 +1,11 @@
 # =============================================================================
-# Kong API Gateway RBAC - Base (Shared ClusterRole only)
+# Kong API Gateway RBAC - Namespace-scoped Resources
 # =============================================================================
-# NOTE: ClusterRoleBinding is environment-specific and defined in overlays
+# NOTE: ClusterRole 'kong-ingress' is managed by shared-rbac app
+# NOTE: ClusterRoleBindings are environment-specific in overlays
 # =============================================================================
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: kong
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kong-ingress
-rules:
-  - apiGroups: [""]
-    resources: ["endpoints", "services", "secrets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses/status"]
-    verbs: ["update"]
-  - apiGroups: ["configuration.konghq.com"]
-    resources: ["kongplugins", "kongconsumers", "kongcredentials", "kongingresses"]
-    verbs: ["get", "list", "watch"]

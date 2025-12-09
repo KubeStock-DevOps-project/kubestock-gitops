@@ -1,0 +1,31 @@
+# =============================================================================
+# ArgoCD Application - Shared RBAC Resources
+# =============================================================================
+# Manages cluster-scoped RBAC resources shared across environments.
+# This prevents conflicts when multiple apps try to manage the same
+# cluster-scoped resources.
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shared-rbac
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    targetRevision: main
+    path: base/shared-rbac
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=false
+      - PruneLast=true
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false

@@ -1,0 +1,23 @@
+# =============================================================================
+# Kong Shared ClusterRole
+# =============================================================================
+# This ClusterRole is shared between staging and production Kong deployments.
+# Environment-specific ClusterRoleBindings are defined in overlays.
+# =============================================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kong-ingress
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints", "services", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses/status"]
+    verbs: ["update"]
+  - apiGroups: ["configuration.konghq.com"]
+    resources: ["kongplugins", "kongconsumers", "kongcredentials", "kongingresses"]
+    verbs: ["get", "list", "watch"]
