@@ -1,0 +1,182 @@
+# =============================================================================
+# Observability Stack - Production Overlay
+# =============================================================================
+# Completely isolated production observability:
+# - Namespace: observability-production
+# - NodePorts: 30090 (Prometheus), 30300 (Grafana), 30093 (Alertmanager)
+# - Prometheus scrapes: kubestock-production namespace
+# - Unique ClusterRole names to avoid conflicts
+# - Includes Alertmanager for production alerting
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: observability-production
+
+resources:
+  - ../../../base/observability-stack/
+  - alertmanager/
+
+labels:
+  - pairs:
+      environment: production
+    includeSelectors: false
+
+# Patches for production-specific configuration
+patches:
+  # Namespace name
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: observability-production
+    target:
+      kind: Namespace
+      name: observability
+
+  # Prometheus service - production NodePort
+  - patch: |-
+      - op: replace
+        path: /spec/ports/0/nodePort
+        value: 30090
+    target:
+      kind: Service
+      name: prometheus
+
+  # Grafana service - production NodePort
+  - patch: |-
+      - op: replace
+        path: /spec/ports/0/nodePort
+        value: 30300
+    target:
+      kind: Service
+      name: grafana
+
+  # Rename ClusterRole for prometheus to avoid conflicts
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prometheus-production
+    target:
+      kind: ClusterRole
+      name: prometheus
+
+  # Rename ClusterRoleBinding for prometheus
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prometheus-production
+      - op: replace
+        path: /roleRef/name
+        value: prometheus-production
+      - op: replace
+        path: /subjects/0/namespace
+        value: observability-production
+    target:
+      kind: ClusterRoleBinding
+      name: prometheus
+
+  # Rename ClusterRole for promtail
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: promtail-production
+    target:
+      kind: ClusterRole
+      name: promtail
+
+  # Rename ClusterRoleBinding for promtail
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: promtail-production
+      - op: replace
+        path: /roleRef/name
+        value: promtail-production
+      - op: replace
+        path: /subjects/0/namespace
+        value: observability-production
+    target:
+      kind: ClusterRoleBinding
+      name: promtail
+
+  # Production resources - higher limits
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+    target:
+      kind: Deployment
+      name: prometheus
+
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+    target:
+      kind: Deployment
+      name: grafana
+
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+    target:
+      kind: Deployment
+      name: loki
+
+  # Production PVC sizes
+  - patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 10Gi
+    target:
+      kind: PersistentVolumeClaim
+      name: prometheus-storage
+
+  - patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 5Gi
+    target:
+      kind: PersistentVolumeClaim
+      name: grafana-storage
+
+  - patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 10Gi
+    target:
+      kind: PersistentVolumeClaim
+      name: loki-storage
+
+  # Prometheus config - production scrape targets
+  - path: prometheus-config.yaml
+
+# Images
+images:
+  - name: prom/prometheus
+    newTag: v2.48.0
+  - name: grafana/grafana
+    newTag: "10.2.3"
+  - name: grafana/loki
+    newTag: "2.9.3"
+  - name: grafana/promtail
+    newTag: "2.9.3"

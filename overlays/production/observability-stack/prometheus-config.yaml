@@ -1,0 +1,162 @@
+# =============================================================================
+# Prometheus Config - Production Environment
+# =============================================================================
+# Scrapes kubestock-production namespace services
+# Includes alerting configuration
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  labels:
+    app: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: 'kubestock'
+        environment: 'production'
+
+    # Alertmanager configuration
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: ['alertmanager:9093']
+
+    # Rule files
+    rule_files:
+      - '/etc/prometheus/alerts.yml'
+
+    scrape_configs:
+      # Prometheus self-monitoring
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # Alertmanager
+      - job_name: 'alertmanager'
+        static_configs:
+          - targets: ['alertmanager:9093']
+
+      # Kubernetes API server
+      - job_name: 'kubernetes-apiservers'
+        kubernetes_sd_configs:
+          - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: default;kubernetes;https
+
+      # Kubernetes nodes
+      - job_name: 'kubernetes-nodes'
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+
+      # Kubernetes pods with prometheus.io annotations
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+
+      # KubeStock Microservices - PRODUCTION namespace
+      - job_name: 'kubestock-services'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - kubestock-production
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: ms-.+|web
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: http
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+
+      # Kong Gateway - Production
+      - job_name: 'kong-gateway'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - kong-production
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: kong.*
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+
+  alerts.yml: |
+    groups:
+      - name: kubestock-alerts
+        rules:
+          - alert: ServiceDown
+            expr: up{job="kubestock-services"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Service {{ $labels.service }} is down"
+              description: "Service {{ $labels.service }} has been down for more than 1 minute."
+
+          - alert: HighErrorRate
+            expr: |
+              sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+              /
+              sum(rate(http_requests_total[5m])) by (service) > 0.05
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High error rate on {{ $labels.service }}"
+              description: "Service {{ $labels.service }} has error rate > 5%."
+
+          - alert: PodRestarting
+            expr: increase(kube_pod_container_status_restarts_total[1h]) > 3
+            labels:
+              severity: warning
+            annotations:
+              summary: "Pod {{ $labels.pod }} restarting frequently"
+              description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last hour."

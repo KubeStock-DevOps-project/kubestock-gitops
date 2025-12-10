@@ -1,0 +1,14 @@
+# =============================================================================
+# Namespace - Placeholder (overridden by environment overlay)
+# =============================================================================
+# This file creates a generic namespace that overlays will rename to:
+# - observability-staging
+# - observability-production
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    name: observability
+    app.kubernetes.io/part-of: kubestock-observability

@@ -1,0 +1,16 @@
+# =============================================================================
+# Grafana - PersistentVolumeClaim
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-storage
+  labels:
+    app: grafana
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ebs-sc
+  resources:
+    requests:
+      storage: 2Gi

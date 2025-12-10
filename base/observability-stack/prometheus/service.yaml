@@ -1,0 +1,23 @@
+# =============================================================================
+# Prometheus - Service
+# =============================================================================
+# NodePort is a placeholder - overlay patches set environment-specific ports:
+# - Staging: 31090 (NLB port 9091)
+# - Production: 30090 (NLB port 9090)
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      nodePort: 30090
+      protocol: TCP
+  selector:
+    app: prometheus

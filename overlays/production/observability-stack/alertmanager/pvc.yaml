@@ -1,0 +1,16 @@
+# =============================================================================
+# Alertmanager - PersistentVolumeClaim
+# =============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alertmanager-storage
+  labels:
+    app: alertmanager
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ebs-sc
+  resources:
+    requests:
+      storage: 2Gi

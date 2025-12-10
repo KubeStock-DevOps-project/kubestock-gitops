@@ -1,0 +1,80 @@
+# =============================================================================
+# Promtail - ConfigMap
+# =============================================================================
+# Configuration for log collection
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  labels:
+    app: promtail
+data:
+  promtail-config.yaml: |
+    server:
+      http_listen_port: 3101
+      grpc_listen_port: 0
+
+    positions:
+      filename: /run/promtail/positions.yaml
+
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+
+    scrape_configs:
+      # Discover pods running on this node
+      - job_name: kubernetes-pods
+        pipeline_stages:
+          - cri: {}
+          # Extract log level from common patterns
+          - regex:
+              expression: '(?P<level>(INFO|WARN|ERROR|DEBUG|FATAL|info|warn|error|debug|fatal))'
+          - labels:
+              level:
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Keep only pods on this node
+          - source_labels:
+              - __meta_kubernetes_pod_node_name
+            target_label: __host__
+          - action: drop
+            regex: ''
+            source_labels:
+              - __meta_kubernetes_pod_node_name
+
+          # Capture labels
+          - source_labels:
+              - __meta_kubernetes_namespace
+            target_label: namespace
+
+          - source_labels:
+              - __meta_kubernetes_pod_name
+            target_label: pod
+
+          - source_labels:
+              - __meta_kubernetes_pod_container_name
+            target_label: container
+
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+
+          - source_labels:
+              - __meta_kubernetes_pod_label_app
+            target_label: app
+
+          - source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            target_label: service
+
+          - source_labels:
+              - __meta_kubernetes_pod_label_environment
+            target_label: environment
+
+          # Set __path__ to the log file path
+          - replacement: /var/log/pods/*$1/*.log
+            separator: /
+            source_labels:
+              - __meta_kubernetes_pod_uid
+              - __meta_kubernetes_pod_container_name
+            target_label: __path__

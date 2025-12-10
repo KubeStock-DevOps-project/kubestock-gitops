@@ -1,0 +1,19 @@
+# =============================================================================
+# Alertmanager - Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  labels:
+    app: alertmanager
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 9093
+      targetPort: 9093
+      nodePort: 30093
+      protocol: TCP
+  selector:
+    app: alertmanager

@@ -1,0 +1,34 @@
+# =============================================================================
+# Observability Stack Base - Kustomization
+# =============================================================================
+# Complete observability stack for a single environment.
+# Includes:
+# - Prometheus: Metrics collection
+# - Grafana: Dashboards and visualization  
+# - Loki: Log aggregation
+# - Promtail: Log collection (DaemonSet)
+#
+# Each environment (staging/production) deploys this to their own namespace.
+# No shared resources between environments.
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Namespace (will be overridden by overlay)
+  - namespace.yaml
+  # RBAC for Prometheus and Promtail
+  - prometheus-rbac.yaml
+  - promtail-rbac.yaml
+  # Core components
+  - prometheus/
+  - grafana/
+  - loki/
+  - promtail/
+
+# Common labels - will be combined with overlay labels
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: kubestock-observability
+      app.kubernetes.io/managed-by: argocd
+    includeSelectors: false

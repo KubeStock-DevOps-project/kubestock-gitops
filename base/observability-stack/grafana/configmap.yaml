@@ -1,0 +1,34 @@
+# =============================================================================
+# Grafana - Datasources ConfigMap
+# =============================================================================
+# Pre-configures Prometheus and Loki as data sources
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  labels:
+    app: grafana
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      # Prometheus - Metrics
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+        editable: true
+        jsonData:
+          timeInterval: 30s
+          queryTimeout: 60s
+
+      # Loki - Logs
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+        editable: true
+        jsonData:
+          maxLines: 1000

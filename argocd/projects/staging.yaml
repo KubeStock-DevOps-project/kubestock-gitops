@@ -27,7 +27,7 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: 'external-secrets'
       server: https://kubernetes.default.svc
-    - namespace: 'observability'
+    - namespace: 'observability-staging'
       server: https://kubernetes.default.svc
 
   # Cluster-scoped resources allowed

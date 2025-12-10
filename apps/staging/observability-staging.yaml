@@ -1,11 +1,10 @@
 # =============================================================================
 # ArgoCD Application - Observability Stack (Staging)
 # =============================================================================
-# Deploys Prometheus, Grafana, Loki, and Promtail to observability namespace
-# Uses staging overlay with reduced resources and shorter retention
-# 
-# Note: Staging depends on production overlay for cluster-scoped resources
-# (Namespace, StorageClass, ClusterRoles). Deploy production first.
+# Completely isolated staging observability environment
+# - Namespace: observability-staging
+# - NodePorts: 31090 (Prometheus), 31300 (Grafana)
+# - Own RBAC, PVCs, and configurations
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -14,30 +13,27 @@ metadata:
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"  # Deploy after cluster resources from production
 spec:
   project: kubestock-staging
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: overlays/staging/observability
+    path: overlays/staging/observability-stack
   destination:
     server: https://kubernetes.default.svc
-    namespace: observability
+    namespace: observability-staging
   syncPolicy:
     syncOptions:
-      - CreateNamespace=false  # Namespace created by production overlay
+      - CreateNamespace=true
       - PruneLast=true
       - ApplyOutOfSyncOnly=true
-      - RespectIgnoreDifferences=true
+      - ServerSideApply=true
     automated:
       prune: true
       selfHeal: true
-  # Ignore differences in dynamic fields
   ignoreDifferences:
     - group: ""
       kind: ConfigMap
-      name: prometheus-config
+      name: staging-prometheus-config
       jsonPointers:
         - /data
