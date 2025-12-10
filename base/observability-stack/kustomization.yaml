@@ -25,6 +25,8 @@ resources:
   - grafana/
   - loki/
   - promtail/
+  - kube-state-metrics/
+  - node-exporter/
 
 # Common labels - will be combined with overlay labels
 labels:
