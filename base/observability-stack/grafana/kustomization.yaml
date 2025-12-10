@@ -6,6 +6,10 @@ kind: Kustomization
 
 resources:
   - configmap.yaml
+  - dashboard-provisioning.yaml
+  - dashboard-kubernetes.yaml
+  - dashboard-microservices.yaml
+  - dashboard-logs.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml
