@@ -20,6 +20,20 @@ This directory contains ArgoCD Application definitions for the staging environme
   - Kong API Gateway
   - Secrets and configuration
 
+### observability-staging.yaml
+**Purpose**: Staging-specific observability configuration
+
+**Specifies**:
+- **Source**: Points to `overlays/staging/observability/` 
+- **Destination**: Deploys to `observability` namespace (shared with production)
+- **Sync Policy**: Auto-sync enabled
+- **Dependencies**: Requires `observability-production` to be deployed first (creates namespace and RBAC)
+- **Components**: 
+  - Prometheus config with staging namespace scrape targets
+  - Grafana, Loki, Promtail use shared resources
+
+**Note**: Cluster-scoped resources (Namespace, StorageClass, ClusterRoles) are managed by the production overlay only to avoid ArgoCD shared resource conflicts.
+
 **Monitored by ArgoCD**: Any push to `gitops/overlays/staging/` triggers an automatic sync
 
 ## Deployment Strategy

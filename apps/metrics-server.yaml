@@ -1,0 +1,38 @@
+# =============================================================================
+# ArgoCD Application - Metrics Server
+# =============================================================================
+# Kubernetes Metrics Server - provides resource metrics API for:
+# - Horizontal Pod Autoscaler (HPA)
+# - kubectl top nodes/pods commands
+# - Vertical Pod Autoscaler (VPA)
+#
+# Deployed to kube-system namespace as a cluster-level component
+# Shared between all environments (staging/production)
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metrics-server
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"  # Deploy early - many components depend on it
+spec:
+  project: kubestock-infrastructure
+  source:
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+    targetRevision: main
+    path: base/metrics-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=false  # kube-system already exists
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true  # Required for APIService
+    automated:
+      prune: true
+      selfHeal: true

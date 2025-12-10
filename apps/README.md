@@ -6,24 +6,42 @@ This directory contains ArgoCD Application definitions that tell ArgoCD what to 
 
 ```
 apps/
-├── kong.yaml              # Kong API Gateway application
-├── production/            # Production environment applications
+├── ebs-csi-driver.yaml        # AWS EBS CSI driver for persistent volumes
+├── external-secrets.yaml      # External Secrets Operator
+├── metrics-server.yaml        # Kubernetes Metrics Server (HPA, kubectl top)
+├── shared-rbac.yaml           # Shared RBAC across namespaces
+├── production/                # Production environment applications
+│   ├── kong-production.yaml
 │   ├── kubestock-production.yaml
+│   ├── observability-production.yaml
 │   └── README.md
-└── staging/               # Staging environment applications
+└── staging/                   # Staging environment applications
+    ├── kong-staging.yaml
     ├── kubestock-staging.yaml
+    ├── observability-staging.yaml
     └── README.md
 ```
 
-## Files Overview
+## Cluster-Level Applications
 
-### kong.yaml
-**Purpose**: Defines the Kong API Gateway application for ArgoCD
+### metrics-server.yaml
+**Purpose**: Kubernetes Metrics Server for resource metrics API
+- **Enables**: `kubectl top nodes/pods`, Horizontal Pod Autoscaler (HPA)
+- **Namespace**: kube-system
+- **Deploy First**: Many components depend on this
 
-**Specifies**:
-- Source: Points to the Kong configuration in the base directory
-- Destination: Kong namespace in the cluster
-- Sync policy: When and how ArgoCD syncs changes
+### ebs-csi-driver.yaml
+**Purpose**: AWS EBS CSI driver for persistent volume provisioning
+- **Namespace**: kube-system
+
+### external-secrets.yaml  
+**Purpose**: Syncs secrets from AWS Secrets Manager to Kubernetes
+- **Namespace**: external-secrets
+
+### shared-rbac.yaml
+**Purpose**: Shared RBAC rules across environments
+
+## Environment-Specific Applications
 
 ### production/ & staging/
 Each environment-specific application file defines:
@@ -31,6 +49,16 @@ Each environment-specific application file defines:
 - Target namespace and cluster
 - Sync policies and automation settings
 - Notification preferences
+
+## Deployment Order
+
+For a new cluster, deploy in this order:
+1. `ebs-csi-driver.yaml` - Storage provisioning
+2. `metrics-server.yaml` - Resource metrics
+3. `external-secrets.yaml` - Secrets sync
+4. `production/observability-production.yaml` - Creates shared observability resources
+5. `staging/observability-staging.yaml` - Staging observability config
+6. Environment apps (kong, kubestock)
 
 ## Usage
 

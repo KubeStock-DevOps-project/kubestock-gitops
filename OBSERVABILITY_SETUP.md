@@ -1,36 +1,68 @@
 # 🎯 Observability Setup Guide for KubeStock
 
-Complete guide to deploy Prometheus and Grafana monitoring for your cluster.
+Complete guide to deploy the full observability stack for monitoring metrics and logs.
 
 ## 📋 What You're Deploying
 
+### Core Components
 - **Prometheus**: Metrics collection and storage (observability namespace)
 - **Grafana**: Visualization dashboards (observability namespace)
-- **Monitoring**: All 6 microservices + Kong Gateway
+- **Loki**: Log aggregation (observability namespace)
+- **Promtail**: Log collector DaemonSet (observability namespace)
+- **Metrics Server**: Kubernetes resource metrics API (kube-system namespace)
+
+### Monitoring Targets
+- All KubeStock microservices (staging + production)
+- Kong Gateway
+- Kubernetes API server, nodes, and pods
+
+## 🏗️ Architecture Overview
+
+The observability stack uses a **shared namespace** (`observability`) for both staging and production environments to save resources. However, each environment has its own ArgoCD Application:
+
+- **observability-production**: Deploys cluster-scoped resources (namespace, RBAC, StorageClass) + production config
+- **observability-staging**: Uses shared resources but with staging-specific Prometheus scrape config
+
+**Important**: Deploy production first as it creates the shared cluster-scoped resources.
 
 ## 🚀 Deployment Steps
 
-### Step 1: Deploy Observability Stack via ArgoCD
+### Step 1: Deploy Metrics Server (Required)
 
-From your bastion or dev server:
+Metrics Server provides the resource metrics API for HPA and `kubectl top`:
 
 ```bash
-# Apply the ArgoCD Application manifest
-kubectl apply -f gitops/apps/staging/observability-staging.yaml
+# Apply metrics-server ArgoCD Application
+kubectl apply -f gitops/apps/metrics-server.yaml
 
-# Verify the application is created
-kubectl get applications -n argocd | grep observability
+# Wait for deployment
+kubectl get pods -n kube-system -l app=metrics-server
+
+# Verify it works
+kubectl top nodes
+kubectl top pods -A
 ```
 
-### Step 2: Sync the Application
+### Step 2: Deploy Production Observability (Creates Shared Resources)
 
 ```bash
-# Sync via kubectl
-kubectl patch app observability-staging -n argocd \
-  --type merge \
-  -p '{"operation":{"initiatedBy":{"username":"admin"},"sync":{}}}'
+# Deploy production first - creates namespace, RBAC, StorageClass
+kubectl apply -f gitops/apps/production/observability-production.yaml
 
-# OR sync via ArgoCD CLI (if installed)
+# Sync the application
+argocd app sync observability-production
+
+# Verify deployment
+kubectl get pods -n observability
+```
+
+### Step 3: Deploy Staging Observability
+
+```bash
+# Apply staging observability (depends on production for cluster resources)
+kubectl apply -f gitops/apps/staging/observability-staging.yaml
+
+# Sync will apply staging-specific Prometheus config
 argocd app sync observability-staging
 ```
 
