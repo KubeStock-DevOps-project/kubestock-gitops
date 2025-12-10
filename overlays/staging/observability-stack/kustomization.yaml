@@ -51,6 +51,9 @@ patches:
 
   # Node Exporter - Change port for staging to avoid conflict with production
   - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: "--web.listen-address=:9101"
       - op: replace
         path: /spec/template/spec/containers/0/ports/0/containerPort
         value: 9101
