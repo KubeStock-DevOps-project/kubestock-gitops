@@ -49,6 +49,30 @@ patches:
       kind: Service
       name: grafana
 
+  # Node Exporter - Change port for staging to avoid conflict with production
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 9101
+      - op: replace
+        path: /spec/template/metadata/annotations/prometheus.io~1port
+        value: "9101"
+    target:
+      kind: DaemonSet
+      name: node-exporter
+
+  # Node Exporter Service - Update port for staging
+  - patch: |-
+      - op: replace
+        path: /spec/ports/0/port
+        value: 9101
+      - op: replace
+        path: /spec/ports/0/targetPort
+        value: 9101
+    target:
+      kind: Service
+      name: node-exporter
+
   # Rename ClusterRole for prometheus to avoid conflicts
   - patch: |-
       - op: replace
