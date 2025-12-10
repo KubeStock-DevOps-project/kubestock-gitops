@@ -5,6 +5,10 @@
 # - Longer retention periods (15 days local, S3 for long-term)
 # - Higher resource limits
 # - Alerting enabled
+#
+# This overlay also includes cluster-scoped resources (Namespace, StorageClass,
+# ClusterRoles) that are shared with staging. Only production manages these
+# to avoid ArgoCD shared resource conflicts.
 # =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -13,6 +17,7 @@ namespace: observability
 
 resources:
   - ../../../base/observability/
+  - ../../../base/observability/cluster-resources/
   - alertmanager/
 
 labels:

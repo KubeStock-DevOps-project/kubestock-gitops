@@ -1,5 +1,8 @@
 # =============================================================================
-# Prometheus - RBAC Configuration
+# Prometheus - ServiceAccount (Namespaced)
+# =============================================================================
+# Note: ClusterRole and ClusterRoleBinding are in cluster-resources/
+# to avoid conflicts between staging and production ArgoCD apps.
 # =============================================================================
 apiVersion: v1
 kind: ServiceAccount
@@ -8,59 +11,3 @@ metadata:
   namespace: observability
   labels:
     app: prometheus
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: prometheus
-  labels:
-    app: prometheus
-rules:
-  # Access to nodes and node metrics
-  - apiGroups: [""]
-    resources:
-      - nodes
-      - nodes/metrics
-      - nodes/proxy
-    verbs: ["get", "list", "watch"]
-  
-  # Access to services, endpoints, and pods
-  - apiGroups: [""]
-    resources:
-      - services
-      - endpoints
-      - pods
-    verbs: ["get", "list", "watch"]
-  
-  # Access to configmaps
-  - apiGroups: [""]
-    resources:
-      - configmaps
-    verbs: ["get"]
-  
-  # Access to ingresses
-  - apiGroups: ["networking.k8s.io"]
-    resources:
-      - ingresses
-    verbs: ["get", "list", "watch"]
-  
-  # Non-resource URLs for metrics scraping
-  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
-    verbs: ["get"]
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: prometheus
-  labels:
-    app: prometheus
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: prometheus
-subjects:
-  - kind: ServiceAccount
-    name: prometheus
-    namespace: observability
