@@ -21,6 +21,10 @@ spec:
     metadata:
       labels:
         app: ms-product
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3002"
+        prometheus.io/path: "/metrics"
     spec:
       imagePullSecrets:
         - name: ecr-cred
