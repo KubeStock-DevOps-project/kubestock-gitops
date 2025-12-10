@@ -99,6 +99,30 @@ patches:
       kind: ClusterRoleBinding
       name: promtail
 
+  # Rename ClusterRole for kube-state-metrics
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: kube-state-metrics-production
+    target:
+      kind: ClusterRole
+      name: kube-state-metrics
+
+  # Rename ClusterRoleBinding for kube-state-metrics
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: kube-state-metrics-production
+      - op: replace
+        path: /roleRef/name
+        value: kube-state-metrics-production
+      - op: replace
+        path: /subjects/0/namespace
+        value: observability-production
+    target:
+      kind: ClusterRoleBinding
+      name: kube-state-metrics
+
   # Production resources - higher limits
   - patch: |-
       - op: replace

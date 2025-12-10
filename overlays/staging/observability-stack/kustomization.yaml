@@ -97,6 +97,30 @@ patches:
       kind: ClusterRoleBinding
       name: promtail
 
+  # Rename ClusterRole for kube-state-metrics
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: kube-state-metrics-staging
+    target:
+      kind: ClusterRole
+      name: kube-state-metrics
+
+  # Rename ClusterRoleBinding for kube-state-metrics
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: kube-state-metrics-staging
+      - op: replace
+        path: /roleRef/name
+        value: kube-state-metrics-staging
+      - op: replace
+        path: /subjects/0/namespace
+        value: observability-staging
+    target:
+      kind: ClusterRoleBinding
+      name: kube-state-metrics
+
   # Prometheus config - staging scrape targets
   - path: prometheus-config.yaml
 
