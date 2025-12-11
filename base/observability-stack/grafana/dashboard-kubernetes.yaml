@@ -77,7 +77,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "count(count by (node) (kube_node_info{namespace=\"$environment\"}))",
+              "expr": "count(count by (node) (kube_node_info))",
               "refId": "A"
             }
           ],
@@ -129,7 +129,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "count(kube_pod_info)",
+              "expr": "count(count by (namespace, pod) (kube_pod_info{namespace=~\"$namespace\"}))",
               "refId": "A"
             }
           ],
@@ -301,7 +301,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * (1 - avg(irate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[2m])) by (instance)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+              "expr": "100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m]))) * on(instance) group_left(nodename) (node_uname_info{nodename=~\"$node\"})",
               "legendFormat": "{{nodename}}",
               "refId": "A"
             }
@@ -362,7 +362,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * ((node_memory_MemTotal_bytes{instance=~\".*:9100\"} - node_memory_MemAvailable_bytes{instance=~\".*:9100\"}) / node_memory_MemTotal_bytes{instance=~\".*:9100\"}) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+              "expr": "100 * ((node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Cached_bytes - node_memory_Buffers_bytes + node_memory_Slab_bytes) / node_memory_MemTotal_bytes) * on(instance) group_left(nodename) (node_uname_info{nodename=~\"$node\"})",
               "legendFormat": "{{nodename}}",
               "refId": "A"
             }
@@ -746,12 +746,12 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(kube_pod_status_phase{phase=~\"Running|Pending|Failed\",namespace=\"$environment\",pod=~\"$pod\",node=~\"$node\"}) by (phase)",
+              "expr": "sum(kube_pod_status_phase{phase=~\"Running|Pending|Failed\",namespace=~\"$namespace\",pod=~\"$pod\",node=~\"$node\"}) by (phase)",
               "legendFormat": "{{phase}}",
               "refId": "A"
             }
           ],
-          "title": "Pod Status (Filtered by Node/Pod)",
+          "title": "Pod Status (Filtered by Namespace/Node/Pod)",
           "type": "timeseries"
         }
       ],
@@ -763,27 +763,44 @@ data:
         "list": [
           {
             "current": {
-              "selected": false,
-              "text": "Production",
-              "value": "observability-production"
+              "selected": true,
+              "text": [
+                "kubestock-production",
+                "kubestock-staging"
+              ],
+              "value": [
+                "kubestock-production",
+                "kubestock-staging"
+              ]
             },
             "hide": 0,
-            "includeAll": false,
-            "multi": false,
-            "name": "environment",
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": true,
+            "name": "namespace",
             "options": [
               {
-                "selected": false,
-                "text": "Staging",
-                "value": "observability-staging"
+                "selected": true,
+                "text": "kubestock-production",
+                "value": "kubestock-production"
               },
               {
                 "selected": true,
-                "text": "Production",
+                "text": "kubestock-staging",
+                "value": "kubestock-staging"
+              },
+              {
+                "selected": false,
+                "text": "observability-production",
                 "value": "observability-production"
+              },
+              {
+                "selected": false,
+                "text": "observability-staging",
+                "value": "observability-staging"
               }
             ],
-            "query": "observability-staging,observability-production",
+            "query": "kubestock-production,kubestock-staging,observability-production,observability-staging",
             "queryValue": "",
             "skipUrlSync": false,
             "type": "custom"
@@ -795,7 +812,7 @@ data:
               "value": ".*"
             },
             "datasource": "Prometheus",
-            "definition": "label_values(kube_node_info{namespace=\"$environment\"}, node)",
+            "definition": "label_values(kube_node_info, node)",
             "hide": 0,
             "includeAll": true,
             "allValue": ".*",
@@ -803,7 +820,7 @@ data:
             "name": "node",
             "options": [],
             "query": {
-              "query": "label_values(kube_node_info{namespace=\"$environment\"}, node)",
+              "query": "label_values(kube_node_info, node)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
@@ -819,7 +836,7 @@ data:
               "value": ".*"
             },
             "datasource": "Prometheus",
-            "definition": "label_values(kube_pod_info{namespace=\"$environment\",node=~\"$node\"}, pod)",
+            "definition": "label_values(kube_pod_info{namespace=~\"$namespace\",node=~\"$node\"}, pod)",
             "hide": 0,
             "includeAll": true,
             "allValue": ".*",
@@ -827,7 +844,7 @@ data:
             "name": "pod",
             "options": [],
             "query": {
-              "query": "label_values(kube_pod_info{namespace=\"$environment\",node=~\"$node\"}, pod)",
+              "query": "label_values(kube_pod_info{namespace=~\"$namespace\",node=~\"$node\"}, pod)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
