@@ -4,36 +4,46 @@ This directory contains AppProject definitions that control what can be deployed
 
 ## Files Overview
 
+### infrastructure.yaml
+**Purpose**: AppProject for cluster-wide infrastructure components
+
+**Manages**:
+- EBS CSI Driver (kube-system)
+- Metrics Server (kube-system)
+- External Secrets Operator (external-secrets)
+- Observability components (observability namespace)
+
+**Allowed cluster-scoped resources**: Namespace, StorageClass, CSIDriver, ClusterRole, ClusterRoleBinding, CRDs, APIService
+
 ### staging.yaml
 **Purpose**: AppProject definition for the staging environment
 
-**Defines**:
-- Allowed source repositories (which Git repos can be synced)
-- Allowed destination clusters and namespaces for staging deployments
-- Resource restrictions and RBAC policies for staging
-- Cluster role bindings for the staging project
+**Destination namespaces**:
+- `kubestock-staging`: Microservices
+- `kong-staging`: Kong API Gateway
+- `observability-staging`: Observability stack
+- `external-secrets`: Shared secret store
 
-**Use case**: Staging environment deployments with relaxed restrictions for testing
+**Sync policy**: Auto-sync enabled (24/7)
 
 ### production.yaml
 **Purpose**: AppProject definition for the production environment
 
-**Defines**:
-- Allowed source repositories (restricted to kubestock-core)
-- Destination namespaces:
-  - `kubestock-production`: Production environment
-  - `argocd`: ArgoCD system namespace
-- Stricter RBAC policies and resource restrictions for production
-- Rolling update deployment strategy
+**Destination namespaces**:
+- `kubestock-production`: Microservices
+- `kong`: Kong API Gateway
+- `observability-production`: Observability stack
 
-**Use case**: Production environment with high availability and zero-downtime deployments
+**Sync windows**: 
+- Deny: 10 PM - 6 AM (manual override allowed)
+- Allow: 6 AM - 10 PM (Monday-Friday)
 
 ## Key Differences
 
-| Aspect | Staging | Production |
-|--------|---------|------------|
-| Repositories | Multiple sources allowed | Only kubestock-core |
-| Namespaces | kubestock-staging | kubestock-production |
-| Strategy | Rolling updates | Rolling updates |
-| Risk Level | Lower, for testing | Higher, requires strict controls |
+| Aspect | Infrastructure | Staging | Production |
+|--------|---------------|---------|------------|
+| Namespaces | kube-system, observability | kubestock-staging | kubestock-production |
+| Cluster Resources | Full access | Limited | Limited |
+| Sync Windows | Always | Always | Business hours |
+| Risk Level | Medium | Low | High |
 

@@ -7,30 +7,49 @@ GitOps repository for KubeStock Kubernetes deployments using ArgoCD.
 ```
 gitops/
 ├── README.md
+├── BOOTSTRAP.md               # Cluster bootstrap instructions
+├── OBSERVABILITY_SETUP.md     # Observability stack documentation
 ├── argocd/                    # ArgoCD configuration
 │   ├── projects/              # AppProject definitions
+│   │   ├── infrastructure.yaml
 │   │   ├── staging.yaml
 │   │   └── production.yaml
 │   └── config/                # ArgoCD ConfigMaps
 │       └── argocd-cm.yaml
-├── apps/                      # ArgoCD Application definitions (skeleton)
+├── apps/                      # ArgoCD Application definitions
+│   ├── ebs-csi-driver.yaml    # EBS CSI Driver
+│   ├── external-secrets.yaml  # External Secrets Operator config
+│   ├── metrics-server.yaml    # Kubernetes Metrics Server
+│   ├── shared-rbac.yaml       # Shared RBAC resources
 │   ├── staging/               # Staging environment apps
+│   │   ├── kong-staging.yaml
+│   │   ├── kubestock-staging.yaml
+│   │   └── observability-staging.yaml
 │   └── production/            # Production environment apps
+│       ├── kong-production.yaml
+│       ├── kubestock-production.yaml
+│       └── observability-production.yaml
 ├── base/                      # Base Kustomize manifests
-│   ├── namespaces/
-│   ├── postgres/              # PostgreSQL StatefulSet
-│   └── services/              # Microservice deployments
-│       ├── ms-product/
-│       ├── ms-inventory/
-│       ├── ms-supplier/
-│       ├── ms-order-management/
-│       ├── ms-identity/
-│       └── frontend/
+│   ├── ebs-csi-driver/        # AWS EBS CSI Driver
+│   ├── external-secrets/      # ClusterSecretStore
+│   ├── kong/                  # Kong API Gateway
+│   ├── metrics-server/        # Metrics Server
+│   ├── observability-stack/   # Prometheus, Grafana, Loki, Promtail
+│   ├── services/              # Microservice deployments
+│   │   ├── frontend/
+│   │   ├── ms-identity/
+│   │   ├── ms-inventory/
+│   │   ├── ms-order-management/
+│   │   ├── ms-product/
+│   │   └── ms-supplier/
+│   └── shared-rbac/           # Shared ClusterRoles
 └── overlays/                  # Environment-specific overlays
     ├── staging/               # Staging overlay
-    └── production/            # Production overlay (blue-green)
-        ├── blue/
-        └── green/
+    │   ├── kong/              # Kong config for staging
+    │   └── observability-stack/ # Observability for staging
+    └── production/            # Production overlay
+        ├── kong/              # Kong config for production
+        └── observability-stack/ # Observability for production
 ```
 
 ## Services

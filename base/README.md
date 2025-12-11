@@ -6,77 +6,58 @@ This directory contains the base Kubernetes manifests and Kustomize configuratio
 
 ```
 base/
-├── kustomization.yaml      # Main Kustomize file that aggregates all base resources
+├── ebs-csi-driver/         # AWS EBS CSI Driver for persistent volumes
+├── external-secrets/       # External Secrets configuration (ClusterSecretStore)
 ├── kong/                   # Kong API Gateway manifests
-│   ├── kustomization.yaml
-│   ├── deployment.yaml     # Kong Gateway deployment
-│   ├── service.yaml        # Kong services (proxy and admin)
-│   ├── config.yaml         # Kong configuration
-│   └── rbac.yaml           # RBAC for Kong
-├── namespaces/             # Kubernetes namespace definitions
-│   ├── kustomization.yaml
-│   ├── kong.yaml           # Kong namespace
-│   ├── production.yaml     # Production namespace
-│   └── staging.yaml        # Staging namespace
-└── services/               # Microservice deployments
-    ├── frontend/           # React frontend
-    ├── ms-identity/        # Identity/Auth microservice
-    ├── ms-inventory/       # Inventory management microservice
-    ├── ms-order-management/ # Order management microservice
-    ├── ms-product/         # Product catalog microservice
-    └── ms-supplier/        # Supplier management microservice
+├── metrics-server/         # Kubernetes Metrics Server for HPA
+├── observability-stack/    # Prometheus, Grafana, Loki, Promtail stack
+├── services/               # Microservice deployments
+│   ├── frontend/
+│   ├── ms-identity/
+│   ├── ms-inventory/
+│   ├── ms-order-management/
+│   ├── ms-product/
+│   └── ms-supplier/
+└── shared-rbac/            # Shared cluster-scoped RBAC resources
 ```
 
-## Files Overview
+## Components
 
-### kustomization.yaml (root)
-**Purpose**: Main Kustomize aggregation file
+### Infrastructure Components (Deployed via separate ArgoCD Applications)
 
-**Includes**:
-- `namespaces/`: All namespace definitions
-- `kong/`: Kong API Gateway
-- `services/`: All microservices in dependency order
+| Component | Path | Description |
+|-----------|------|-------------|
+| ebs-csi-driver | `base/ebs-csi-driver/` | AWS EBS CSI Driver for dynamic volume provisioning |
+| external-secrets | `base/external-secrets/` | ClusterSecretStore for AWS Secrets Manager |
+| metrics-server | `base/metrics-server/` | Metrics API for HPA and kubectl top |
+| shared-rbac | `base/shared-rbac/` | Cluster-scoped RBAC shared across environments |
 
-**Use case**: Defines the complete base resource structure that gets overlayed for each environment
-
-### kong/
-- **deployment.yaml**: Kong Gateway deployment with 2 replicas, rolling update strategy, and Prometheus metrics
-- **service.yaml**: Kong services (NodePort services for proxy and admin API)
-- **config.yaml**: Kong configuration (routes, upstreams, plugins)
+### Kong API Gateway
+- **deployment.yaml**: Kong Gateway deployment with Prometheus metrics
+- **service.yaml**: Kong services (NodePort for proxy and admin API)
+- **config.yaml**: Default Kong configuration
 - **rbac.yaml**: RBAC rules for Kong service account
-- **kustomization.yaml**: Kustomize aggregation for Kong resources
 
-### namespaces/
-- **kong.yaml**: Kong namespace definition
-- **production.yaml**: Production environment namespace
-- **staging.yaml**: Staging environment namespace
-- **kustomization.yaml**: Aggregates all namespace definitions
+### Observability Stack
+Complete monitoring stack:
+- **prometheus/**: Metrics collection
+- **grafana/**: Dashboards and visualization
+- **loki/**: Log aggregation
+- **promtail/**: Log collection DaemonSet
+- **kube-state-metrics/**: Kubernetes object metrics
+- **node-exporter/**: Node-level metrics
 
-### services/
-Each service directory contains:
-- **deployment.yaml**: Service deployment specification
-- **service.yaml**: Kubernetes service for internal/external access
-- **kustomization.yaml**: Kustomize aggregation for the service
-
-**Included services**:
-- **frontend/**: React-based user interface
-- **ms-identity/**: User authentication and authorization
-- **ms-inventory/**: Inventory tracking and management
-- **ms-order-management/**: Order processing and management
-- **ms-product/**: Product catalog and information
-- **ms-supplier/**: Supplier management and information
+### Services
+Each microservice contains:
+- **deployment.yaml**: Kubernetes Deployment
+- **service.yaml**: ClusterIP Service
+- **kustomization.yaml**: Kustomize aggregation
 
 ## Key Concepts
 
-1. **Base vs Overlays**: These are base definitions without environment-specific values. Environment-specific settings are applied via overlays.
-2. **Kustomize Aggregation**: Each `kustomization.yaml` aggregates child resources
-3. **Shared Configuration**: All resources here are inherited by both staging and production overlays
-4. **No Secrets**: Base files should NOT contain secrets (those go in overlays)
-
-## Deployment Order
-
-When applied, resources are deployed in this order:
-1. Namespaces (kong, production, staging)
-2. Kong API Gateway
+1. **Base vs Overlays**: Base definitions without environment-specific values. Overlays apply environment-specific settings.
+2. **Modular Design**: Each component is self-contained and deployed via its own ArgoCD Application
+3. **Shared Configuration**: Resources here are inherited by staging and production overlays
+4. **No Secrets**: Base files should NOT contain secrets (those are managed via External Secrets)
 3. Microservices (in the order specified in kustomization.yaml)
 
