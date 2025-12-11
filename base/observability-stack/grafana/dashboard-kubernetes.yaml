@@ -362,7 +362,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * ((node_memory_MemTotal_bytes{instance=~\".*:9100\"} - node_memory_MemFree_bytes{instance=~\".*:9100\"} - node_memory_Buffers_bytes{instance=~\".*:9100\"} - node_memory_Cached_bytes{instance=~\".*:9100\"}) / node_memory_MemTotal_bytes{instance=~\".*:9100\"}) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+              "expr": "100 * ((node_memory_MemTotal_bytes{instance=~\".*:9100\"} - node_memory_MemAvailable_bytes{instance=~\".*:9100\"}) / node_memory_MemTotal_bytes{instance=~\".*:9100\"}) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
               "legendFormat": "{{nodename}}",
               "refId": "A"
             }
