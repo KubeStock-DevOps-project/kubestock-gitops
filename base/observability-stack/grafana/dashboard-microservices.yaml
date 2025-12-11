@@ -79,12 +79,12 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(kube_pod_status_phase{namespace=~\"$namespace\",pod=~\"ms-.*\",phase=\"Running\"}) by (pod)",
+              "expr": "count(kube_pod_status_phase{namespace=~\"$namespace\",pod=~\"ms-.*\",phase=\"Running\"}) by (pod) * 0 + 1",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
-          "title": "Microservices Status",
+          "title": "Microservices Status (Running Pods)",
           "type": "bargauge"
         },
         {
@@ -156,8 +156,8 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"ms-.*\",container!=\"\",container!=\"POD\"}[5m])) by (pod)",
-              "legendFormat": "{{pod}}",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"ms-.*\",container!=\"\",container!=\"POD\"}[5m])) by (pod) * on(pod) group_left(label_app) kube_pod_labels{namespace=~\"$namespace\"}",
+              "legendFormat": "{{label_app}}",
               "refId": "A"
             }
           ],
@@ -233,8 +233,8 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"ms-.*\",container!=\"\",container!=\"POD\"}) by (pod)",
-              "legendFormat": "{{pod}}",
+              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"ms-.*\",container!=\"\",container!=\"POD\"}) by (pod) * on(pod) group_left(label_app) kube_pod_labels{namespace=~\"$namespace\"}",
+              "legendFormat": "{{label_app}}",
               "refId": "A"
             }
           ],
@@ -310,12 +310,12 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(kube_pod_container_status_restarts_total{namespace=~\"$namespace\",pod=~\"ms-.*\"}) by (pod)",
-              "legendFormat": "{{pod}}",
+              "expr": "sum(kube_pod_container_status_restarts_total{namespace=~\"$namespace\",pod=~\"ms-.*\"}) by (pod) * on(pod) group_left(label_app) kube_pod_labels{namespace=~\"$namespace\"}",
+              "legendFormat": "{{label_app}}",
               "refId": "A"
             }
           ],
-          "title": "Pod Restart Count",
+          "title": "Pod Restart Count (by Service)",
           "type": "timeseries"
         },
         {
@@ -387,17 +387,17 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(rate(container_network_receive_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\",interface!=\"lo\"}[5m])) by (pod)",
-              "legendFormat": "{{pod}} (RX)",
+              "expr": "sum(rate(container_network_receive_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\",interface!=\"lo\"}[5m])) by (pod) * on(pod) group_left(label_app) kube_pod_labels{namespace=~\"$namespace\"}",
+              "legendFormat": "{{label_app}} (RX)",
               "refId": "A"
             },
             {
-              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\",interface!=\"lo\"}[5m])) by (pod)",
-              "legendFormat": "{{pod}} (TX)",
+              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\",interface!=\"lo\"}[5m])) by (pod) * on(pod) group_left(label_app) kube_pod_labels{namespace=~\"$namespace\"}",
+              "legendFormat": "{{label_app}} (TX)",
               "refId": "B"
             }
           ],
-          "title": "Network Traffic",
+          "title": "Network Traffic by Service",
           "type": "timeseries"
         }
       ],

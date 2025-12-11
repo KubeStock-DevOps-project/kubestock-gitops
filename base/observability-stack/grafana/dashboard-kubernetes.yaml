@@ -185,7 +185,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[5m])))",
+              "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[1m])))",
               "refId": "A"
             }
           ],
@@ -301,7 +301,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[5m])) by (instance)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+              "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[1m])) by (instance)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
               "legendFormat": "{{nodename}}",
               "refId": "A"
             }
