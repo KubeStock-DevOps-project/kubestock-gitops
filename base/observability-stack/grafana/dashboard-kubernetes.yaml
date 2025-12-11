@@ -185,11 +185,11 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[1m])))",
+              "expr": "100 * (1 - avg(irate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[2m])))",
               "refId": "A"
             }
           ],
-          "title": "Cluster CPU Usage (Average)",
+          "title": "Cluster CPU Usage (Current Avg)",
           "type": "stat"
         },
         {
@@ -301,12 +301,12 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[1m])) by (instance)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
+              "expr": "100 * (1 - avg(irate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[2m])) by (instance)) * on(instance) group_left(nodename) node_uname_info{nodename=~\"$node\"}",
               "legendFormat": "{{nodename}}",
               "refId": "A"
             }
           ],
-          "title": "Node CPU Usage (%)",
+          "title": "Node CPU Usage (%) - Current",
           "type": "bargauge"
         },
         {
@@ -367,7 +367,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Node Memory Usage (%)",
+          "title": "Node Memory Usage (%) - Current",
           "type": "bargauge"
         },
         {
