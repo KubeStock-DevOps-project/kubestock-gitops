@@ -79,12 +79,12 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(kube_pod_status_phase{namespace=~\"$namespace\",pod=~\"ms-.*\",phase=\"Running\"}) by (pod)",
+              "expr": "count(kube_pod_status_phase{namespace=~\"$namespace\",pod=~\"ms-.*\",phase=\"Running\"}) by (pod) * 0 + 1",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
-          "title": "Microservices Status",
+          "title": "Microservices Status (Running Pods)",
           "type": "bargauge"
         },
         {
@@ -156,7 +156,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"ms-.*\"}[5m])) by (pod)",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"ms-.*\",container!=\"\",container!=\"POD\"}[5m])) by (pod)",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }
@@ -233,7 +233,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"ms-.*\"}) by (pod)",
+              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"ms-.*\",container!=\"\",container!=\"POD\"}) by (pod)",
               "legendFormat": "{{pod}}",
               "refId": "A"
             }
@@ -387,12 +387,12 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(rate(container_network_receive_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\"}[5m])) by (pod)",
+              "expr": "sum(rate(container_network_receive_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\",interface!=\"lo\"}[5m])) by (pod)",
               "legendFormat": "{{pod}} (RX)",
               "refId": "A"
             },
             {
-              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\"}[5m])) by (pod)",
+              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=~\"$namespace\",pod=~\"ms-.*\",interface!=\"lo\"}[5m])) by (pod)",
               "legendFormat": "{{pod}} (TX)",
               "refId": "B"
             }

@@ -77,7 +77,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "count(kube_node_info)",
+              "expr": "count(count by (node) (kube_node_info))",
               "refId": "A"
             }
           ],
@@ -129,7 +129,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "count(kube_pod_info)",
+              "expr": "count(count by (namespace, pod) (kube_pod_info{namespace=~\"$namespace\"}))",
               "refId": "A"
             }
           ],
@@ -185,11 +185,11 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))",
+              "expr": "100 * (1 - avg(irate(node_cpu_seconds_total{mode=\"idle\",instance=~\".*:9100\"}[2m])))",
               "refId": "A"
             }
           ],
-          "title": "Cluster CPU Usage",
+          "title": "Cluster CPU Usage (Current Avg)",
           "type": "stat"
         },
         {
@@ -241,12 +241,195 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "100 * (1 - (avg(node_memory_MemAvailable_bytes) / avg(node_memory_MemTotal_bytes)))",
+              "expr": "100 * avg((node_memory_MemTotal_bytes{instance=~\".*:9100\"} - node_memory_MemFree_bytes{instance=~\".*:9100\"} - node_memory_Buffers_bytes{instance=~\".*:9100\"} - node_memory_Cached_bytes{instance=~\".*:9100\"}) / node_memory_MemTotal_bytes{instance=~\".*:9100\"})",
               "refId": "A"
             }
           ],
-          "title": "Cluster Memory Usage",
+          "title": "Cluster Memory Usage (Current Avg)",
           "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 85
+                  }
+                ]
+              },
+              "unit": "percent",
+              "min": 0,
+              "max": 100
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 4
+          },
+          "id": 6,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "10.2.3",
+          "targets": [
+            {
+              "expr": "100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m]))) * on(instance) group_left(nodename) (node_uname_info{nodename=~\"$node\"})",
+              "legendFormat": "{{nodename}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Node CPU Usage (%) - Current",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 85
+                  }
+                ]
+              },
+              "unit": "percent",
+              "min": 0,
+              "max": 100
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 4
+          },
+          "id": 7,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "10.2.3",
+          "targets": [
+            {
+              "expr": "100 * ((node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Cached_bytes - node_memory_Buffers_bytes + node_memory_Slab_bytes) / node_memory_MemTotal_bytes) * on(instance) group_left(nodename) (node_uname_info{nodename=~\"$node\"})",
+              "legendFormat": "{{nodename}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Node Memory Usage (%) - Current",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 75
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent",
+              "min": 0,
+              "max": 100
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 12
+          },
+          "id": 9,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "10.2.3",
+          "targets": [
+            {
+              "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"rootfs\"})",
+              "legendFormat": "{{instance}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Node Disk Usage (%) - Root Filesystem",
+          "type": "bargauge"
         },
         {
           "datasource": "Prometheus",
@@ -293,36 +476,41 @@ data:
                   }
                 ]
               },
-              "unit": "percentunit"
+              "unit": "Bps"
             },
             "overrides": []
           },
           "gridPos": {
             "h": 8,
             "w": 12,
-            "x": 0,
-            "y": 4
+            "x": 12,
+            "y": 12
           },
-          "id": 6,
+          "id": 10,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
+              "calcs": ["mean", "lastNotNull"],
+              "displayMode": "table",
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single"
+              "mode": "multi"
             }
           },
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) by (instance)",
-              "legendFormat": "{{instance}}",
+              "expr": "rate(node_network_receive_bytes_total{device!~\"lo|veth.*|docker.*|virbr.*|cali.*\"}[5m])",
+              "legendFormat": "{{instance}} - {{device}} RX",
               "refId": "A"
+            },
+            {
+              "expr": "rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|docker.*|virbr.*|cali.*\"}[5m])",
+              "legendFormat": "{{instance}} - {{device}} TX",
+              "refId": "B"
             }
           ],
-          "title": "Node CPU Usage",
+          "title": "Node Network Traffic (Bytes/sec)",
           "type": "timeseries"
         },
         {
@@ -370,7 +558,89 @@ data:
                   }
                 ]
               },
-              "unit": "percentunit"
+              "unit": "iops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 20
+          },
+          "id": 11,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull"],
+              "displayMode": "table",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "multi"
+            }
+          },
+          "pluginVersion": "10.2.3",
+          "targets": [
+            {
+              "expr": "rate(node_disk_reads_completed_total{device!~\"dm-.*\"}[5m])",
+              "legendFormat": "{{instance}} - {{device}} reads",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(node_disk_writes_completed_total{device!~\"dm-.*\"}[5m])",
+              "legendFormat": "{{instance}} - {{device}} writes",
+              "refId": "B"
+            }
+          ],
+          "title": "Node Disk I/O Operations",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bytes"
             },
             "overrides": []
           },
@@ -378,28 +648,33 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 20
           },
-          "id": 7,
+          "id": 12,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
+              "calcs": ["lastNotNull"],
+              "displayMode": "table",
               "placement": "bottom"
             },
             "tooltip": {
-              "mode": "single"
+              "mode": "multi"
             }
           },
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
-              "legendFormat": "{{instance}}",
+              "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+              "legendFormat": "{{instance}} - Used",
               "refId": "A"
+            },
+            {
+              "expr": "node_memory_MemAvailable_bytes",
+              "legendFormat": "{{instance}} - Available",
+              "refId": "B"
             }
           ],
-          "title": "Node Memory Usage",
+          "title": "Node Memory Details (Bytes)",
           "type": "timeseries"
         },
         {
@@ -455,7 +730,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 12
+            "y": 28
           },
           "id": 8,
           "options": {
@@ -471,12 +746,12 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(kube_pod_status_phase{phase=~\"Running|Pending|Failed\"}) by (phase)",
+              "expr": "sum(kube_pod_status_phase{phase=~\"Running|Pending|Failed\",namespace=~\"$namespace\",pod=~\"$pod\",node=~\"$node\"}) by (phase)",
               "legendFormat": "{{phase}}",
               "refId": "A"
             }
           ],
-          "title": "Pod Status",
+          "title": "Pod Status (Filtered by Namespace/Node/Pod)",
           "type": "timeseries"
         }
       ],
@@ -485,7 +760,100 @@ data:
       "style": "dark",
       "tags": ["kubernetes", "cluster"],
       "templating": {
-        "list": []
+        "list": [
+          {
+            "current": {
+              "selected": true,
+              "text": [
+                "kubestock-production",
+                "kubestock-staging"
+              ],
+              "value": [
+                "kubestock-production",
+                "kubestock-staging"
+              ]
+            },
+            "hide": 0,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": true,
+            "name": "namespace",
+            "options": [
+              {
+                "selected": true,
+                "text": "kubestock-production",
+                "value": "kubestock-production"
+              },
+              {
+                "selected": true,
+                "text": "kubestock-staging",
+                "value": "kubestock-staging"
+              },
+              {
+                "selected": false,
+                "text": "observability-production",
+                "value": "observability-production"
+              },
+              {
+                "selected": false,
+                "text": "observability-staging",
+                "value": "observability-staging"
+              }
+            ],
+            "query": "kubestock-production,kubestock-staging,observability-production,observability-staging",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          },
+          {
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": ".*"
+            },
+            "datasource": "Prometheus",
+            "definition": "label_values(kube_node_info, node)",
+            "hide": 0,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": false,
+            "name": "node",
+            "options": [],
+            "query": {
+              "query": "label_values(kube_node_info, node)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": ".*"
+            },
+            "datasource": "Prometheus",
+            "definition": "label_values(kube_pod_info{namespace=~\"$namespace\",node=~\"$node\"}, pod)",
+            "hide": 0,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": false,
+            "name": "pod",
+            "options": [],
+            "query": {
+              "query": "label_values(kube_pod_info{namespace=~\"$namespace\",node=~\"$node\"}, pod)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          }
+        ]
       },
       "time": {
         "from": "now-1h",

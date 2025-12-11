@@ -92,3 +92,20 @@ data:
           - source_labels: [__meta_kubernetes_endpoint_node_name]
             action: replace
             target_label: instance
+
+      # Kubelet cAdvisor - Container metrics
+      - job_name: 'kubelet-cadvisor'
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        metrics_path: /metrics/cadvisor
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+            regex: node-exporter
+          - source_labels: [__meta_kubernetes_endpoint_node_name]
+            action: replace
+            target_label: instance
