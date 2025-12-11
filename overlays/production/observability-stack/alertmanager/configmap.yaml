@@ -28,11 +28,40 @@ data:
 
     receivers:
       - name: 'default'
-        # Add webhook, email, or slack config here
+        slack_configs:
+          - api_url_file: '/etc/secrets/default-url'
+            channel: '#alerts'
+            title: 'Kubestock Alert'
+            text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+            
       - name: 'critical'
-        # Add webhook, email, or slack config here
+        slack_configs:
+          - api_url_file: '/etc/secrets/critical-url'
+            channel: '#alerts-critical'
+            title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+            text: |-
+              *Alert:* {{ .GroupLabels.alertname }}
+              *Severity:* {{ .CommonLabels.severity }}
+              *Summary:* {{ .CommonAnnotations.summary }}
+              *Description:* {{ .CommonAnnotations.description }}
+              {{ range .Alerts }}
+              *Details:*
+              {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+              {{ end }}
+              {{ end }}
+            send_resolved: true
+            
       - name: 'warning'
-        # Add webhook, email, or slack config here
+        slack_configs:
+          - api_url_file: '/etc/secrets/warning-url'
+            channel: '#alerts-warning'
+            title: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
+            text: |-
+              *Alert:* {{ .GroupLabels.alertname }}
+              *Severity:* {{ .CommonLabels.severity }}
+              *Summary:* {{ .CommonAnnotations.summary }}
+              *Description:* {{ .CommonAnnotations.description }}
+            send_resolved: true
 
     inhibit_rules:
       - source_match:
