@@ -172,6 +172,7 @@ data:
     groups:
       - name: kubestock-alerts
         rules:
+          # Service Availability
           - alert: ServiceDown
             expr: up{job="kubestock-services"} == 0
             for: 1m
@@ -179,7 +180,7 @@ data:
               severity: critical
             annotations:
               summary: "Service {{ $labels.service }} is down"
-              description: "Service {{ $labels.service }} has been down for more than 1 minute."
+              description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been down for more than 1 minute."
 
           - alert: HighErrorRate
             expr: |
@@ -191,12 +192,123 @@ data:
               severity: warning
             annotations:
               summary: "High error rate on {{ $labels.service }}"
-              description: "Service {{ $labels.service }} has error rate > 5%."
+              description: "Service {{ $labels.service }} has error rate > 5% (current: {{ $value | humanizePercentage }})."
 
+          # Pod Health
           - alert: PodRestarting
-            expr: increase(kube_pod_container_status_restarts_total[1h]) > 3
+            expr: increase(kube_pod_container_status_restarts_total{namespace="kubestock-production"}[1h]) > 3
             labels:
               severity: warning
             annotations:
               summary: "Pod {{ $labels.pod }} restarting frequently"
               description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last hour."
+
+          - alert: PodCrashLooping
+            expr: rate(kube_pod_container_status_restarts_total{namespace="kubestock-production"}[15m]) > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Pod {{ $labels.pod }} is crash looping"
+              description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is in CrashLoopBackOff state."
+
+          - alert: PodNotReady
+            expr: kube_pod_status_phase{namespace="kubestock-production", phase!~"Running|Succeeded"} == 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Pod {{ $labels.pod }} not ready"
+              description: "Pod {{ $labels.pod }} has been in {{ $labels.phase }} state for more than 5 minutes."
+
+          # Resource Usage - Pods
+          - alert: HighMemoryUsage
+            expr: |
+              (container_memory_working_set_bytes{namespace="kubestock-production", container!=""}
+              / container_spec_memory_limit_bytes{namespace="kubestock-production", container!=""}) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High memory usage on {{ $labels.pod }}"
+              description: "Pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit."
+
+          - alert: HighCPUUsage
+            expr: |
+              (rate(container_cpu_usage_seconds_total{namespace="kubestock-production", container!=""}[5m])
+              / container_spec_cpu_quota{namespace="kubestock-production", container!=""} * 100000) > 0.8
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High CPU usage on {{ $labels.pod }}"
+              description: "Pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of CPU limit."
+
+          # Node Health
+          - alert: NodeNotReady
+            expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Node {{ $labels.node }} is not ready"
+              description: "Node {{ $labels.node }} has been in NotReady state for more than 5 minutes."
+
+          - alert: NodeMemoryPressure
+            expr: kube_node_status_condition{condition="MemoryPressure",status="true"} == 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Node {{ $labels.node }} has memory pressure"
+              description: "Node {{ $labels.node }} is experiencing memory pressure."
+
+          - alert: NodeDiskPressure
+            expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Node {{ $labels.node }} has disk pressure"
+              description: "Node {{ $labels.node }} is experiencing disk pressure."
+
+          # Storage
+          - alert: PersistentVolumeNearFull
+            expr: |
+              (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "PVC {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+              description: "PersistentVolumeClaim {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} is more than 80% full."
+
+          - alert: PersistentVolumeCriticallyFull
+            expr: |
+              (kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes) > 0.9
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "PVC {{ $labels.persistentvolumeclaim }} is {{ $value | humanizePercentage }} full"
+              description: "PersistentVolumeClaim {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} is critically full (>90%)."
+
+          # Kubernetes Components
+          - alert: KubernetesAPIServerDown
+            expr: up{job="kubernetes-apiservers"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes API server is down"
+              description: "Kubernetes API server has been unreachable for more than 1 minute."
+
+          # Database (PostgreSQL - if exposed metrics)
+          - alert: DatabaseDown
+            expr: up{job=~".*postgres.*"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Database {{ $labels.instance }} is down"
+              description: "PostgreSQL database has been down for more than 1 minute."
