@@ -31,8 +31,13 @@ data:
         slack_configs:
           - api_url_file: '/etc/secrets/default-url'
             channel: '#alerts'
-            title: 'Kubestock Alert'
-            text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+            title: 'Kubestock Alert: {{ .GroupLabels.alertname }}'
+            text: |-
+              {{ range .Alerts }}
+              *Alert:* {{ .Labels.alertname }}
+              *Summary:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              {{ end }}
             
       - name: 'critical'
         slack_configs:
@@ -40,11 +45,11 @@ data:
             channel: '#alerts-critical'
             title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
             text: |-
-              *Alert:* {{ .GroupLabels.alertname }}
-              *Severity:* {{ .CommonLabels.severity }}
-              *Summary:* {{ .CommonAnnotations.summary }}
-              *Description:* {{ .CommonAnnotations.description }}
               {{ range .Alerts }}
+              *Alert:* {{ .Labels.alertname }}
+              *Severity:* {{ .Labels.severity }}
+              *Summary:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
               *Details:*
               {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
               {{ end }}
@@ -57,10 +62,14 @@ data:
             channel: '#alerts-warning'
             title: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
             text: |-
-              *Alert:* {{ .GroupLabels.alertname }}
-              *Severity:* {{ .CommonLabels.severity }}
-              *Summary:* {{ .CommonAnnotations.summary }}
-              *Description:* {{ .CommonAnnotations.description }}
+              {{ range .Alerts }}
+              *Alert:* {{ .Labels.alertname }}
+              *Severity:* {{ .Labels.severity }}
+              *Summary:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              *Namespace:* {{ .Labels.namespace }}
+              *Pod:* {{ .Labels.pod }}
+              {{ end }}
             send_resolved: true
 
     inhibit_rules:
