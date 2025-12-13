@@ -1,0 +1,52 @@
+# =============================================================================
+# k6 Prometheus Remote Write Configuration
+# =============================================================================
+# Allows test-runner to export k6 metrics directly to Prometheus
+# k6 supports Prometheus remote write out of the box
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-config
+  namespace: kubestock-staging
+data:
+  k6-prometheus.json: |
+    {
+      "options": {
+        "ext": {
+          "loadimpact": {
+            "name": "Staging Smoke Tests",
+            "projectID": 0
+          }
+        }
+      }
+    }
+  # Instructions for enabling Prometheus output
+  README.md: |
+    # k6 Prometheus Integration
+    
+    ## Option 1: Prometheus Remote Write (Recommended)
+    k6 supports Prometheus remote write natively:
+    
+    ```bash
+    k6 run --out experimental-prometheus-rw script.js
+    ```
+    
+    ## Option 2: StatsD Output to Prometheus
+    Configure k6 to output to StatsD, then use statsd_exporter:
+    
+    ```bash
+    k6 run --out statsd script.js
+    ```
+    
+    ## Option 3: Parse Logs with Promtail
+    k6 outputs structured logs that can be parsed by Promtail and sent to Loki.
+    Prometheus can then query Loki for metrics.
+    
+    ## Current Setup
+    The test-runner service exposes metrics on port 3007 at /metrics.
+    k6 test results are logged in structured format for Promtail to scrape.
+    
+    ## Grafana Dashboards
+    - Use Grafana's built-in k6 dashboard (ID: 10660)
+    - Or create custom dashboards using k6 metrics in Prometheus
