@@ -3,6 +3,7 @@
 # =============================================================================
 # Deploys all production services using rolling update strategy
 # Auto-sync enabled for GitOps best practices
+# HPA manages replica counts - ignoreDifferences configured
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -20,6 +21,12 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: kubestock-production
+  # Ignore HPA-managed replica count differences
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
   syncPolicy:
     automated:
       prune: true
@@ -29,6 +36,7 @@ spec:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
       - PruneLast=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:

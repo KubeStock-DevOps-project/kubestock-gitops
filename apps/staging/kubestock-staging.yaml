@@ -4,6 +4,7 @@
 # Deploys all services to kubestock-staging namespace
 # Uses specific SHA tags managed by CI/CD pipeline
 # Auto-sync enabled for GitOps best practices
+# HPA manages replica counts - ignoreDifferences configured
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -21,11 +22,18 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: kubestock-staging
+  # Ignore HPA-managed replica count differences
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
       - PruneLast=true
       - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
     automated:
       prune: true
       selfHeal: true

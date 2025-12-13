@@ -76,8 +76,13 @@ spec:
       kind: ECRAuthorizationToken
 
   # Orphaned resources warning (don't auto-delete)
+  # Ignore aws-external-secrets-creds as it's a manually created prerequisite
   orphanedResources:
     warn: true
+    ignore:
+      - group: ""
+        kind: Secret
+        name: aws-external-secrets-creds
 
   # Roles for RBAC
   roles:
