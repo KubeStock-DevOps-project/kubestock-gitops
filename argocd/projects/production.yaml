@@ -75,22 +75,6 @@ spec:
     - group: 'generators.external-secrets.io'
       kind: ECRAuthorizationToken
 
-  # Sync windows - restricted for production
-  syncWindows:
-    # Deny deployments during night hours (10 PM - 6 AM)
-    - kind: deny
-      schedule: '0 22 * * *'
-      duration: 8h
-      applications:
-        - '*'
-      manualSync: true  # Allow manual sync override
-    # Allow deployments during business hours (Monday-Friday)
-    - kind: allow
-      schedule: '0 6 * * 1-5'
-      duration: 16h
-      applications:
-        - '*'
-
   # Orphaned resources warning (don't auto-delete)
   orphanedResources:
     warn: true
