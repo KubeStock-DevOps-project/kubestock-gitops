@@ -257,12 +257,12 @@ data:
             "graphMode": "none",
             "justifyMode": "center",
             "orientation": "horizontal",
-            "reduceOptions": {"values": true, "calcs": ["lastNotNull"], "fields": ""},
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "value_and_name"
           },
           "targets": [
             {
-              "expr": "max by (horizontalpodautoscaler, namespace) (kube_horizontalpodautoscaler_status_condition{job=\"kube-state-metrics\",namespace=~\"$namespace\",condition=\"ScalingActive\",status=\"true\"})",
+              "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_status_condition{job=\"kube-state-metrics\",namespace=~\"$namespace\",condition=\"ScalingActive\",status=\"true\"})",
               "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
               "refId": "A"
             }
@@ -295,8 +295,8 @@ data:
           },
           "targets": [
             {
-              "expr": "(kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"} / kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}) * 100",
-              "legendFormat": "{{horizontalpodautoscaler}}",
+              "expr": "max by (namespace, horizontalpodautoscaler) ((kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"} / kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}) * 100)",
+              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
               "refId": "A"
             }
           ],
