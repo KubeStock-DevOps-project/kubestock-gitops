@@ -1,0 +1,10 @@
+# =============================================================================
+# Test Runner Namespace
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-runner
+  labels:
+    app.kubernetes.io/name: test-runner
+    app.kubernetes.io/component: testing

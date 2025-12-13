@@ -1,25 +1,25 @@
 # =============================================================================
-# ArgoCD Application - Test Runner (Staging)
+# ArgoCD Application - Test Runner
 # =============================================================================
-# Deploys test-runner service to kubestock-staging namespace
-# Manages automated testing infrastructure
+# Deploys test-runner service to dedicated test-runner namespace
+# Environment-agnostic testing infrastructure for both staging and production
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: test-runner-staging
+  name: test-runner
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: kubestock-staging
+  project: infrastructure
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: overlays/staging/test-runner
+    path: base/services/test-runner
   destination:
     server: https://kubernetes.default.svc
-    namespace: kubestock-staging
+    namespace: test-runner
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -29,11 +29,3 @@ spec:
       prune: true
       selfHeal: true
       allowEmpty: false
-  ignoreDifferences:
-    # Ignore differences in Job status and metadata
-    - group: batch
-      kind: Job
-      jsonPointers:
-        - /status
-        - /metadata/labels
-        - /metadata/annotations

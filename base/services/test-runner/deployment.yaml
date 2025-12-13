@@ -41,7 +41,12 @@ spec:
               value: "0.0.0.0"
             - name: PORT
               value: "3007"
-            # Gateway URL for smoke tests (through Kong)
+            # Gateway URL - configurable per environment
+            - name: STAGING_GATEWAY_URL
+              value: "http://kong-proxy.kubestock-staging.svc.cluster.local:8000"
+            - name: PRODUCTION_GATEWAY_URL
+              value: "http://kong-proxy.kubestock-production.svc.cluster.local:8000"
+            # Default gateway URL (staging)
             - name: GATEWAY_URL
               value: "http://kong-proxy.kubestock-staging.svc.cluster.local:8000"
             # Asgardeo Configuration - Token endpoint
