@@ -240,37 +240,50 @@ data:
         },
         {
           "datasource": "Prometheus",
+          "description": "Shows pods that are NOT ready - if empty, all pods are healthy",
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "thresholds"},
+              "custom": {
+                "align": "auto",
+                "displayMode": "color-background-solid",
+                "filterable": true,
+                "inspect": false
+              },
               "mappings": [
-                {"options": {"0": {"color": "red", "index": 0, "text": "Not Ready"}}, "type": "value"},
-                {"options": {"1": {"color": "green", "index": 1, "text": "Ready"}}, "type": "value"}
+                {"options": {"0": {"color": "red", "index": 0, "text": "NOT READY"}}, "type": "value"},
+                {"options": {"1": {"color": "green", "index": 1, "text": "READY"}}, "type": "value"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
-              "unit": "short"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
             },
-            "overrides": []
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "Pod"}, "properties": [{"id": "custom.width", "value": 280}]},
+              {"matcher": {"id": "byName", "options": "Namespace"}, "properties": [{"id": "custom.width", "value": 150}]},
+              {"matcher": {"id": "byName", "options": "Status"}, "properties": [{"id": "custom.width", "value": 100}]}
+            ]
           },
           "gridPos": {"h": 6, "w": 12, "x": 12, "y": 6},
           "id": 8,
           "options": {
-            "colorMode": "background",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "horizontal",
-            "reduceOptions": {"values": true, "calcs": ["lastNotNull"], "fields": ""},
-            "textMode": "name"
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {"show": false, "reducer": ["sum"], "countRows": false, "fields": ""},
+            "sortBy": [{"displayName": "Status", "desc": false}]
           },
           "targets": [
             {
               "expr": "kube_pod_status_ready{job=\"kube-state-metrics\",namespace=~\"$namespace\",pod=~\"$microservice.*\",condition=\"true\"}",
-              "legendFormat": "{{pod}}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
           "title": "Pod Ready Status",
-          "type": "stat"
+          "transformations": [
+            {"id": "organize", "options": {"excludeByName": {"Time": true, "condition": true, "job": true, "__name__": true, "uid": true, "instance": true, "container": true, "endpoint": true, "service": true}, "renameByName": {"namespace": "Namespace", "pod": "Pod", "Value": "Status"}}}
+          ],
+          "type": "table"
         },
         {
           "collapsed": false,
