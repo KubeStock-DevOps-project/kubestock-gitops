@@ -202,13 +202,15 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 6},
           "id": 7,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
           "targets": [
             {
@@ -218,7 +220,7 @@ data:
             }
           ],
           "title": "Node CPU Usage (%)",
-          "type": "bargauge"
+          "type": "gauge"
         },
         {
           "datasource": "Prometheus",
@@ -233,13 +235,15 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 6},
           "id": 8,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
           "targets": [
             {
@@ -249,7 +253,7 @@ data:
             }
           ],
           "title": "Node Memory Usage (%)",
-          "type": "bargauge"
+          "type": "gauge"
         },
         {
           "datasource": "Prometheus",
@@ -264,13 +268,15 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 11},
           "id": 9,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
           "targets": [
             {
@@ -279,8 +285,8 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Node Disk Usage (%) - Root Filesystem",
-          "type": "bargauge"
+          "title": "Node Disk Usage (%)",
+          "type": "gauge"
         },
         {
           "datasource": "Prometheus",
@@ -293,13 +299,15 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 11},
           "id": 10,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
           "targets": [
             {
@@ -309,11 +317,11 @@ data:
             }
           ],
           "title": "Pods per Node",
-          "type": "bargauge"
+          "type": "gauge"
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 22},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 16},
           "id": 102,
           "panels": [],
           "title": "Time Series",
@@ -347,7 +355,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 23},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
           "id": 11,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -391,7 +399,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 23},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
           "id": 12,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -435,7 +443,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 31},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 25},
           "id": 13,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -484,7 +492,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 31},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 25},
           "id": 14,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -507,7 +515,7 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 39},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 33},
           "id": 103,
           "panels": [],
           "title": "Node Details",
@@ -533,7 +541,7 @@ data:
               {"matcher": {"id": "byName", "options": "Disk %"}, "properties": [{"id": "custom.width", "value": 80}, {"id": "custom.displayMode", "value": "color-background"}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 75}, {"color": "red", "value": 90}]}}]}
             ]
           },
-          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40},
+          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 34},
           "id": 15,
           "options": {"showHeader": true, "sortBy": []},
           "targets": [

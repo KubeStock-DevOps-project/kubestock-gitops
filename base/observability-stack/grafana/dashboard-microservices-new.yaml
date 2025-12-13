@@ -186,33 +186,51 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "thresholds"},
+              "custom": {"align": "auto", "displayMode": "auto", "inspect": false},
               "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
-              "unit": "short"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
             },
-            "overrides": []
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "Namespace"}, "properties": [{"id": "custom.width", "value": 150}]},
+              {"matcher": {"id": "byName", "options": "Deployment"}, "properties": [{"id": "custom.width", "value": 180}]},
+              {"matcher": {"id": "byName", "options": "Available"}, "properties": [{"id": "custom.width", "value": 80}, {"id": "custom.displayMode", "value": "color-background"}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}]},
+              {"matcher": {"id": "byName", "options": "Desired"}, "properties": [{"id": "custom.width", "value": 80}]},
+              {"matcher": {"id": "byName", "options": "Ready"}, "properties": [{"id": "custom.width", "value": 80}]}
+            ]
           },
-          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 5},
+          "gridPos": {"h": 5, "w": 24, "x": 0, "y": 5},
           "id": 7,
-          "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
-            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
-          },
+          "options": {"showHeader": true, "sortBy": [{"desc": false, "displayName": "Namespace"}]},
           "targets": [
             {
               "expr": "kube_deployment_status_replicas_available{job=\"kube-state-metrics\",namespace=~\"$namespace\",deployment=~\"$microservice\"}",
-              "legendFormat": "{{namespace}}/{{deployment}}",
-              "refId": "A"
+              "format": "table",
+              "instant": true,
+              "refId": "Available"
+            },
+            {
+              "expr": "kube_deployment_spec_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\",deployment=~\"$microservice\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "Desired"
+            },
+            {
+              "expr": "kube_deployment_status_replicas_ready{job=\"kube-state-metrics\",namespace=~\"$namespace\",deployment=~\"$microservice\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "Ready"
             }
           ],
-          "title": "Deployment Status (Available Replicas)",
-          "type": "bargauge"
+          "title": "Deployment Status",
+          "transformations": [
+            {"id": "seriesToColumns", "options": {"byField": "deployment"}},
+            {"id": "organize", "options": {"excludeByName": {"Time": true, "Time 1": true, "Time 2": true, "Time 3": true, "instance": true, "instance 1": true, "instance 2": true, "job": true, "job 1": true, "job 2": true, "namespace 1": true, "namespace 2": true}, "renameByName": {"deployment": "Deployment", "namespace": "Namespace", "Value #Available": "Available", "Value #Desired": "Desired", "Value #Ready": "Ready"}}}
+          ],
+          "type": "table"
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 11},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 10},
           "id": 101,
           "panels": [],
           "title": "HPA (Horizontal Pod Autoscaler)",
@@ -232,7 +250,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 6, "w": 12, "x": 0, "y": 12},
+          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 11},
           "id": 8,
           "options": {
             "displayMode": "gradient",
@@ -265,7 +283,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 6, "w": 12, "x": 12, "y": 12},
+          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 11},
           "id": 9,
           "options": {
             "displayMode": "gradient",
@@ -313,7 +331,7 @@ data:
               {"matcher": {"id": "byRegexp", "options": "/.*desired.*/"}, "properties": [{"id": "custom.lineStyle", "value": {"dash": [10, 10], "fill": "dash"}}]}
             ]
           },
-          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 18},
+          "gridPos": {"h": 7, "w": 24, "x": 0, "y": 16},
           "id": 10,
           "options": {
             "legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right"},
@@ -352,7 +370,7 @@ data:
               {"matcher": {"id": "byName", "options": "Utilization %"}, "properties": [{"id": "custom.width", "value": 120}, {"id": "custom.displayMode", "value": "color-background"}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]}}]}
             ]
           },
-          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 26},
+          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 23},
           "id": 11,
           "options": {"showHeader": true, "sortBy": []},
           "targets": [
@@ -390,7 +408,7 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 34},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 29},
           "id": 102,
           "panels": [],
           "title": "Resource Usage by Microservice",
@@ -407,7 +425,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 35},
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 30},
           "id": 16,
           "options": {
             "displayLabels": ["name", "percent"],
@@ -437,7 +455,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 6, "x": 6, "y": 35},
+          "gridPos": {"h": 8, "w": 6, "x": 6, "y": 30},
           "id": 17,
           "options": {
             "displayLabels": ["name", "percent"],
@@ -484,7 +502,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 35},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
           "id": 12,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -528,7 +546,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 43},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 38},
           "id": 13,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -572,7 +590,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 51},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 46},
           "id": 14,
           "options": {
             "legend": {"calcs": ["mean"], "displayMode": "table", "placement": "right"},
@@ -621,7 +639,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 51},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 46},
           "id": 15,
           "options": {
             "legend": {"calcs": [], "displayMode": "list", "placement": "bottom"},

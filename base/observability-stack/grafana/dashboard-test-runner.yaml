@@ -36,7 +36,7 @@ data:
               {"matcher": {"id": "byName", "options": "Failed"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]}
             ]
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
           "id": 1,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
           "targets": [
@@ -55,6 +55,45 @@ data:
           ],
           "title": "Test Results (Last Hour)",
           "type": "timeseries"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "Passed"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "Failed"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]}
+            ]
+          },
+          "gridPos": {"h": 8, "w": 4, "x": 8, "y": 0},
+          "id": 7,
+          "options": {
+            "displayLabels": ["name", "percent"],
+            "legend": {"displayMode": "list", "placement": "bottom", "values": []},
+            "pieType": "pie",
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+            "tooltip": {"mode": "single"}
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
+              "legendFormat": "Passed",
+              "refId": "A"
+            },
+            {
+              "datasource": "Loki",
+              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code\" |!= \"code 0\" [24h]))",
+              "legendFormat": "Failed",
+              "refId": "B"
+            }
+          ],
+          "title": "Pass/Fail Ratio",
+          "type": "piechart"
         },
         {
           "datasource": "Loki",

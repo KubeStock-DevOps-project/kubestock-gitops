@@ -255,20 +255,22 @@ data:
           "gridPos": {"h": 6, "w": 12, "x": 12, "y": 6},
           "id": 8,
           "options": {
-            "displayMode": "gradient",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
             "orientation": "horizontal",
-            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "reduceOptions": {"values": true, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "name"
           },
           "targets": [
             {
               "expr": "kube_pod_status_ready{job=\"kube-state-metrics\",namespace=~\"$namespace\",pod=~\"$microservice.*\",condition=\"true\"}",
-              "legendFormat": "{{namespace}}/{{pod}}",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
           "title": "Pod Ready Status",
-          "type": "bargauge"
+          "type": "stat"
         },
         {
           "collapsed": false,
@@ -379,13 +381,15 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21},
+          "gridPos": {"h": 6, "w": 12, "x": 0, "y": 21},
           "id": 11,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
           "targets": [
             {
@@ -395,7 +399,7 @@ data:
             }
           ],
           "title": "Memory Usage vs Limit (%)",
-          "type": "bargauge"
+          "type": "gauge"
         },
         {
           "datasource": "Prometheus",
@@ -410,13 +414,15 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21},
+          "gridPos": {"h": 6, "w": 12, "x": 12, "y": 21},
           "id": 12,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
           "targets": [
             {
@@ -426,11 +432,11 @@ data:
             }
           ],
           "title": "CPU Usage vs Limit (%)",
-          "type": "bargauge"
+          "type": "gauge"
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 29},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 27},
           "id": 103,
           "panels": [],
           "title": "Container Health",
@@ -464,7 +470,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
           "id": 13,
           "options": {
             "legend": {"calcs": ["lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -508,7 +514,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
           "id": 14,
           "options": {
             "legend": {"calcs": ["mean"], "displayMode": "table", "placement": "right"},
@@ -531,7 +537,7 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 38},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 36},
           "id": 104,
           "panels": [],
           "title": "Pod Details Table",
@@ -555,7 +561,7 @@ data:
               {"matcher": {"id": "byName", "options": "Restarts"}, "properties": [{"id": "custom.width", "value": 80}, {"id": "custom.displayMode", "value": "color-background"}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}]}
             ]
           },
-          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 39},
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 37},
           "id": 15,
           "options": {"showHeader": true, "sortBy": [{"desc": false, "displayName": "Namespace"}]},
           "targets": [
