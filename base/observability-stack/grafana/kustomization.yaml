@@ -7,8 +7,9 @@ kind: Kustomization
 resources:
   - configmap.yaml
   - dashboard-provisioning.yaml
-  - dashboard-kubernetes.yaml
-  - dashboard-microservices.yaml
+  - dashboard-nodes.yaml
+  - dashboard-microservices-new.yaml
+  - dashboard-pods.yaml
   - dashboard-logs.yaml
   - dashboard-test-runner.yaml
   - pvc.yaml

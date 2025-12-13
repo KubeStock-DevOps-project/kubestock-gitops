@@ -1,0 +1,629 @@
+# =============================================================================
+# Grafana Dashboard - Microservices Overview
+# =============================================================================
+# Microservice/Deployment level metrics with namespace filter
+# Includes HPA status, deployment health, and resource allocation
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-microservices
+  labels:
+    app: grafana
+    grafana_dashboard: "1"
+data:
+  microservices-overview.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+          "id": 100,
+          "panels": [],
+          "title": "Deployment Status",
+          "type": "row"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 4, "x": 0, "y": 1},
+          "id": 1,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "count(kube_deployment_status_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"})", "refId": "A"}],
+          "title": "Total Deployments",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 4, "x": 4, "y": 1},
+          "id": 2,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "count(kube_deployment_status_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\",deployment=~\"ms-.*|frontend\"})", "refId": "A"}],
+          "title": "Microservices",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 4, "x": 8, "y": 1},
+          "id": 3,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "sum(kube_deployment_status_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"})", "refId": "A"}],
+          "title": "Total Pods",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 4, "x": 12, "y": 1},
+          "id": 4,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "count(kube_horizontalpodautoscaler_info{job=\"kube-state-metrics\",namespace=~\"$namespace\"})", "refId": "A"}],
+          "title": "Total HPAs",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 4, "x": 16, "y": 1},
+          "id": 5,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "count(kube_deployment_status_replicas_unavailable{job=\"kube-state-metrics\",namespace=~\"$namespace\"} > 0) or vector(0)", "refId": "A"}],
+          "title": "Unhealthy Deployments",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 4, "w": 4, "x": 20, "y": 1},
+          "id": 6,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "sum(kube_pod_container_status_restarts_total{job=\"kube-state-metrics\",namespace=~\"$namespace\"})", "refId": "A"}],
+          "title": "Total Restarts",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 5},
+          "id": 7,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "kube_deployment_status_replicas_available{job=\"kube-state-metrics\",namespace=~\"$namespace\",deployment=~\"$microservice\"}",
+              "legendFormat": "{{namespace}}/{{deployment}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Deployment Status (Available Replicas)",
+          "type": "bargauge"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 11},
+          "id": 101,
+          "panels": [],
+          "title": "HPA (Horizontal Pod Autoscaler)",
+          "type": "row"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"0": {"color": "red", "index": 0, "text": "Unable to Scale"}}, "type": "value"},
+                {"options": {"1": {"color": "green", "index": 1, "text": "Active"}}, "type": "value"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 12, "x": 0, "y": 12},
+          "id": 8,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_condition{job=\"kube-state-metrics\",namespace=~\"$namespace\",condition=\"ScalingActive\",status=\"true\"}",
+              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
+              "refId": "A"
+            }
+          ],
+          "title": "HPA Scaling Status",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]},
+              "unit": "percent",
+              "min": 0,
+              "max": 100
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 12, "x": 12, "y": 12},
+          "id": 9,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "(kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"} / kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}) * 100",
+              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
+              "refId": "A"
+            }
+          ],
+          "title": "HPA Capacity Utilization (%)",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {"group": "A", "mode": "none"},
+                "thresholdsStyle": {"mode": "off"}
+              },
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": [
+              {"matcher": {"id": "byRegexp", "options": "/.*desired.*/"}, "properties": [{"id": "custom.lineStyle", "value": {"dash": [10, 10], "fill": "dash"}}]}
+            ]
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 18},
+          "id": 10,
+          "options": {
+            "legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right"},
+            "tooltip": {"mode": "multi"}
+          },
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
+              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}} (current)",
+              "refId": "A"
+            },
+            {
+              "expr": "kube_horizontalpodautoscaler_status_desired_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
+              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}} (desired)",
+              "refId": "B"
+            }
+          ],
+          "title": "HPA Current vs Desired Replicas",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "custom": {"align": "auto", "displayMode": "auto", "inspect": false},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "HPA"}, "properties": [{"id": "custom.width", "value": 200}]},
+              {"matcher": {"id": "byName", "options": "Namespace"}, "properties": [{"id": "custom.width", "value": 150}]},
+              {"matcher": {"id": "byName", "options": "Current"}, "properties": [{"id": "custom.width", "value": 80}]},
+              {"matcher": {"id": "byName", "options": "Min"}, "properties": [{"id": "custom.width", "value": 60}]},
+              {"matcher": {"id": "byName", "options": "Max"}, "properties": [{"id": "custom.width", "value": 60}]},
+              {"matcher": {"id": "byName", "options": "Utilization %"}, "properties": [{"id": "custom.width", "value": 120}, {"id": "custom.displayMode", "value": "color-background"}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]}}]}
+            ]
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 26},
+          "id": 11,
+          "options": {"showHeader": true, "sortBy": []},
+          "targets": [
+            {
+              "expr": "kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "Current"
+            },
+            {
+              "expr": "kube_horizontalpodautoscaler_spec_min_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "Min"
+            },
+            {
+              "expr": "kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "Max"
+            },
+            {
+              "expr": "(kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"} / kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}) * 100",
+              "format": "table",
+              "instant": true,
+              "refId": "Util"
+            }
+          ],
+          "title": "HPA Configuration Summary",
+          "transformations": [
+            {"id": "seriesToColumns", "options": {"byField": "horizontalpodautoscaler"}},
+            {"id": "organize", "options": {"excludeByName": {"Time": true, "Time 1": true, "Time 2": true, "Time 3": true, "Time 4": true, "namespace 1": true, "namespace 2": true, "namespace 3": true}, "renameByName": {"horizontalpodautoscaler": "HPA", "namespace": "Namespace", "Value #Current": "Current", "Value #Min": "Min", "Value #Max": "Max", "Value #Util": "Utilization %"}}}
+          ],
+          "type": "table"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 34},
+          "id": 102,
+          "panels": [],
+          "title": "Resource Usage by Microservice",
+          "type": "row"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {"group": "A", "mode": "none"},
+                "thresholdsStyle": {"mode": "off"}
+              },
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 35},
+          "id": 12,
+          "options": {
+            "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
+            "tooltip": {"mode": "multi"}
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}[5m])) by (namespace, pod)",
+              "legendFormat": "{{namespace}}/{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Usage by Microservice",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {"group": "A", "mode": "none"},
+                "thresholdsStyle": {"mode": "off"}
+              },
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 35},
+          "id": 13,
+          "options": {
+            "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
+            "tooltip": {"mode": "multi"}
+          },
+          "targets": [
+            {
+              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}) by (namespace, pod)",
+              "legendFormat": "{{namespace}}/{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Memory Usage by Microservice",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {"group": "A", "mode": "none"},
+                "thresholdsStyle": {"mode": "off"}
+              },
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "Bps"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 43},
+          "id": 14,
+          "options": {
+            "legend": {"calcs": ["mean"], "displayMode": "table", "placement": "right"},
+            "tooltip": {"mode": "multi"}
+          },
+          "targets": [
+            {
+              "expr": "sum(rate(container_network_receive_bytes_total{namespace=~\"$namespace\",pod=~\"$microservice.*\"}[5m])) by (namespace, pod)",
+              "legendFormat": "{{namespace}}/{{pod}} (RX)",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=~\"$namespace\",pod=~\"$microservice.*\"}[5m])) by (namespace, pod)",
+              "legendFormat": "{{namespace}}/{{pod}} (TX)",
+              "refId": "B"
+            }
+          ],
+          "title": "Network Traffic",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {"group": "A", "mode": "none"},
+                "thresholdsStyle": {"mode": "off"}
+              },
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 43},
+          "id": 15,
+          "options": {
+            "legend": {"calcs": [], "displayMode": "list", "placement": "bottom"},
+            "tooltip": {"mode": "multi"}
+          },
+          "targets": [
+            {
+              "expr": "sum(kube_pod_container_status_restarts_total{job=\"kube-state-metrics\",namespace=~\"$namespace\",pod=~\"$microservice.*\"}) by (namespace, pod)",
+              "legendFormat": "{{namespace}}/{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Pod Restart Count",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["microservices", "hpa", "kubestock"],
+      "templating": {
+        "list": [
+          {
+            "current": {"selected": true, "text": ["kubestock-production", "kubestock-staging"], "value": ["kubestock-production", "kubestock-staging"]},
+            "datasource": "Prometheus",
+            "definition": "label_values(kube_deployment_status_replicas{job=\"kube-state-metrics\"}, namespace)",
+            "hide": 0,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": true,
+            "name": "namespace",
+            "options": [],
+            "query": {"query": "label_values(kube_deployment_status_replicas{job=\"kube-state-metrics\"}, namespace)", "refId": "StandardVariableQuery"},
+            "refresh": 1,
+            "regex": "/kubestock.*/",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {"selected": true, "text": "All", "value": "$__all"},
+            "datasource": "Prometheus",
+            "definition": "label_values(kube_deployment_status_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}, deployment)",
+            "hide": 0,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": true,
+            "name": "microservice",
+            "options": [],
+            "query": {"query": "label_values(kube_deployment_status_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}, deployment)", "refId": "StandardVariableQuery"},
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          }
+        ]
+      },
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "timezone": "",
+      "title": "2 - Microservices Overview",
+      "uid": "microservices-overview",
+      "version": 1
+    }

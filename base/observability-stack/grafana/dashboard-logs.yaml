@@ -253,7 +253,7 @@ data:
       },
       "timepicker": {},
       "timezone": "",
-      "title": "Application Logs",
+      "title": "4 - Logs",
       "uid": "application-logs",
-      "version": 0
+      "version": 1
     }
