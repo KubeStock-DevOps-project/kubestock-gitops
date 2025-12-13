@@ -8,3 +8,4 @@ resources:
   - deployment.yaml
   - service.yaml
   - externalsecret.yaml
+  - ecr-secret.yaml

@@ -91,6 +91,8 @@ spec:
       kind: CronJob
     - group: 'external-secrets.io'
       kind: ExternalSecret
+    - group: 'generators.external-secrets.io'
+      kind: ECRAuthorizationToken
 
   # Allow sync anytime for infrastructure
   syncWindows:
