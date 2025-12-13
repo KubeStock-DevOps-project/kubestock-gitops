@@ -1,0 +1,18 @@
+# =============================================================================
+# test-runner - Service
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-runner
+  labels:
+    app: test-runner
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3007
+      targetPort: 3007
+      protocol: TCP
+      name: http
+  selector:
+    app: test-runner

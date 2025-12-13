@@ -1,0 +1,34 @@
+# =============================================================================
+# test-runner - Staging Overlay
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kubestock-staging
+
+resources:
+  - ../../../base/services/test-runner
+  - externalsecret.yaml
+  - post-sync-hook.yaml
+  - k6-config.yaml
+
+# Patches for staging-specific configuration
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: test-runner
+      spec:
+        template:
+          spec:
+            containers:
+              - name: test-runner
+                image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/test-runner:latest
+                env:
+                  - name: GATEWAY_URL
+                    value: "http://kong-proxy.kubestock-staging.svc.cluster.local:8000"
+
+images:
+  - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/test-runner
+    newTag: latest

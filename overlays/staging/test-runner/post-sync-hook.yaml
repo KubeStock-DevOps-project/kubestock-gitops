@@ -1,0 +1,58 @@
+# =============================================================================
+# ArgoCD Post-Deployment Smoke Test Hook
+# =============================================================================
+# This Job runs after successful ArgoCD sync to validate deployment
+# It triggers the test-runner service to execute smoke tests
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: post-sync-smoke-test
+  namespace: kubestock-staging
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 300  # Clean up after 5 minutes
+  backoffLimit: 2
+  template:
+    metadata:
+      name: smoke-test
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: smoke-test
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "⏳ Waiting for test-runner to be ready..."
+              sleep 15
+              
+              echo "🚀 Triggering smoke tests via test-runner..."
+              RESPONSE=$(curl -X POST http://test-runner.kubestock-staging.svc.cluster.local:3007/api/tests/run \
+                -H "Content-Type: application/json" \
+                -d '{"testType":"smoke","vus":1,"duration":"10s"}' \
+                -w "\n%{http_code}" -s)
+              
+              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+              BODY=$(echo "$RESPONSE" | head -n -1)
+              
+              echo "📊 Response Code: $HTTP_CODE"
+              echo "📄 Response Body: $BODY"
+              
+              if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+                echo "✅ Smoke tests triggered successfully"
+                exit 0
+              else
+                echo "❌ Failed to trigger smoke tests"
+                exit 1
+              fi
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"

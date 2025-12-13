@@ -1,0 +1,97 @@
+# =============================================================================
+# test-runner - Automated Testing Service (k6)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-runner
+  labels:
+    app: test-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-runner
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: test-runner
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3007"
+        prometheus.io/path: "/metrics"
+    spec:
+      imagePullSecrets:
+        - name: ecr-cred
+      containers:
+        - name: test-runner
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/test-runner:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3007
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "3007"
+            # Gateway URL for smoke tests (through Kong)
+            - name: GATEWAY_URL
+              value: "http://kong-proxy.kubestock-staging.svc.cluster.local:8000"
+            # Asgardeo Configuration - Token endpoint
+            - name: ASGARDEO_TOKEN_URL
+              valueFrom:
+                secretKeyRef:
+                  name: test-runner-secret
+                  key: ASGARDEO_TOKEN_URL
+            # Test Runner OAuth Client (Password Grant Enabled)
+            - name: ASGARDEO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: test-runner-secret
+                  key: ASGARDEO_TEST_CLIENT_ID
+            - name: ASGARDEO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: test-runner-secret
+                  key: ASGARDEO_TEST_CLIENT_SECRET
+            # Test User Credentials
+            - name: ASGARDEO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: test-runner-secret
+                  key: ASGARDEO_USERNAME
+            - name: ASGARDEO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: test-runner-secret
+                  key: ASGARDEO_PASSWORD
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3007
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3007
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
