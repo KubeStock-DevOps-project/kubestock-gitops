@@ -238,71 +238,65 @@ data:
         },
         {
           "datasource": "Prometheus",
+          "description": "Comprehensive HPA status with scaling metrics",
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "thresholds"},
-              "custom": {"align": "auto", "displayMode": "color-background"},
-              "mappings": [
-                {"options": {"0": {"color": "dark-red", "text": "Inactive"}, "1": {"color": "dark-green", "text": "Active"}}, "type": "value"}
-              ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "dark-red", "value": null}, {"color": "dark-green", "value": 1}]}
+              "custom": {"align": "center", "displayMode": "auto", "inspect": false, "filterable": true},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
             },
             "overrides": [
-              {"matcher": {"id": "byName", "options": "Namespace"}, "properties": [{"id": "custom.width", "value": 160}]},
-              {"matcher": {"id": "byName", "options": "HPA"}, "properties": [{"id": "custom.width", "value": 220}]},
-              {"matcher": {"id": "byName", "options": "Status"}, "properties": [{"id": "custom.displayMode", "value": "color-text"}]}
+              {"matcher": {"id": "byName", "options": "Status"}, "properties": [{"id": "custom.width", "value": 100}, {"id": "custom.displayMode", "value": "color-background-solid"}, {"id": "mappings", "value": [{"options": {"1": {"color": "dark-green", "index": 0, "text": "✓ ACTIVE"}}, "type": "value"}, {"options": {"0": {"color": "dark-red", "index": 1, "text": "✗ INACTIVE"}}, "type": "value"}]}]},
+              {"matcher": {"id": "byName", "options": "Namespace"}, "properties": [{"id": "custom.width", "value": 160}, {"id": "custom.displayMode", "value": "color-text"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "light-blue"}}]},
+              {"matcher": {"id": "byName", "options": "HPA"}, "properties": [{"id": "custom.width", "value": 200}, {"id": "custom.displayMode", "value": "color-text"}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "white"}}]},
+              {"matcher": {"id": "byName", "options": "Current"}, "properties": [{"id": "custom.width", "value": 80}, {"id": "custom.displayMode", "value": "lcd-gauge"}, {"id": "color", "value": {"mode": "continuous-BlYlRd"}}]},
+              {"matcher": {"id": "byName", "options": "Min"}, "properties": [{"id": "custom.width", "value": 60}]},
+              {"matcher": {"id": "byName", "options": "Max"}, "properties": [{"id": "custom.width", "value": 60}]},
+              {"matcher": {"id": "byName", "options": "Capacity %"}, "properties": [{"id": "custom.width", "value": 140}, {"id": "custom.displayMode", "value": "gradient-gauge"}, {"id": "min", "value": 0}, {"id": "max", "value": 100}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 60}, {"color": "orange", "value": 80}, {"color": "red", "value": 95}]}}]}
             ]
           },
-          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 11},
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 11},
           "id": 8,
-          "options": {"showHeader": true, "sortBy": [{"desc": false, "displayName": "Namespace"}]},
+          "options": {"showHeader": true, "footer": {"show": true, "reducer": ["count"], "fields": ""}, "sortBy": [{"desc": false, "displayName": "Namespace"}]},
           "targets": [
             {
               "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_status_condition{job=\"kube-state-metrics\",namespace=~\"$namespace\",condition=\"ScalingActive\",status=\"true\"})",
               "format": "table",
               "instant": true,
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "title": "HPA Status",
-          "transformations": [
-            {"id": "organize", "options": {"excludeByName": {"Time": true}, "renameByName": {"horizontalpodautoscaler": "HPA", "namespace": "Namespace", "Value": "Status"}}}
-          ],
-          "type": "table"
-        },
-        {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {"mode": "thresholds"},
-              "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "super-light-green", "value": null}, {"color": "light-green", "value": 25}, {"color": "green", "value": 50}, {"color": "yellow", "value": 70}, {"color": "orange", "value": 85}, {"color": "red", "value": 95}]},
-              "unit": "percent",
-              "min": 0,
-              "max": 100
+              "refId": "Status"
             },
-            "overrides": []
-          },
-          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 11},
-          "id": 9,
-          "options": {
-            "minVizHeight": 75,
-            "minVizWidth": 75,
-            "orientation": "auto",
-            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "targets": [
+            {
+              "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"})",
+              "format": "table",
+              "instant": true,
+              "refId": "Current"
+            },
+            {
+              "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_spec_min_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"})",
+              "format": "table",
+              "instant": true,
+              "refId": "Min"
+            },
+            {
+              "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"})",
+              "format": "table",
+              "instant": true,
+              "refId": "Max"
+            },
             {
               "expr": "max by (namespace, horizontalpodautoscaler) ((kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"} / kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}) * 100)",
-              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
-              "refId": "A"
+              "format": "table",
+              "instant": true,
+              "refId": "Capacity"
             }
           ],
-          "title": "HPA Capacity",
-          "type": "gauge"
+          "title": "🚀 HPA Live Status",
+          "transformations": [
+            {"id": "seriesToColumns", "options": {"byField": "horizontalpodautoscaler"}},
+            {"id": "organize", "options": {"excludeByName": {"Time": true, "Time 1": true, "Time 2": true, "Time 3": true, "Time 4": true, "Time 5": true, "namespace 1": true, "namespace 2": true, "namespace 3": true, "namespace 4": true, "job": true, "job 1": true, "job 2": true, "job 3": true, "job 4": true}, "indexByName": {"namespace": 0, "horizontalpodautoscaler": 1, "Value #Status": 2, "Value #Current": 3, "Value #Min": 4, "Value #Max": 5, "Value #Capacity": 6}, "renameByName": {"horizontalpodautoscaler": "HPA", "namespace": "Namespace", "Value #Status": "Status", "Value #Current": "Current", "Value #Min": "Min", "Value #Max": "Max", "Value #Capacity": "Capacity %"}}}
+          ],
+          "type": "table"
         },
         {
           "datasource": "Prometheus",
@@ -334,7 +328,7 @@ data:
               {"matcher": {"id": "byRegexp", "options": "/.*desired.*/"}, "properties": [{"id": "custom.lineStyle", "value": {"dash": [10, 10], "fill": "dash"}}]}
             ]
           },
-          "gridPos": {"h": 7, "w": 24, "x": 0, "y": 16},
+          "gridPos": {"h": 7, "w": 24, "x": 0, "y": 19},
           "id": 10,
           "options": {
             "legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right"},
@@ -342,12 +336,12 @@ data:
           },
           "targets": [
             {
-              "expr": "kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
+              "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"})",
               "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}} (current)",
               "refId": "A"
             },
             {
-              "expr": "kube_horizontalpodautoscaler_status_desired_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
+              "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_status_desired_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"})",
               "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}} (desired)",
               "refId": "B"
             }
@@ -356,62 +350,8 @@ data:
           "type": "timeseries"
         },
         {
-          "datasource": "Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "color": {"mode": "thresholds"},
-              "custom": {"align": "auto", "displayMode": "auto", "inspect": false},
-              "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
-            },
-            "overrides": [
-              {"matcher": {"id": "byName", "options": "HPA"}, "properties": [{"id": "custom.width", "value": 200}]},
-              {"matcher": {"id": "byName", "options": "Namespace"}, "properties": [{"id": "custom.width", "value": 150}]},
-              {"matcher": {"id": "byName", "options": "Current"}, "properties": [{"id": "custom.width", "value": 80}]},
-              {"matcher": {"id": "byName", "options": "Min"}, "properties": [{"id": "custom.width", "value": 60}]},
-              {"matcher": {"id": "byName", "options": "Max"}, "properties": [{"id": "custom.width", "value": 60}]},
-              {"matcher": {"id": "byName", "options": "Utilization %"}, "properties": [{"id": "custom.width", "value": 120}, {"id": "custom.displayMode", "value": "color-background"}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]}}]}
-            ]
-          },
-          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 23},
-          "id": 11,
-          "options": {"showHeader": true, "sortBy": []},
-          "targets": [
-            {
-              "expr": "kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
-              "format": "table",
-              "instant": true,
-              "refId": "Current"
-            },
-            {
-              "expr": "kube_horizontalpodautoscaler_spec_min_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
-              "format": "table",
-              "instant": true,
-              "refId": "Min"
-            },
-            {
-              "expr": "kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}",
-              "format": "table",
-              "instant": true,
-              "refId": "Max"
-            },
-            {
-              "expr": "(kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"} / kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}) * 100",
-              "format": "table",
-              "instant": true,
-              "refId": "Util"
-            }
-          ],
-          "title": "HPA Configuration Summary",
-          "transformations": [
-            {"id": "seriesToColumns", "options": {"byField": "horizontalpodautoscaler"}},
-            {"id": "organize", "options": {"excludeByName": {"Time": true, "Time 1": true, "Time 2": true, "Time 3": true, "Time 4": true, "namespace 1": true, "namespace 2": true, "namespace 3": true}, "renameByName": {"horizontalpodautoscaler": "HPA", "namespace": "Namespace", "Value #Current": "Current", "Value #Min": "Min", "Value #Max": "Max", "Value #Util": "Utilization %"}}}
-          ],
-          "type": "table"
-        },
-        {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 29},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 26},
           "id": 102,
           "panels": [],
           "title": "Resource Usage by Microservice",
