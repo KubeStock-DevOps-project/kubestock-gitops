@@ -43,12 +43,12 @@ spec:
               value: "3007"
             # Gateway URL - configurable per environment
             - name: STAGING_GATEWAY_URL
-              value: "http://kong-proxy.kubestock-staging.svc.cluster.local:8000"
+              value: "http://kong-proxy.kong-staging.svc.cluster.local"
             - name: PRODUCTION_GATEWAY_URL
-              value: "http://kong-proxy.kubestock-production.svc.cluster.local:8000"
+              value: "http://kong-proxy.kong.svc.cluster.local"
             # Default gateway URL (staging)
             - name: GATEWAY_URL
-              value: "http://kong-proxy.kubestock-staging.svc.cluster.local:8000"
+              value: "http://kong-proxy.kong-staging.svc.cluster.local"
             # Asgardeo Configuration - Token endpoint
             - name: ASGARDEO_TOKEN_URL
               valueFrom:
