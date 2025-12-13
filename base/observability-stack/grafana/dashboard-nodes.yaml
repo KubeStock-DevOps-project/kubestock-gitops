@@ -294,8 +294,10 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
-              "unit": "short"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "super-light-green", "value": null}, {"color": "light-green", "value": 15}, {"color": "green", "value": 30}, {"color": "yellow", "value": 45}, {"color": "orange", "value": 60}, {"color": "red", "value": 80}]},
+              "unit": "short",
+              "min": 0,
+              "max": 110
             },
             "overrides": []
           },

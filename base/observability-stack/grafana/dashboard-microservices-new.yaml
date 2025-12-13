@@ -242,10 +242,10 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"0": {"color": "red", "index": 0, "text": "Unable to Scale"}}, "type": "value"},
-                {"options": {"1": {"color": "green", "index": 1, "text": "Active"}}, "type": "value"}
+                {"options": {"0": {"color": "dark-red", "index": 0, "text": "⚠ INACTIVE"}}, "type": "value"},
+                {"options": {"1": {"color": "dark-green", "index": 1, "text": "✓ ACTIVE"}}, "type": "value"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+              "thresholds": {"mode": "absolute", "steps": [{"color": "dark-red", "value": null}, {"color": "dark-green", "value": 1}]},
               "unit": "short"
             },
             "overrides": []
@@ -253,22 +253,22 @@ data:
           "gridPos": {"h": 5, "w": 12, "x": 0, "y": 11},
           "id": 8,
           "options": {
-            "displayMode": "gradient",
-            "minVizHeight": 10,
-            "minVizWidth": 0,
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
             "orientation": "horizontal",
-            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "reduceOptions": {"values": true, "calcs": [], "fields": ""},
+            "textMode": "value_and_name"
           },
           "targets": [
             {
               "expr": "kube_horizontalpodautoscaler_status_condition{job=\"kube-state-metrics\",namespace=~\"$namespace\",condition=\"ScalingActive\",status=\"true\"}",
-              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
+              "legendFormat": "{{horizontalpodautoscaler}}",
               "refId": "A"
             }
           ],
-          "title": "HPA Scaling Status",
-          "type": "bargauge"
+          "title": "HPA Status",
+          "type": "stat"
         },
         {
           "datasource": "Prometheus",
@@ -276,7 +276,7 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]},
+              "thresholds": {"mode": "absolute", "steps": [{"color": "super-light-green", "value": null}, {"color": "light-green", "value": 25}, {"color": "green", "value": 50}, {"color": "yellow", "value": 70}, {"color": "orange", "value": 85}, {"color": "red", "value": 95}]},
               "unit": "percent",
               "min": 0,
               "max": 100
@@ -286,20 +286,22 @@ data:
           "gridPos": {"h": 5, "w": 12, "x": 12, "y": 11},
           "id": 9,
           "options": {
-            "displayMode": "gradient",
-            "orientation": "horizontal",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "showUnfilled": true
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
           "targets": [
             {
               "expr": "(kube_horizontalpodautoscaler_status_current_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"} / kube_horizontalpodautoscaler_spec_max_replicas{job=\"kube-state-metrics\",namespace=~\"$namespace\"}) * 100",
-              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
+              "legendFormat": "{{horizontalpodautoscaler}}",
               "refId": "A"
             }
           ],
-          "title": "HPA Capacity Utilization (%)",
-          "type": "bargauge"
+          "title": "HPA Capacity",
+          "type": "gauge"
         },
         {
           "datasource": "Prometheus",
