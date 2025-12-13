@@ -401,6 +401,66 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "palette-classic"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 35},
+          "id": 16,
+          "options": {
+            "displayLabels": ["name", "percent"],
+            "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+            "pieType": "donut",
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+            "tooltip": {"mode": "single"}
+          },
+          "targets": [
+            {
+              "expr": "sum by (workload) (label_replace(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}[5m]), \"workload\", \"$1\", \"pod\", \"(.+)-.+-.+$\"))",
+              "legendFormat": "{{workload}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Distribution",
+          "type": "piechart"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 6, "x": 6, "y": 35},
+          "id": 17,
+          "options": {
+            "displayLabels": ["name", "percent"],
+            "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+            "pieType": "donut",
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+            "tooltip": {"mode": "single"}
+          },
+          "targets": [
+            {
+              "expr": "sum by (workload) (label_replace(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}, \"workload\", \"$1\", \"pod\", \"(.+)-.+-.+$\"))",
+              "legendFormat": "{{workload}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Memory Distribution",
+          "type": "piechart"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
               "custom": {
                 "axisLabel": "",
                 "axisPlacement": "auto",
@@ -424,7 +484,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 35},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 35},
           "id": 12,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -432,8 +492,8 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}[5m])) by (namespace, pod)",
-              "legendFormat": "{{namespace}}/{{pod}}",
+              "expr": "sum by (namespace, workload) (label_replace(rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}[5m]), \"workload\", \"$1\", \"pod\", \"(.+)-.+-.+$\"))",
+              "legendFormat": "{{namespace}}/{{workload}}",
               "refId": "A"
             }
           ],
@@ -468,7 +528,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 35},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 43},
           "id": 13,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -476,8 +536,8 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}) by (namespace, pod)",
-              "legendFormat": "{{namespace}}/{{pod}}",
+              "expr": "sum by (namespace, workload) (label_replace(container_memory_working_set_bytes{namespace=~\"$namespace\",pod=~\"$microservice.*\",container!=\"\",container!=\"POD\"}, \"workload\", \"$1\", \"pod\", \"(.+)-.+-.+$\"))",
+              "legendFormat": "{{namespace}}/{{workload}}",
               "refId": "A"
             }
           ],
@@ -512,7 +572,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 43},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 51},
           "id": 14,
           "options": {
             "legend": {"calcs": ["mean"], "displayMode": "table", "placement": "right"},
@@ -520,13 +580,13 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(rate(container_network_receive_bytes_total{namespace=~\"$namespace\",pod=~\"$microservice.*\"}[5m])) by (namespace, pod)",
-              "legendFormat": "{{namespace}}/{{pod}} (RX)",
+              "expr": "sum by (namespace, workload) (label_replace(rate(container_network_receive_bytes_total{namespace=~\"$namespace\",pod=~\"$microservice.*\"}[5m]), \"workload\", \"$1\", \"pod\", \"(.+)-.+-.+$\"))",
+              "legendFormat": "{{namespace}}/{{workload}} (RX)",
               "refId": "A"
             },
             {
-              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=~\"$namespace\",pod=~\"$microservice.*\"}[5m])) by (namespace, pod)",
-              "legendFormat": "{{namespace}}/{{pod}} (TX)",
+              "expr": "sum by (namespace, workload) (label_replace(rate(container_network_transmit_bytes_total{namespace=~\"$namespace\",pod=~\"$microservice.*\"}[5m]), \"workload\", \"$1\", \"pod\", \"(.+)-.+-.+$\"))",
+              "legendFormat": "{{namespace}}/{{workload}} (TX)",
               "refId": "B"
             }
           ],
@@ -561,7 +621,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 43},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 51},
           "id": 15,
           "options": {
             "legend": {"calcs": [], "displayMode": "list", "placement": "bottom"},
@@ -569,12 +629,12 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kube_pod_container_status_restarts_total{job=\"kube-state-metrics\",namespace=~\"$namespace\",pod=~\"$microservice.*\"}) by (namespace, pod)",
-              "legendFormat": "{{namespace}}/{{pod}}",
+              "expr": "sum by (namespace, workload) (label_replace(kube_pod_container_status_restarts_total{job=\"kube-state-metrics\",namespace=~\"$namespace\",pod=~\"$microservice.*\"}, \"workload\", \"$1\", \"pod\", \"(.+)-.+-.+$\"))",
+              "legendFormat": "{{namespace}}/{{workload}}",
               "refId": "A"
             }
           ],
-          "title": "Pod Restart Count",
+          "title": "Restarts by Microservice",
           "type": "timeseries"
         }
       ],
