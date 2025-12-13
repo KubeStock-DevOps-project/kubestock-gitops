@@ -41,14 +41,5 @@ images:
   newTag: 0a4b35b
 
 # Patches for staging-specific configuration
-patches:
-  # Reduce replicas for staging
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-    target:
-      kind: Deployment
-  
-  # No frontend-specific environment variables needed for staging
-  # All configuration is handled at runtime via window.location.origin
+# HPA manages scaling with minReplicas=1 (base default)
+# No replicas patch needed - HPA controls pod count

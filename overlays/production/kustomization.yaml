@@ -25,18 +25,16 @@ labels:
       environment: production
     includeSelectors: false
 
-# Production replicas patch
+# Production HPA and replica configuration
+# HPA manages scaling, we set minReplicas=2 for production HA
 patches:
-  # Set replicas to 2 for all deployments
+  # Set minReplicas to 2 for all HPAs in production for HA
   - patch: |-
       - op: replace
-        path: /spec/replicas
+        path: /spec/minReplicas
         value: 2
     target:
-      kind: Deployment
-  
-  # No frontend-specific environment variables needed for production
-  # All configuration is handled at runtime via window.location.origin
+      kind: HorizontalPodAutoscaler
 
 # Image tags - managed by CI/CD pipeline
 images:

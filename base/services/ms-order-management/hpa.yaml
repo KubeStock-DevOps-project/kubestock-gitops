@@ -1,0 +1,61 @@
+# =============================================================================
+# HPA - ms-order-management Horizontal Pod Autoscaler
+# =============================================================================
+# Express.js HPA Configuration for ~2000 req/s target
+# Node.js is single-threaded, scales best on CPU utilization
+# Idle usage observed: ~5m CPU, ~38Mi memory
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ms-order-management-hpa
+  labels:
+    app: ms-order-management
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ms-order-management
+  minReplicas: 1
+  maxReplicas: 8
+  metrics:
+    # Primary metric: CPU utilization
+    # Target 70% to allow headroom for traffic spikes
+    # Node.js is CPU-bound under load
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    # Secondary metric: Memory
+    # Express.js typically doesn't spike memory, but good safety net
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    # Scale up quickly to handle traffic bursts
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 30
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+      selectPolicy: Max
+    # Scale down slowly to avoid flapping
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+      selectPolicy: Min
