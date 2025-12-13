@@ -31,7 +31,7 @@ spec:
               sleep 15
               
               echo "🚀 Triggering smoke tests via test-runner..."
-              RESPONSE=$(curl -X POST http://test-runner.kubestock-staging.svc.cluster.local:3007/api/tests/run \
+              RESPONSE=$(curl -X POST http://test-runner:3007/api/tests/run \
                 -H "Content-Type: application/json" \
                 -d '{"testType":"smoke","vus":1,"duration":"10s"}' \
                 -w "\n%{http_code}" -s)
