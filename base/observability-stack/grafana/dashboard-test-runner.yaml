@@ -183,7 +183,7 @@ data:
       "time": {"from": "now-6h", "to": "now"},
       "timepicker": {},
       "timezone": "browser",
-      "title": "Test Runner - k6 Tests",
+      "title": "5 - Tests",
       "uid": "test-runner-k6",
       "version": 1
     }
