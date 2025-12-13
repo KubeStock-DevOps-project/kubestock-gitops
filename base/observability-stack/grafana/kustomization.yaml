@@ -10,6 +10,7 @@ resources:
   - dashboard-kubernetes.yaml
   - dashboard-microservices.yaml
   - dashboard-logs.yaml
+  - dashboard-test-runner.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml

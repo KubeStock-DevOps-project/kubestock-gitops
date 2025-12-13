@@ -54,6 +54,9 @@ spec:
             - name: grafana-dashboard-logs
               mountPath: /var/lib/grafana/dashboards/application-logs.json
               subPath: application-logs.json
+            - name: grafana-dashboard-test-runner
+              mountPath: /var/lib/grafana/dashboards/test-runner.json
+              subPath: test-runner.json
           resources:
             requests:
               cpu: 50m
@@ -94,3 +97,6 @@ spec:
         - name: grafana-dashboard-logs
           configMap:
             name: grafana-dashboard-logs
+        - name: grafana-dashboard-test-runner
+          configMap:
+            name: grafana-dashboard-test-runner

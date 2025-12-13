@@ -1,0 +1,189 @@
+# =============================================================================
+# Grafana Dashboard - k6 Test Results
+# =============================================================================
+# Monitors test-runner k6 test executions via Loki logs
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-test-runner
+  labels:
+    app: grafana
+    grafana_dashboard: "1"
+data:
+  test-runner.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 50, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "auto", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "Passed"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]},
+              {"matcher": {"id": "byName", "options": "Failed"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]}
+            ]
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "id": 1,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code 0\" [1h]))",
+              "legendFormat": "Passed",
+              "refId": "A"
+            },
+            {
+              "datasource": "Loki",
+              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code\" |!= \"code 0\" [1h]))",
+              "legendFormat": "Failed",
+              "refId": "B"
+            }
+          ],
+          "title": "Test Results (Last Hour)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+          "id": 2,
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Passed Tests (24h)",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+          "id": 3,
+          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code\" |!= \"code 0\" [24h]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Failed Tests (24h)",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 8},
+          "id": 4,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{app=\"test-runner\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "Test Runner Logs",
+          "type": "logs"
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+          "id": 5,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{app=\"test-runner\"} |= \"Test\" |= \"completed\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Completed Tests",
+          "type": "logs"
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+          "id": 6,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{app=\"test-runner\"} |= \"Access Token\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Authentication Events",
+          "type": "logs"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 30,
+      "style": "dark",
+      "tags": ["test-runner", "k6", "smoke-tests"],
+      "templating": {"list": []},
+      "time": {"from": "now-6h", "to": "now"},
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Test Runner - k6 Tests",
+      "uid": "test-runner-k6",
+      "version": 1
+    }
