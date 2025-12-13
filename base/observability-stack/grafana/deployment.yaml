@@ -45,12 +45,15 @@ spec:
               mountPath: /etc/grafana/provisioning/datasources
             - name: grafana-dashboard-provisioning
               mountPath: /etc/grafana/provisioning/dashboards
-            - name: grafana-dashboard-kubernetes
-              mountPath: /var/lib/grafana/dashboards/kubernetes-cluster.json
-              subPath: kubernetes-cluster.json
+            - name: grafana-dashboard-nodes
+              mountPath: /var/lib/grafana/dashboards/nodes-overview.json
+              subPath: nodes-overview.json
             - name: grafana-dashboard-microservices
-              mountPath: /var/lib/grafana/dashboards/kubestock-microservices.json
-              subPath: kubestock-microservices.json
+              mountPath: /var/lib/grafana/dashboards/microservices-overview.json
+              subPath: microservices-overview.json
+            - name: grafana-dashboard-pods
+              mountPath: /var/lib/grafana/dashboards/pods-overview.json
+              subPath: pods-overview.json
             - name: grafana-dashboard-logs
               mountPath: /var/lib/grafana/dashboards/application-logs.json
               subPath: application-logs.json
@@ -88,12 +91,15 @@ spec:
         - name: grafana-dashboard-provisioning
           configMap:
             name: grafana-dashboard-provisioning
-        - name: grafana-dashboard-kubernetes
+        - name: grafana-dashboard-nodes
           configMap:
-            name: grafana-dashboard-kubernetes
+            name: grafana-dashboard-nodes
         - name: grafana-dashboard-microservices
           configMap:
             name: grafana-dashboard-microservices
+        - name: grafana-dashboard-pods
+          configMap:
+            name: grafana-dashboard-pods
         - name: grafana-dashboard-logs
           configMap:
             name: grafana-dashboard-logs
