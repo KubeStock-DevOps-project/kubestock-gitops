@@ -241,34 +241,35 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "thresholds"},
+              "custom": {"align": "auto", "displayMode": "color-background"},
               "mappings": [
-                {"options": {"0": {"color": "dark-red", "index": 0, "text": "⚠ INACTIVE"}}, "type": "value"},
-                {"options": {"1": {"color": "dark-green", "index": 1, "text": "✓ ACTIVE"}}, "type": "value"}
+                {"options": {"0": {"color": "dark-red", "text": "Inactive"}, "1": {"color": "dark-green", "text": "Active"}}, "type": "value"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "dark-red", "value": null}, {"color": "dark-green", "value": 1}]},
-              "unit": "short"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "dark-red", "value": null}, {"color": "dark-green", "value": 1}]}
             },
-            "overrides": []
+            "overrides": [
+              {"matcher": {"id": "byName", "options": "Namespace"}, "properties": [{"id": "custom.width", "value": 160}]},
+              {"matcher": {"id": "byName", "options": "HPA"}, "properties": [{"id": "custom.width", "value": 220}]},
+              {"matcher": {"id": "byName", "options": "Status"}, "properties": [{"id": "custom.displayMode", "value": "color-text"}]}
+            ]
           },
           "gridPos": {"h": 5, "w": 12, "x": 0, "y": 11},
           "id": 8,
-          "options": {
-            "colorMode": "background",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "horizontal",
-            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
-            "textMode": "value_and_name"
-          },
+          "options": {"showHeader": true, "sortBy": [{"desc": false, "displayName": "Namespace"}]},
           "targets": [
             {
               "expr": "max by (namespace, horizontalpodautoscaler) (kube_horizontalpodautoscaler_status_condition{job=\"kube-state-metrics\",namespace=~\"$namespace\",condition=\"ScalingActive\",status=\"true\"})",
-              "legendFormat": "{{namespace}}/{{horizontalpodautoscaler}}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
           "title": "HPA Status",
-          "type": "stat"
+          "transformations": [
+            {"id": "organize", "options": {"excludeByName": {"Time": true}, "renameByName": {"horizontalpodautoscaler": "HPA", "namespace": "Namespace", "Value": "Status"}}}
+          ],
+          "type": "table"
         },
         {
           "datasource": "Prometheus",
