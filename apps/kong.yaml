@@ -43,9 +43,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:kubestock/kubestock-core.git
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: gitops/overlays/production/kong
+    path: overlays/production/kong
   destination:
     server: https://kubernetes.default.svc
     namespace: kong
@@ -70,9 +70,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:kubestock/kubestock-core.git
+    repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: gitops/overlays/staging/kong
+    path: overlays/staging/kong
   destination:
     server: https://kubernetes.default.svc
     namespace: kong-staging
