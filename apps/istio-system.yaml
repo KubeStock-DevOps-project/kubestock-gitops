@@ -16,9 +16,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
+  # Ignore webhook caBundle differences - Istio injects certs dynamically
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions:
+        - .webhooks[].clientConfig.caBundle
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     automated:
       prune: true
       selfHeal: true
