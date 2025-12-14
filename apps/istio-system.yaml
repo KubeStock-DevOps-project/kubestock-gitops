@@ -94,6 +94,10 @@ spec:
       releaseName: istio-ingressgateway
       values: |
         name: istio-ingressgateway
+        # Specify explicit image to avoid "auto" placeholder issues
+        image:
+          repository: docker.io/istio/proxyv2
+          tag: 1.24.0
         service:
           type: NodePort
           ports:
