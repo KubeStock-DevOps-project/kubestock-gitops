@@ -9,7 +9,7 @@ resources:
   - rbac.yaml
   - deployment.yaml
   - service.yaml
-  - podmonitor.yaml
+  # - podmonitor.yaml  # Uncomment when Prometheus Operator CRDs are installed
 
 commonLabels:
   app.kubernetes.io/name: cluster-autoscaler
