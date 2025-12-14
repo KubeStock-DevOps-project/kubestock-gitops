@@ -10,7 +10,7 @@ spec:
   hosts:
     - "*"
   gateways:
-    - kubestock-gateway-staging  # Staging gateway
+    - kubestock-gateway-staging
   http:
     # Health endpoint for NLB
     - match:
@@ -22,20 +22,17 @@ spec:
           string: '{"status":"healthy","gateway":"istio","environment":"staging"}'
 
     # Product Service
-    # /api/product -> /, /api/product/ -> /, /api/product/categories -> /categories
     - match:
         - uri:
             prefix: /api/product
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/product(?:/(.*))?$"
-          rewrite: "/\\1"
+        uri: /
       route:
         - destination:
             host: ms-product.kubestock-staging.svc.cluster.local
             port:
               number: 3002
-      corsPolicy:
+      corsPolicy: &default-cors
         allowOrigins:
           - regex: ".*"
         allowMethods:
@@ -58,124 +55,52 @@ spec:
         - uri:
             prefix: /api/inventory
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/inventory(?:/(.*))?$"
-          rewrite: "/\\1"
+        uri: /
       route:
         - destination:
             host: ms-inventory.kubestock-staging.svc.cluster.local
             port:
               number: 3003
-      corsPolicy:
-        allowOrigins:
-          - regex: ".*"
-        allowMethods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
-          - OPTIONS
-        allowHeaders:
-          - Authorization
-          - Content-Type
-          - Accept
-          - X-Request-ID
-        allowCredentials: true
-        maxAge: "3600s"
+      corsPolicy: *default-cors
 
     # Supplier Service
     - match:
         - uri:
             prefix: /api/supplier
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/supplier(?:/(.*))?$"
-          rewrite: "/\\1"
+        uri: /
       route:
         - destination:
             host: ms-supplier.kubestock-staging.svc.cluster.local
             port:
               number: 3004
-      corsPolicy:
-        allowOrigins:
-          - regex: ".*"
-        allowMethods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
-          - OPTIONS
-        allowHeaders:
-          - Authorization
-          - Content-Type
-          - Accept
-          - X-Request-ID
-        allowCredentials: true
-        maxAge: "3600s"
+      corsPolicy: *default-cors
 
     # Order Management Service
     - match:
         - uri:
             prefix: /api/order
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/order(?:/(.*))?$"
-          rewrite: "/\\1"
+        uri: /
       route:
         - destination:
             host: ms-order-management.kubestock-staging.svc.cluster.local
             port:
               number: 3005
-      corsPolicy:
-        allowOrigins:
-          - regex: ".*"
-        allowMethods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
-          - OPTIONS
-        allowHeaders:
-          - Authorization
-          - Content-Type
-          - Accept
-          - X-Request-ID
-        allowCredentials: true
-        maxAge: "3600s"
+      corsPolicy: *default-cors
 
     # Identity Service
     - match:
         - uri:
             prefix: /api/identity
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/identity(?:/(.*))?$"
-          rewrite: "/\\1"
+        uri: /
       route:
         - destination:
             host: ms-identity.kubestock-staging.svc.cluster.local
             port:
               number: 3006
-      corsPolicy:
-        allowOrigins:
-          - regex: ".*"
-        allowMethods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
-          - OPTIONS
-        allowHeaders:
-          - Authorization
-          - Content-Type
-          - Accept
-          - X-Request-ID
-        allowCredentials: true
-        maxAge: "3600s"
+      corsPolicy: *default-cors
 
     # Frontend (catch-all)
     - match:
