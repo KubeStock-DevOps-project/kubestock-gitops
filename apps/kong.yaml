@@ -1,0 +1,84 @@
+# =============================================================================
+# Kong API Gateway - ArgoCD Applications
+# =============================================================================
+# Kong handles ingress routing and API gateway functionality:
+# - Path-based routing (/api/product, /api/inventory, etc.)
+# - Path stripping (strip_path: true)
+# - CORS configuration
+# - Rate limiting
+# - JWT validation (aud/iss check)
+#
+# Istio handles only mTLS for secure inter-service communication
+# =============================================================================
+
+---
+# Kong Namespace (Production)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kong
+  labels:
+    istio-injection: enabled  # Enable Istio sidecar for mTLS
+
+---
+# Kong Namespace (Staging)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kong-staging
+  labels:
+    istio-injection: enabled  # Enable Istio sidecar for mTLS
+
+---
+# Kong Production
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kong-production
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:kubestock/kubestock-core.git
+    targetRevision: main
+    path: gitops/overlays/production/kong
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kong
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+# Kong Staging
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kong-staging
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:kubestock/kubestock-core.git
+    targetRevision: main
+    path: gitops/overlays/staging/kong
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kong-staging
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

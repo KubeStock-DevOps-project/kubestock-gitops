@@ -110,12 +110,12 @@ spec:
             - name: http2
               port: 80
               targetPort: 8080
-              nodePort: 30080
+              nodePort: 30090
               protocol: TCP
             - name: https
               port: 443
               targetPort: 8443
-              nodePort: 30444
+              nodePort: 30445
               protocol: TCP
             - name: status-port
               port: 15021

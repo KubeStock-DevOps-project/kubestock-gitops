@@ -1,0 +1,26 @@
+# =============================================================================
+# Kong Service Patch for Staging
+# =============================================================================
+# Uses different NodePorts to avoid conflict with production Kong
+# Staging: 30081 (HTTP), 30445 (HTTPS)
+# Production: 30080 (HTTP), 30444 (HTTPS)
+# =============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-proxy
+spec:
+  type: NodePort
+  ports:
+    - name: proxy
+      port: 80
+      targetPort: 8000
+      nodePort: 30081
+      protocol: TCP
+    - name: proxy-ssl
+      port: 443
+      targetPort: 8443
+      nodePort: 30445
+      protocol: TCP
+  selector:
+    app: kong-gateway
