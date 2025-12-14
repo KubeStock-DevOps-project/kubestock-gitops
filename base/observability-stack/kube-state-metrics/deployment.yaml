@@ -18,9 +18,7 @@ spec:
     metadata:
       labels:
         app: kube-state-metrics
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
+      # No prometheus annotations - scraped via dedicated job in prometheus config
     spec:
       serviceAccountName: kube-state-metrics
       containers:

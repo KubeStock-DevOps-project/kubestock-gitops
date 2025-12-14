@@ -184,6 +184,164 @@ data:
         {
           "collapsed": false,
           "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+          "id": 104,
+          "panels": [],
+          "title": "Master vs Worker Nodes",
+          "type": "row"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 3, "w": 3, "x": 0, "y": 6},
+          "id": 16,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "count(kube_node_role{job=\"kube-state-metrics\",role=\"control-plane\"})", "refId": "A"}],
+          "title": "Master Nodes",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 3, "w": 3, "x": 3, "y": 6},
+          "id": 17,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "count(kube_node_info{job=\"kube-state-metrics\"}) - count(kube_node_role{job=\"kube-state-metrics\",role=\"control-plane\"})", "refId": "A"}],
+          "title": "Worker Nodes",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]},
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 3, "w": 4, "x": 6, "y": 6},
+          "id": 18,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "avg(100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\"}[5m]))) * on(instance) group_left(node) node_exporter_build_info * on(node) group_left() kube_node_role{role=\"control-plane\"})", "refId": "A"}],
+          "title": "Master CPU Avg",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]},
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 3, "w": 4, "x": 10, "y": 6},
+          "id": 19,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "avg(100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"worker.*\"}[5m])))", "refId": "A"}],
+          "title": "Worker CPU Avg",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]},
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 3, "w": 5, "x": 14, "y": 6},
+          "id": 20,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "avg(100 * container_memory_working_set_bytes{id=\"/\",instance=~\"master.*\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"master.*\"} * 3040016 / 3928848))", "refId": "A"}],
+          "title": "Master Memory Avg",
+          "type": "stat"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]},
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 3, "w": 5, "x": 19, "y": 6},
+          "id": 21,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+            "textMode": "auto"
+          },
+          "targets": [{"expr": "avg(100 * container_memory_working_set_bytes{id=\"/\",instance=~\"worker.*\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"worker.*\"} * 3040016 / 3928848))", "refId": "A"}],
+          "title": "Worker Memory Avg",
+          "type": "stat"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 9},
           "id": 101,
           "panels": [],
           "title": "Node Resources",
@@ -200,9 +358,9 @@ data:
               "min": 0,
               "max": 100
             },
-            "overrides": []
+            "overrides": [{"matcher": {"id": "byRegexp", "options": "master.*"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]}]
           },
-          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 6},
+          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 10},
           "id": 7,
           "options": {
             "minVizHeight": 75,
@@ -233,9 +391,9 @@ data:
               "min": 0,
               "max": 100
             },
-            "overrides": []
+            "overrides": [{"matcher": {"id": "byRegexp", "options": "master.*"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]}]
           },
-          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 6},
+          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 10},
           "id": 8,
           "options": {
             "minVizHeight": 75,
@@ -268,7 +426,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 11},
+          "gridPos": {"h": 5, "w": 12, "x": 0, "y": 15},
           "id": 9,
           "options": {
             "minVizHeight": 75,
@@ -301,7 +459,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 11},
+          "gridPos": {"h": 5, "w": 12, "x": 12, "y": 15},
           "id": 10,
           "options": {
             "minVizHeight": 75,
@@ -323,7 +481,7 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 16},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 20},
           "id": 102,
           "panels": [],
           "title": "Time Series",
@@ -357,7 +515,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21},
           "id": 11,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -399,9 +557,9 @@ data:
               "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
               "unit": "percent"
             },
-            "overrides": []
+            "overrides": [{"matcher": {"id": "byRegexp", "options": "master.*"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]}]
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21},
           "id": 12,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -445,7 +603,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 25},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 29},
           "id": 13,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -494,7 +652,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 25},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 29},
           "id": 14,
           "options": {
             "legend": {"calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right"},
@@ -517,7 +675,7 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 33},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 37},
           "id": 103,
           "panels": [],
           "title": "Node Details",
@@ -543,7 +701,7 @@ data:
               {"matcher": {"id": "byName", "options": "Disk %"}, "properties": [{"id": "custom.width", "value": 80}, {"id": "custom.displayMode", "value": "color-background"}, {"id": "thresholds", "value": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 75}, {"color": "red", "value": 90}]}}]}
             ]
           },
-          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 34},
+          "gridPos": {"h": 6, "w": 24, "x": 0, "y": 38},
           "id": 15,
           "options": {"showHeader": true, "sortBy": []},
           "targets": [
@@ -606,6 +764,22 @@ data:
             "skipUrlSync": false,
             "sort": 1,
             "type": "query"
+          },
+          {
+            "current": {"selected": true, "text": "All", "value": "$__all"},
+            "hide": 0,
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": false,
+            "name": "node_type",
+            "options": [
+              {"selected": true, "text": "All", "value": "$__all"},
+              {"selected": false, "text": "Master", "value": "master.*"},
+              {"selected": false, "text": "Worker", "value": "worker.*"}
+            ],
+            "query": "All,Master:master.*,Worker:worker.*",
+            "skipUrlSync": false,
+            "type": "custom"
           }
         ]
       },
