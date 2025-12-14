@@ -48,6 +48,10 @@ spec:
       containers:
         - name: kiali
           image: quay.io/kiali/kiali:v1.77
+          command:
+            - "/opt/kiali/kiali"
+            - "-config"
+            - "/kiali-configuration/config.yaml"
           ports:
             - containerPort: 20001
           env:
