@@ -1,0 +1,27 @@
+# =============================================================================
+# Staging Kong Overlay
+# =============================================================================
+# Kong for staging environment with separate NodePorts
+# Access via bastion: NodePort 30081 (HTTP), 30445 (HTTPS)
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kong-staging
+
+resources:
+  - ../../../base/kong/
+  - rbac-binding.yaml
+  - peer-authentication.yaml
+
+patches:
+  # Override service to use different NodePorts for staging
+  - target:
+      kind: Service
+      name: kong-proxy
+    path: service-patch.yaml
+  # Use staging Kong config
+  - target:
+      kind: ConfigMap
+      name: kong-declarative-config
+    path: kong-config.yaml

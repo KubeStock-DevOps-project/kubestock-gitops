@@ -1,0 +1,336 @@
+# =============================================================================
+# Kong Configuration for Staging
+# =============================================================================
+# Routes /api/* to kubestock-staging services
+# CORS: * (wildcard for staging)
+# JWT: aud/iss claim checking (pre-function plugin, no signature verify)
+#      Signature verification is done by Istio sidecars
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-declarative-config
+data:
+  kong.yml: |
+    _format_version: "3.0"
+
+    # ==========================================================================
+    # Global Plugins - Applied to all services
+    # ==========================================================================
+    plugins:
+      # JWT aud/iss claim checking (no signature verification)
+      # Checks that tokens are intended for our application
+      - name: pre-function
+        config:
+          access:
+            - |
+              -- JWT aud/iss checking without signature verification
+              -- Sidecars verify signatures, Kong just validates claims
+              local function check_jwt_claims()
+                local auth_header = kong.request.get_header("Authorization")
+                if not auth_header then
+                  return true -- No token, let request pass (service handles auth)
+                end
+                
+                local token = auth_header:match("Bearer%s+(.+)")
+                if not token then
+                  return true -- Not a bearer token
+                end
+                
+                -- Decode JWT payload (base64url)
+                local parts = {}
+                for part in token:gmatch("[^%.]+") do
+                  table.insert(parts, part)
+                end
+                
+                if #parts ~= 3 then
+                  kong.response.exit(401, { message = "Invalid token format" })
+                  return false
+                end
+                
+                -- Base64url decode the payload
+                local payload_b64 = parts[2]
+                payload_b64 = payload_b64:gsub("-", "+"):gsub("_", "/")
+                local padding = 4 - (#payload_b64 % 4)
+                if padding < 4 then
+                  payload_b64 = payload_b64 .. string.rep("=", padding)
+                end
+                
+                local payload_json = ngx.decode_base64(payload_b64)
+                if not payload_json then
+                  kong.response.exit(401, { message = "Invalid token encoding" })
+                  return false
+                end
+                
+                -- Parse JSON using string matching
+                -- Note: JSON may have escaped forward slashes (\/)
+                local function unescape_json(str)
+                  if not str then return nil end
+                  return str:gsub("\\/", "/")
+                end
+                
+                local function extract_claim(json_str, claim_name)
+                  local pattern = '"' .. claim_name .. '"%s*:%s*"([^"]*)"'
+                  local value = json_str:match(pattern)
+                  return unescape_json(value)
+                end
+                
+                local function extract_array_claim(json_str, claim_name)
+                  local pattern = '"' .. claim_name .. '"%s*:%s*%[([^%]]*)%]'
+                  local array_content = json_str:match(pattern)
+                  if array_content then
+                    local values = {}
+                    for value in array_content:gmatch('"([^"]*)"') do
+                      table.insert(values, unescape_json(value))
+                    end
+                    return values
+                  end
+                  return nil
+                end
+                
+                -- Check issuer
+                local expected_iss = "https://api.asgardeo.io/t/kubestock/oauth2/token"
+                local iss = extract_claim(payload_json, "iss")
+                if iss ~= expected_iss then
+                  kong.response.exit(401, { message = "Invalid token issuer" })
+                  return false
+                end
+                
+                -- Check audience (can be string or array)
+                local valid_audiences = {
+                  ["NydMISKZZ5TdIEuRwJfYv62Yn7ka"] = true,  -- SPA Application
+                  ["6e6DeVI9oNaoYV6SSi7cWjIckMQa"] = true   -- Test Runner Application
+                }
+                
+                -- Try string audience first
+                local aud = extract_claim(payload_json, "aud")
+                local aud_valid = false
+                
+                if aud then
+                  aud_valid = valid_audiences[aud]
+                else
+                  -- Try array audience
+                  local aud_array = extract_array_claim(payload_json, "aud")
+                  if aud_array then
+                    for _, a in ipairs(aud_array) do
+                      if valid_audiences[a] then
+                        aud_valid = true
+                        break
+                      end
+                    end
+                  end
+                end
+                
+                if not aud_valid then
+                  kong.response.exit(401, { message = "Invalid token audience" })
+                  return false
+                end
+                
+                return true
+              end
+              
+              check_jwt_claims()
+
+    services:
+      # Product: /api/product/* → ms-product
+      - name: ms-product
+        url: http://ms-product.kubestock-staging.svc:3002
+        routes:
+          - name: product-routes
+            paths:
+              - /api/product
+            strip_path: true
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 200
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # Inventory: /api/inventory/* → ms-inventory
+      - name: ms-inventory
+        url: http://ms-inventory.kubestock-staging.svc:3003
+        routes:
+          - name: inventory-routes
+            paths:
+              - /api/inventory
+            strip_path: true
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 200
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # Supplier: /api/supplier/* → ms-supplier
+      - name: ms-supplier
+        url: http://ms-supplier.kubestock-staging.svc:3004
+        routes:
+          - name: supplier-routes
+            paths:
+              - /api/supplier
+            strip_path: true
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # Order Management: /api/order/* → ms-order-management
+      - name: ms-order-management
+        url: http://ms-order-management.kubestock-staging.svc:3005
+        routes:
+          - name: order-routes
+            paths:
+              - /api/order
+            strip_path: true
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 150
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # Identity: /api/identity/* → ms-identity (no JWT check - handles own auth)
+      - name: ms-identity
+        url: http://ms-identity.kubestock-staging.svc:3006
+        routes:
+          - name: identity-routes
+            paths:
+              - /api/identity
+            strip_path: true
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              policy: local
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Request-ID
+              credentials: true
+              max_age: 3600
+          - name: prometheus
+
+      # Frontend: /* → frontend (no JWT check - static files)
+      - name: frontend
+        url: http://frontend.kubestock-staging.svc:80
+        routes:
+          - name: frontend-routes
+            paths:
+              - /
+            strip_path: false
+            protocols:
+              - http
+              - https
+        plugins:
+          - name: prometheus
+
+      # Health Check: /api/gateway/health (no JWT check)
+      - name: health
+        url: http://localhost:8001/status
+        routes:
+          - name: health-route
+            paths:
+              - /api/gateway/health
+            strip_path: true

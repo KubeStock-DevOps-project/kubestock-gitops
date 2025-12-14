@@ -1,0 +1,65 @@
+# =============================================================================
+# Kong API Gateway Services
+# =============================================================================
+---
+# Kong Proxy Service - Main entry point for API traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-proxy
+  namespace: kong
+  labels:
+    app: kong-gateway
+    app.kubernetes.io/name: kong
+    app.kubernetes.io/component: api-gateway
+spec:
+  type: NodePort
+  ports:
+    - name: proxy
+      port: 80
+      targetPort: 8000
+      nodePort: 30080
+      protocol: TCP
+    - name: proxy-ssl
+      port: 443
+      targetPort: 8443
+      nodePort: 30444
+      protocol: TCP
+  selector:
+    app: kong-gateway
+---
+# Kong Admin Service - Internal only
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-admin
+  namespace: kong
+  labels:
+    app: kong-gateway
+spec:
+  type: ClusterIP
+  ports:
+    - name: admin
+      port: 8001
+      targetPort: 8001
+      protocol: TCP
+  selector:
+    app: kong-gateway
+---
+# Kong Metrics Service - For Prometheus scraping
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-metrics
+  namespace: kong
+  labels:
+    app: kong-gateway
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 9542
+      targetPort: 9542
+      protocol: TCP
+  selector:
+    app: kong-gateway

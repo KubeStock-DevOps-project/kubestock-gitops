@@ -1,0 +1,25 @@
+# =============================================================================
+# Kong PeerAuthentication - Allow PERMISSIVE mTLS on ingress ports
+# =============================================================================
+# Kong is the API Gateway that receives external traffic from NLB (plain HTTP).
+# Since mesh-wide STRICT mTLS is enabled, we need to allow PERMISSIVE mode
+# on Kong's proxy ports to accept non-mTLS traffic from the load balancer.
+# 
+# Kong will still use mTLS when communicating with backend services (outbound).
+# =============================================================================
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: kong-gateway-permissive
+  namespace: kong-staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kong
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8000":
+      mode: PERMISSIVE
+    "8443":
+      mode: PERMISSIVE
