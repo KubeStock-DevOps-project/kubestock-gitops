@@ -1,9 +1,11 @@
-# Authorization policies for API endpoints
-# Require valid JWT for protected services (applied at workload sidecar level)
-# NOTE: Using DENY policy with notRequestPrincipals to reject unauthenticated requests
+# =============================================================================
+# Authorization Policies for KubeStock Services
+# =============================================================================
+# JWT validation happens at sidecar level via RequestAuthentication.
+# These DENY policies reject requests without valid JWT for protected services.
+# =============================================================================
 ---
-# Deny requests without valid JWT for API microservices
-# This DENY policy ensures requests without valid JWT are rejected
+# Deny requests without valid JWT - Staging
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -15,17 +17,15 @@ spec:
       require-jwt: "true"
   action: DENY
   rules:
-    # Deny requests without valid JWT (notRequestPrincipals means no valid principal)
     - from:
         - source:
             notRequestPrincipals: ["*"]
       to:
         - operation:
-            # Deny all methods except OPTIONS (CORS preflight) and health checks
             notMethods: ["OPTIONS"]
             notPaths: ["/health", "/health/*", "/metrics"]
 ---
-# Deny requests without valid JWT for API microservices in production
+# Deny requests without valid JWT - Production
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -37,7 +37,6 @@ spec:
       require-jwt: "true"
   action: DENY
   rules:
-    # Deny requests without valid JWT
     - from:
         - source:
             notRequestPrincipals: ["*"]
@@ -46,6 +45,7 @@ spec:
             notMethods: ["OPTIONS"]
             notPaths: ["/health", "/health/*", "/metrics"]
 ---
+# Allow all traffic to Identity Service (handles its own auth for SCIM2)
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -72,6 +72,7 @@ spec:
   rules:
     - {}
 ---
+# Allow all traffic to Frontend (static files, no auth needed)
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:

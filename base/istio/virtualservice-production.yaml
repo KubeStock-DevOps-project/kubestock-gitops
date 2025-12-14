@@ -1,28 +1,27 @@
 # =============================================================================
-# Staging VirtualService - Routes to kubestock-staging namespace
+# Production VirtualService - Routes to kubestock-production namespace
 # =============================================================================
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: kubestock-routes-staging
+  name: kubestock-routes-production
   namespace: istio-system
 spec:
   hosts:
     - "*"
   gateways:
-    - kubestock-gateway-staging  # Staging gateway
+    - kubestock-gateway  # Production gateway
   http:
-    # Health endpoint for NLB
+    # Health endpoint for ALB
     - match:
         - uri:
             exact: /api/gateway/health
       directResponse:
         status: 200
         body:
-          string: '{"status":"healthy","gateway":"istio","environment":"staging"}'
+          string: '{"status":"healthy","gateway":"istio","environment":"production"}'
 
     # Product Service
-    # /api/product -> /, /api/product/ -> /, /api/product/categories -> /categories
     - match:
         - uri:
             prefix: /api/product
@@ -30,7 +29,7 @@ spec:
         uri: /
       route:
         - destination:
-            host: ms-product.kubestock-staging.svc.cluster.local
+            host: ms-product.kubestock-production.svc.cluster.local
             port:
               number: 3002
       corsPolicy:
@@ -59,7 +58,7 @@ spec:
         uri: /
       route:
         - destination:
-            host: ms-inventory.kubestock-staging.svc.cluster.local
+            host: ms-inventory.kubestock-production.svc.cluster.local
             port:
               number: 3003
       corsPolicy:
@@ -88,7 +87,7 @@ spec:
         uri: /
       route:
         - destination:
-            host: ms-supplier.kubestock-staging.svc.cluster.local
+            host: ms-supplier.kubestock-production.svc.cluster.local
             port:
               number: 3004
       corsPolicy:
@@ -117,7 +116,7 @@ spec:
         uri: /
       route:
         - destination:
-            host: ms-order-management.kubestock-staging.svc.cluster.local
+            host: ms-order-management.kubestock-production.svc.cluster.local
             port:
               number: 3005
       corsPolicy:
@@ -146,7 +145,7 @@ spec:
         uri: /
       route:
         - destination:
-            host: ms-identity.kubestock-staging.svc.cluster.local
+            host: ms-identity.kubestock-production.svc.cluster.local
             port:
               number: 3006
       corsPolicy:
@@ -173,6 +172,6 @@ spec:
             prefix: /
       route:
         - destination:
-            host: frontend.kubestock-staging.svc.cluster.local
+            host: frontend.kubestock-production.svc.cluster.local
             port:
               number: 80

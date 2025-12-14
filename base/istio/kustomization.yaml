@@ -5,10 +5,10 @@ resources:
   - namespace.yaml
   - gateway.yaml
   - virtualservice.yaml
+  - virtualservice-production.yaml
   - peer-authentication.yaml
   - destination-rule.yaml
   - request-authentication.yaml
   - authorization-policy.yaml
-  - gateway-jwt-guard.yaml
   - envoyfilter-jwt-forward.yaml
   - kiali.yaml

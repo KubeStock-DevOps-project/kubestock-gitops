@@ -1,5 +1,6 @@
-# Gateway configuration for Istio ingress
-# TLS termination happens at AWS ALB, so gateway only needs HTTP
+# =============================================================================
+# Production Gateway - ALB traffic (TLS terminated at ALB)
+# =============================================================================
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
@@ -7,7 +8,26 @@ metadata:
   namespace: istio-system
 spec:
   selector:
-    istio: ingressgateway
+    istio: ingressgateway  # Production gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+# =============================================================================
+# Staging Gateway - NLB dev access traffic
+# =============================================================================
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: kubestock-gateway-staging
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway-staging  # Staging gateway
   servers:
     - port:
         number: 80
