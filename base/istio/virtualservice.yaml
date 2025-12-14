@@ -157,12 +157,11 @@ spec:
     # Health endpoint for ALB
     - match:
         - uri:
-            exact: /healthz
-      route:
-        - destination:
-            host: istio-ingressgateway.istio-system.svc.cluster.local
-            port:
-              number: 15021
+            exact: /api/gateway/health
+      directResponse:
+        status: 200
+        body:
+          string: '{"status":"healthy","gateway":"istio"}'
 
     # Frontend (catch-all)
     - match:
