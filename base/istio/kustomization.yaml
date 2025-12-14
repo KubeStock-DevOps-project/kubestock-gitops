@@ -1,31 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# =============================================================================
-# Istio Configuration - mTLS Only (Service Mesh Security)
-# =============================================================================
-# ARCHITECTURE:
-#   Kong (API Gateway) → handles ALL ingress:
-#     - Path-based routing (/api/product → ms-product, etc.)
-#     - Path stripping (strip_path: true)
-#     - CORS configuration
-#     - Rate limiting
-#     - JWT aud/iss claim checking (pre-function plugin, no signature verify)
-#
-#   Istio (Service Mesh) → handles ONLY inter-service security:
-#     - mTLS between services (peer-authentication, destination-rule)
-#     - JWT signature validation at sidecar level (request-authentication)
-#     - Authorization policies to enforce valid JWT (authorization-policy)
-#     - JWT header forwarding to services (envoyfilter-jwt-forward)
-#
-# REMOVED (Kong handles these):
-#   - gateway.yaml (Istio IngressGateway not needed)
-#   - virtualservice.yaml (Kong does routing)
-#   - virtualservice-production.yaml (Kong does routing)
-# =============================================================================
-
 resources:
   - namespace.yaml
+  - gateway.yaml
+  - virtualservice.yaml
+  - virtualservice-production.yaml
   - peer-authentication.yaml
   - destination-rule.yaml
   - request-authentication.yaml
