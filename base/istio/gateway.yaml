@@ -1,3 +1,5 @@
+# Gateway configuration for Istio ingress
+# TLS termination happens at AWS ALB, so gateway only needs HTTP
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
@@ -11,14 +13,5 @@ spec:
         number: 80
         name: http
         protocol: HTTP
-      hosts:
-        - "*"
-    - port:
-        number: 443
-        name: https
-        protocol: HTTPS
-      tls:
-        mode: SIMPLE
-        credentialName: kubestock-tls-cert
       hosts:
         - "*"
