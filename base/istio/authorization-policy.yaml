@@ -9,12 +9,27 @@ metadata:
 spec:
   action: ALLOW
   rules:
+    # Allow valid JWT holders
     - from:
         - source:
             requestPrincipals: ["*"]
+    # Allow CORS preflight
     - to:
         - operation:
             methods: ["OPTIONS"]
+    # Allow health checks from anywhere (GET /health)
+    - from:
+        - source:
+            namespaces: ["istio-system"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/health", "/health/*"]
+    # Also allow health checks without source restriction (for testing)
+    - to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/health"]
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
@@ -24,12 +39,27 @@ metadata:
 spec:
   action: ALLOW
   rules:
+    # Allow valid JWT holders
     - from:
         - source:
             requestPrincipals: ["*"]
+    # Allow CORS preflight
     - to:
         - operation:
             methods: ["OPTIONS"]
+    # Allow health checks from ingress gateway
+    - from:
+        - source:
+            namespaces: ["istio-system"]
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/health", "/health/*"]
+    # Also allow health checks without source restriction
+    - to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/health"]
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
