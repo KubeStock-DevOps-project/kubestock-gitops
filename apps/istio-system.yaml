@@ -86,6 +86,7 @@ spec:
     helm:
       releaseName: istio-ingressgateway
       values: |
+        name: istio-ingressgateway
         service:
           type: NodePort
           ports:
@@ -97,7 +98,7 @@ spec:
             - name: https
               port: 443
               targetPort: 8443
-              nodePort: 30443
+              nodePort: 30444
               protocol: TCP
             - name: status-port
               port: 15021

@@ -6,10 +6,10 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: kubestock-production
+  project: default
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: istio
     path: overlays/production/istio
   destination:
     server: https://kubernetes.default.svc
