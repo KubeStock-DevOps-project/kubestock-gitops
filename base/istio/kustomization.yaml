@@ -9,5 +9,6 @@ resources:
   - destination-rule.yaml
   - request-authentication.yaml
   - authorization-policy.yaml
+  - gateway-jwt-guard.yaml
   - envoyfilter-jwt-forward.yaml
   - kiali.yaml

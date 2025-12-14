@@ -21,6 +21,7 @@ spec:
     metadata:
       labels:
         app: ms-order-management
+        require-jwt: "true"
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "3001"

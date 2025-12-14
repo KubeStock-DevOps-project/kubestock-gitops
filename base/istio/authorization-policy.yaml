@@ -1,58 +1,50 @@
 # Authorization policies for API endpoints
 # Require valid JWT for protected services (applied at workload sidecar level)
+# NOTE: Using DENY policy with notRequestPrincipals to reject unauthenticated requests
 ---
-# JWT Authorization for API microservices only
-# Frontend and Identity services have their own allow-all policies
+# Deny requests without valid JWT for API microservices
+# This DENY policy ensures requests without valid JWT are rejected
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: require-jwt-staging
+  name: deny-without-jwt-staging
   namespace: kubestock-staging
 spec:
-  # Apply only to ms-product
   selector:
     matchLabels:
       require-jwt: "true"
-  action: ALLOW
+  action: DENY
   rules:
-    # Allow valid JWT holders
+    # Deny requests without valid JWT (notRequestPrincipals means no valid principal)
     - from:
         - source:
-            requestPrincipals: ["*"]
-    # Allow CORS preflight
-    - to:
+            notRequestPrincipals: ["*"]
+      to:
         - operation:
-            methods: ["OPTIONS"]
-    # Allow health checks
-    - to:
-        - operation:
-            methods: ["GET"]
-            paths: ["/health", "/health/*"]
+            # Deny all methods except OPTIONS (CORS preflight) and health checks
+            notMethods: ["OPTIONS"]
+            notPaths: ["/health", "/health/*", "/metrics"]
 ---
+# Deny requests without valid JWT for API microservices in production
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: require-jwt-production
+  name: deny-without-jwt-production
   namespace: kubestock-production
 spec:
   selector:
     matchLabels:
       require-jwt: "true"
-  action: ALLOW
+  action: DENY
   rules:
-    # Allow valid JWT holders
+    # Deny requests without valid JWT
     - from:
         - source:
-            requestPrincipals: ["*"]
-    # Allow CORS preflight
-    - to:
+            notRequestPrincipals: ["*"]
+      to:
         - operation:
-            methods: ["OPTIONS"]
-    # Allow health checks
-    - to:
-        - operation:
-            methods: ["GET"]
-            paths: ["/health", "/health/*"]
+            notMethods: ["OPTIONS"]
+            notPaths: ["/health", "/health/*", "/metrics"]
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy

@@ -1,13 +1,23 @@
+# =============================================================================
 # JWT validation at sidecar level
-# Validates issuer and client_id (aud), forwards token to services
+# =============================================================================
+# Validates JWT signature using Asgardeo's JWKS endpoint
+# Also validates issuer and audience claims
+# Forwards original token to services for application-level authorization
+# =============================================================================
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
   name: jwt-auth-staging
   namespace: kubestock-staging
 spec:
+  # Apply to workloads that require JWT
+  selector:
+    matchLabels:
+      require-jwt: "true"
   jwtRules:
     - issuer: "https://api.asgardeo.io/t/kubestock/oauth2/token"
+      # JWKS endpoint for signature verification
       jwksUri: "https://api.asgardeo.io/t/kubestock/oauth2/jwks"
       audiences:
         - "NydMISKZZ5TdIEuRwJfYv62Yn7ka"  # SPA Application
@@ -20,6 +30,9 @@ metadata:
   name: jwt-auth-production
   namespace: kubestock-production
 spec:
+  selector:
+    matchLabels:
+      require-jwt: "true"
   jwtRules:
     - issuer: "https://api.asgardeo.io/t/kubestock/oauth2/token"
       jwksUri: "https://api.asgardeo.io/t/kubestock/oauth2/jwks"
