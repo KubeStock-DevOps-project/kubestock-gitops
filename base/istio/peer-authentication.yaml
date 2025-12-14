@@ -1,0 +1,9 @@
+# Mesh-wide STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-mtls
+  namespace: istio-system
+spec:
+  mtls:
+    mode: STRICT

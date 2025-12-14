@@ -1,0 +1,92 @@
+# Authorization policies for API endpoints
+# Deny requests without valid JWT for protected routes
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-invalid-jwt-staging
+  namespace: kubestock-staging
+spec:
+  action: DENY
+  rules:
+    - from:
+        - source:
+            notRequestPrincipals: ["*"]
+      to:
+        - operation:
+            paths:
+              - "/api/product/*"
+              - "/api/inventory/*"
+              - "/api/supplier/*"
+              - "/api/order/*"
+            notMethods: ["OPTIONS"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-invalid-jwt-production
+  namespace: kubestock-production
+spec:
+  action: DENY
+  rules:
+    - from:
+        - source:
+            notRequestPrincipals: ["*"]
+      to:
+        - operation:
+            paths:
+              - "/api/product/*"
+              - "/api/inventory/*"
+              - "/api/supplier/*"
+              - "/api/order/*"
+            notMethods: ["OPTIONS"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-identity-public
+  namespace: kubestock-staging
+spec:
+  action: ALLOW
+  rules:
+    - to:
+        - operation:
+            paths: ["/api/identity/*"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-identity-public-production
+  namespace: kubestock-production
+spec:
+  action: ALLOW
+  rules:
+    - to:
+        - operation:
+            paths: ["/api/identity/*"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-frontend
+  namespace: kubestock-staging
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: frontend
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-frontend-production
+  namespace: kubestock-production
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: frontend
+  rules:
+    - {}
