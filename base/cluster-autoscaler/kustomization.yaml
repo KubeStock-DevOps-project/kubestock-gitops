@@ -1,17 +1,17 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: cluster-autoscaler
-
 resources:
   - namespace.yaml
   - serviceaccount.yaml
   - rbac.yaml
+  - rbac-kube-system.yaml
   - deployment.yaml
   - service.yaml
-  # - podmonitor.yaml  # Uncomment when Prometheus Operator CRDs are installed
 
-commonLabels:
-  app.kubernetes.io/name: cluster-autoscaler
-  app.kubernetes.io/component: autoscaler
-  app.kubernetes.io/part-of: infrastructure
+labels:
+  - pairs:
+      app.kubernetes.io/name: cluster-autoscaler
+      app.kubernetes.io/component: autoscaler
+      app.kubernetes.io/part-of: infrastructure
+    includeSelectors: false
