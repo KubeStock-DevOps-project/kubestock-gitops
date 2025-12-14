@@ -6,6 +6,7 @@
 # - Cert-Manager
 # - External-Secrets Operator
 # - Observability Stack
+# - Cluster Autoscaler
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
@@ -34,6 +35,8 @@ spec:
     - namespace: 'argocd'
       server: https://kubernetes.default.svc
     - namespace: 'test-runner'
+      server: https://kubernetes.default.svc
+    - namespace: 'cluster-autoscaler'
       server: https://kubernetes.default.svc
 
   # Cluster-scoped resources allowed (infrastructure needs more permissions)
