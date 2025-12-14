@@ -86,6 +86,7 @@ spec:
     helm:
       releaseName: istio-ingressgateway
       values: |
+        name: istio-ingressgateway
         service:
           type: NodePort
           ports:
