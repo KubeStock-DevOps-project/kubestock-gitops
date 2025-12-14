@@ -1,42 +1,18 @@
 # =============================================================================
-# JWT validation at sidecar level
+# JWT validation - CONSOLIDATED AT GATEWAY LEVEL
 # =============================================================================
-# Validates JWT signature using Asgardeo's JWKS endpoint
-# Also validates issuer and audience claims
-# Forwards original token to services for application-level authorization
+# NOTE: JWT validation is handled at the Istio ingress gateway level
+# (see gateway-jwt-guard.yaml). This file is kept for reference but
+# the gateway-level validation is sufficient.
+#
+# The gateway:
+# 1. Validates JWT signature using Asgardeo's JWKS endpoint
+# 2. Validates issuer and audience claims
+# 3. Sets requestPrincipal for AuthorizationPolicy to use
+# 4. Forwards original token to services
+#
+# Sidecar-level RequestAuthentication is NOT needed because:
+# - Gateway already verified the JWT signature
+# - AuthorizationPolicy uses requestPrincipal set by gateway
+# - Token is forwarded to services via forwardOriginalToken: true
 # =============================================================================
-apiVersion: security.istio.io/v1beta1
-kind: RequestAuthentication
-metadata:
-  name: jwt-auth-staging
-  namespace: kubestock-staging
-spec:
-  # Apply to workloads that require JWT
-  selector:
-    matchLabels:
-      require-jwt: "true"
-  jwtRules:
-    - issuer: "https://api.asgardeo.io/t/kubestock/oauth2/token"
-      # JWKS endpoint for signature verification
-      jwksUri: "https://api.asgardeo.io/t/kubestock/oauth2/jwks"
-      audiences:
-        - "NydMISKZZ5TdIEuRwJfYv62Yn7ka"  # SPA Application
-        - "6e6DeVI9oNaoYV6SSi7cWjIckMQa"  # Test Runner Application
-      forwardOriginalToken: true
----
-apiVersion: security.istio.io/v1beta1
-kind: RequestAuthentication
-metadata:
-  name: jwt-auth-production
-  namespace: kubestock-production
-spec:
-  selector:
-    matchLabels:
-      require-jwt: "true"
-  jwtRules:
-    - issuer: "https://api.asgardeo.io/t/kubestock/oauth2/token"
-      jwksUri: "https://api.asgardeo.io/t/kubestock/oauth2/jwks"
-      audiences:
-        - "NydMISKZZ5TdIEuRwJfYv62Yn7ka"  # SPA Application
-        - "6e6DeVI9oNaoYV6SSi7cWjIckMQa"  # Test Runner Application
-      forwardOriginalToken: true
