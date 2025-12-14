@@ -8,6 +8,7 @@ metadata:
 spec:
   jwtRules:
     - issuer: "https://api.asgardeo.io/t/kubestock/oauth2/token"
+      jwksUri: "https://api.asgardeo.io/t/kubestock/oauth2/jwks"
       audiences:
         - "NydMISKZZ5TdIEuRwJfYv62Yn7ka"  # SPA Application
         - "6e6DeVI9oNaoYV6SSi7cWjIckMQa"  # Test Runner Application
@@ -21,6 +22,7 @@ metadata:
 spec:
   jwtRules:
     - issuer: "https://api.asgardeo.io/t/kubestock/oauth2/token"
+      jwksUri: "https://api.asgardeo.io/t/kubestock/oauth2/jwks"
       audiences:
         - "NydMISKZZ5TdIEuRwJfYv62Yn7ka"  # SPA Application
         - "6e6DeVI9oNaoYV6SSi7cWjIckMQa"  # Test Runner Application
