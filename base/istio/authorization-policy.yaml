@@ -98,3 +98,38 @@ spec:
   action: ALLOW
   rules:
     - {}
+---
+# =============================================================================
+# ALLOW policies for microservices
+# =============================================================================
+# These policies allow traffic that passes the DENY checks above.
+# Without these, requests would be implicitly denied because other ALLOW 
+# policies exist in the namespace (for frontend and identity).
+# =============================================================================
+---
+# Allow traffic to services with require-jwt label (after DENY check passes)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-jwt-services-staging
+  namespace: kubestock-staging
+spec:
+  selector:
+    matchLabels:
+      require-jwt: "true"
+  action: ALLOW
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-jwt-services-production
+  namespace: kubestock-production
+spec:
+  selector:
+    matchLabels:
+      require-jwt: "true"
+  action: ALLOW
+  rules:
+    - {}
