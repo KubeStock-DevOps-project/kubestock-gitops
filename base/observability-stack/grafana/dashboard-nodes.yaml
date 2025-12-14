@@ -260,7 +260,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "avg(100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\"}[5m]))) * on(instance) group_left(node) node_exporter_build_info * on(node) group_left() kube_node_role{role=\"control-plane\"})", "refId": "A"}],
+          "targets": [{"expr": "avg(100 * (1 - rate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"master.*\"}[5m])))", "refId": "A"}],
           "title": "Master CPU Avg",
           "type": "stat"
         },
@@ -285,7 +285,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "avg(100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"worker.*\"}[5m])))", "refId": "A"}],
+          "targets": [{"expr": "avg(100 * (1 - rate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"worker.*\"}[5m])))", "refId": "A"}],
           "title": "Worker CPU Avg",
           "type": "stat"
         },
@@ -310,7 +310,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "avg(100 * container_memory_working_set_bytes{id=\"/\",instance=~\"master.*\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"master.*\"} * 3040016 / 3928848))", "refId": "A"}],
+          "targets": [{"expr": "avg(100 * (1 - (node_memory_MemAvailable_bytes{job=\"node-exporter\",instance=~\"master.*\"} / node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"master.*\"})))", "refId": "A"}],
           "title": "Master Memory Avg",
           "type": "stat"
         },
@@ -335,7 +335,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "avg(100 * container_memory_working_set_bytes{id=\"/\",instance=~\"worker.*\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"worker.*\"} * 3040016 / 3928848))", "refId": "A"}],
+          "targets": [{"expr": "avg(100 * (1 - (node_memory_MemAvailable_bytes{job=\"node-exporter\",instance=~\"worker.*\"} / node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"worker.*\"})))", "refId": "A"}],
           "title": "Worker Memory Avg",
           "type": "stat"
         },
@@ -368,8 +368,8 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "cluster_autoscaler_nodes_count{state=\"ready\"}", "refId": "A"}],
-          "title": "Nodes Ready",
+          "targets": [{"expr": "max(cluster_autoscaler_nodes_count{state=\"ready\"})", "refId": "A"}],
+          "title": "CA Nodes Ready",
           "type": "stat"
         },
         {
@@ -393,8 +393,8 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "cluster_autoscaler_nodes_count{state=\"unready\"} or vector(0)", "refId": "A"}],
-          "title": "Nodes Unready",
+          "targets": [{"expr": "max(cluster_autoscaler_nodes_count{state=\"unready\"}) or vector(0)", "refId": "A"}],
+          "title": "CA Nodes Unready",
           "type": "stat"
         },
         {
@@ -418,7 +418,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "cluster_autoscaler_unschedulable_pods_count or vector(0)", "refId": "A"}],
+          "targets": [{"expr": "sum(cluster_autoscaler_unschedulable_pods_count) or vector(0)", "refId": "A"}],
           "title": "Unschedulable Pods",
           "type": "stat"
         },
@@ -443,7 +443,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "cluster_autoscaler_scaled_up_nodes_total or vector(0)", "refId": "A"}],
+          "targets": [{"expr": "sum(cluster_autoscaler_scaled_up_nodes_total) or vector(0)", "refId": "A"}],
           "title": "Total Scale Ups",
           "type": "stat"
         },
@@ -468,7 +468,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "cluster_autoscaler_scaled_down_nodes_total or vector(0)", "refId": "A"}],
+          "targets": [{"expr": "sum(cluster_autoscaler_scaled_down_nodes_total) or vector(0)", "refId": "A"}],
           "title": "Total Scale Downs",
           "type": "stat"
         },
@@ -493,7 +493,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "cluster_autoscaler_failed_scale_ups_total or vector(0)", "refId": "A"}],
+          "targets": [{"expr": "sum(cluster_autoscaler_failed_scale_ups_total) or vector(0)", "refId": "A"}],
           "title": "Failed Scale Ups",
           "type": "stat"
         },
@@ -513,9 +513,9 @@ data:
           "id": 207,
           "options": {"legend": {"calcs": ["lastNotNull", "min", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
           "targets": [
-            {"expr": "cluster_autoscaler_nodes_count{state=\"ready\"}", "legendFormat": "Ready Nodes", "refId": "A"},
-            {"expr": "cluster_autoscaler_nodes_count{state=\"unready\"}", "legendFormat": "Unready Nodes", "refId": "B"},
-            {"expr": "cluster_autoscaler_nodes_count{state=\"notStarted\"}", "legendFormat": "Not Started", "refId": "C"}
+            {"expr": "max(cluster_autoscaler_nodes_count{state=\"ready\"})", "legendFormat": "Ready Nodes", "refId": "A"},
+            {"expr": "max(cluster_autoscaler_nodes_count{state=\"unready\"})", "legendFormat": "Unready Nodes", "refId": "B"},
+            {"expr": "max(cluster_autoscaler_nodes_count{state=\"notStarted\"})", "legendFormat": "Not Started", "refId": "C"}
           ],
           "title": "Node Count Over Time",
           "type": "timeseries"
@@ -540,9 +540,9 @@ data:
           "id": 208,
           "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
           "targets": [
-            {"expr": "increase(cluster_autoscaler_scaled_up_nodes_total[5m])", "legendFormat": "Scale Ups", "refId": "A"},
-            {"expr": "increase(cluster_autoscaler_scaled_down_nodes_total[5m])", "legendFormat": "Scale Downs", "refId": "B"},
-            {"expr": "increase(cluster_autoscaler_failed_scale_ups_total[5m])", "legendFormat": "Failed Scale Ups", "refId": "C"}
+            {"expr": "sum(increase(cluster_autoscaler_scaled_up_nodes_total[5m]))", "legendFormat": "Scale Ups", "refId": "A"},
+            {"expr": "sum(increase(cluster_autoscaler_scaled_down_nodes_total[5m]))", "legendFormat": "Scale Downs", "refId": "B"},
+            {"expr": "sum(increase(cluster_autoscaler_failed_scale_ups_total[5m]))", "legendFormat": "Failed Scale Ups", "refId": "C"}
           ],
           "title": "Scaling Events (5m intervals)",
           "type": "timeseries"
@@ -580,7 +580,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"$node\"}[5m])))",
+              "expr": "100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"$node\"}[5m]))) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}}",
               "refId": "A"
             }
@@ -613,7 +613,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 * container_memory_working_set_bytes{id=\"/\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"} * 3040016 / 3928848)",
+              "expr": "100 * (1 - (node_memory_MemAvailable_bytes{job=\"node-exporter\",instance=~\"$node\"} / node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"})) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}}",
               "refId": "A"
             }
@@ -646,7 +646,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 - ((node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\",instance=~\"$node\"} * 100) / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\",instance=~\"$node\"})",
+              "expr": "(100 - ((node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\",instance=~\"$node\"} * 100) / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"rootfs\",instance=~\"$node\"})) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}}",
               "refId": "A"
             }
@@ -679,7 +679,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(kube_pod_info{job=\"kube-state-metrics\",node=~\"$node\"}) by (node)",
+              "expr": "sum(kube_pod_info{job=\"kube-state-metrics\",node=~\"$node\"}) by (node) and on(node) kube_node_info",
               "legendFormat": "{{node}}",
               "refId": "A"
             }
