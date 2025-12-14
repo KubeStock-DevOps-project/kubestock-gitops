@@ -136,7 +136,7 @@ rules:
       - cronjobs
       - jobs
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.istio.io", "security.istio.io", "telemetry.istio.io"]
+  - apiGroups: ["networking.istio.io", "security.istio.io", "telemetry.istio.io", "extensions.istio.io"]
     resources: ["*"]
     verbs: ["get", "list", "watch", "create", "delete", "patch"]
   - apiGroups: ["apps.openshift.io"]
