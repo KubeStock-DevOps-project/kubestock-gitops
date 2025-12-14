@@ -32,6 +32,16 @@ spec:
       prune: true
       selfHeal: true
 ---
+# =============================================================================
+# Istiod - Control Plane for mTLS Service Mesh
+# =============================================================================
+# Istiod provides:
+# - mTLS certificate management for sidecars
+# - Service discovery for mesh
+# - Configuration distribution to Envoy sidecars
+#
+# NOTE: No IngressGateway deployed - Kong handles all ingress routing
+# =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -67,130 +77,6 @@ spec:
               limits:
                 cpu: 200m
                 memory: 256Mi
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: istio-system
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: istio-ingressgateway
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: gateway
-    targetRevision: 1.24.0
-    helm:
-      releaseName: istio-ingressgateway
-      values: |
-        name: istio-ingressgateway
-        # Production ingress gateway - serves ALB traffic
-        labels:
-          app: istio-ingressgateway
-          istio: ingressgateway
-          environment: production
-        image:
-          repository: docker.io/istio/proxyv2
-          tag: 1.24.0
-        service:
-          type: NodePort
-          ports:
-            - name: http2
-              port: 80
-              targetPort: 8080
-              nodePort: 30095
-              protocol: TCP
-            - name: https
-              port: 443
-              targetPort: 8443
-              nodePort: 30446
-              protocol: TCP
-            - name: status-port
-              port: 15021
-              targetPort: 15021
-              nodePort: 30021
-              protocol: TCP
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: istio-system
-  syncPolicy:
-    syncOptions:
-      - CreateNamespace=true
-    automated:
-      prune: true
-      selfHeal: true
----
-# Staging Ingress Gateway - serves NLB traffic for dev access
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: istio-ingressgateway-staging
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: gateway
-    targetRevision: 1.24.0
-    helm:
-      releaseName: istio-ingressgateway-staging
-      values: |
-        name: istio-ingressgateway-staging
-        labels:
-          app: istio-ingressgateway-staging
-          istio: ingressgateway-staging
-          environment: staging
-        image:
-          repository: docker.io/istio/proxyv2
-          tag: 1.24.0
-        service:
-          type: NodePort
-          ports:
-            - name: http2
-              port: 80
-              targetPort: 8080
-              nodePort: 30081
-              protocol: TCP
-            - name: https
-              port: 443
-              targetPort: 8443
-              nodePort: 30445
-              protocol: TCP
-            - name: status-port
-              port: 15021
-              targetPort: 15021
-              nodePort: 30022
-              protocol: TCP
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system

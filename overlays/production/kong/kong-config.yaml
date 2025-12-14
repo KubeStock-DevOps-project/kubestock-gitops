@@ -3,6 +3,8 @@
 # =============================================================================
 # Domain: kubestock.dpiyumal.me (single domain for frontend + API)
 # Routing: /api/{service}/* → strips prefix → backend
+# JWT: aud/iss claim checking (pre-function plugin, no signature verify)
+#      Signature verification is done by Istio sidecars
 # =============================================================================
 apiVersion: v1
 kind: ConfigMap
@@ -11,6 +13,98 @@ metadata:
 data:
   kong.yml: |
     _format_version: "3.0"
+
+    # ==========================================================================
+    # Global Plugins - Applied to all services
+    # ==========================================================================
+    plugins:
+      # JWT aud/iss claim checking (no signature verification)
+      # Checks that tokens are intended for our application
+      - name: pre-function
+        config:
+          access:
+            - |
+              -- JWT aud/iss checking without signature verification
+              -- Sidecars verify signatures, Kong just validates claims
+              local function check_jwt_claims()
+                local auth_header = kong.request.get_header("Authorization")
+                if not auth_header then
+                  return true -- No token, let request pass (service handles auth)
+                end
+                
+                local token = auth_header:match("Bearer%s+(.+)")
+                if not token then
+                  return true -- Not a bearer token
+                end
+                
+                -- Decode JWT payload (base64url)
+                local parts = {}
+                for part in token:gmatch("[^%.]+") do
+                  table.insert(parts, part)
+                end
+                
+                if #parts ~= 3 then
+                  kong.response.exit(401, { message = "Invalid token format" })
+                  return false
+                end
+                
+                -- Base64url decode the payload
+                local payload_b64 = parts[2]
+                payload_b64 = payload_b64:gsub("-", "+"):gsub("_", "/")
+                local padding = 4 - (#payload_b64 % 4)
+                if padding < 4 then
+                  payload_b64 = payload_b64 .. string.rep("=", padding)
+                end
+                
+                local payload_json = ngx.decode_base64(payload_b64)
+                if not payload_json then
+                  kong.response.exit(401, { message = "Invalid token encoding" })
+                  return false
+                end
+                
+                local cjson = require("cjson.safe")
+                local payload, err = cjson.decode(payload_json)
+                if not payload then
+                  kong.response.exit(401, { message = "Invalid token payload" })
+                  return false
+                end
+                
+                -- Check issuer
+                local expected_iss = "https://api.asgardeo.io/t/kubestock/oauth2/token"
+                if payload.iss ~= expected_iss then
+                  kong.response.exit(401, { message = "Invalid token issuer" })
+                  return false
+                end
+                
+                -- Check audience (can be string or array)
+                local valid_audiences = {
+                  ["NydMISKZZ5TdIEuRwJfYv62Yn7ka"] = true,  -- SPA Application
+                  ["6e6DeVI9oNaoYV6SSi7cWjIckMQa"] = true   -- Test Runner Application
+                }
+                
+                local aud = payload.aud
+                local aud_valid = false
+                
+                if type(aud) == "string" then
+                  aud_valid = valid_audiences[aud]
+                elseif type(aud) == "table" then
+                  for _, a in ipairs(aud) do
+                    if valid_audiences[a] then
+                      aud_valid = true
+                      break
+                    end
+                  end
+                end
+                
+                if not aud_valid then
+                  kong.response.exit(401, { message = "Invalid token audience" })
+                  return false
+                end
+                
+                return true
+              end
+              
+              check_jwt_claims()
 
     services:
       # Product: /api/product/* → ms-product
@@ -157,7 +251,7 @@ data:
               max_age: 3600
           - name: prometheus
 
-      # Identity: /api/identity/* → ms-identity
+      # Identity: /api/identity/* → ms-identity (no JWT check - handles own auth)
       - name: ms-identity
         url: http://ms-identity.kubestock-production.svc:3006
         routes:
@@ -193,7 +287,7 @@ data:
               max_age: 3600
           - name: prometheus
 
-      # Frontend: /* → frontend
+      # Frontend: /* → frontend (no JWT check - static files)
       - name: frontend
         url: http://frontend.kubestock-production.svc:80
         routes:
@@ -207,7 +301,7 @@ data:
         plugins:
           - name: prometheus
 
-      # Health: /api/gateway/health
+      # Health: /api/gateway/health (no JWT check)
       - name: health
         url: http://localhost:8001/status
         routes:

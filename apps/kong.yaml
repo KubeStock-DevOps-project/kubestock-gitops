@@ -1,14 +1,27 @@
 # =============================================================================
 # Kong API Gateway - ArgoCD Applications
 # =============================================================================
-# Kong handles ingress routing and API gateway functionality:
-# - Path-based routing (/api/product, /api/inventory, etc.)
-# - Path stripping (strip_path: true)
-# - CORS configuration
-# - Rate limiting
-# - JWT validation (aud/iss check)
+# ARCHITECTURE - Clean Separation of Concerns:
 #
-# Istio handles only mTLS for secure inter-service communication
+# Kong (API Gateway) handles ALL ingress:
+#   - Path-based routing (/api/product → ms-product, etc.)
+#   - Path stripping (strip_path: true)
+#   - CORS configuration
+#   - Rate limiting
+#   - JWT aud/iss claim checking (pre-function plugin, no signature verify)
+#
+# Istio (Service Mesh) handles ONLY inter-service security:
+#   - mTLS between services (automatic mutual TLS)
+#   - JWT signature verification at sidecar level
+#   - Authorization policies (deny without valid JWT)
+#
+# Traffic Flow:
+#   NLB → Kong (NodePort 30080/30081) → Service → Istio Sidecar → App
+#
+# Security Layers:
+#   1. Kong: Check JWT aud/iss claims (fast reject invalid audience)
+#   2. Istio Sidecar: Verify JWT signature via JWKS
+#   3. Istio AuthorizationPolicy: Deny if no valid requestPrincipal
 # =============================================================================
 
 ---

@@ -2,13 +2,26 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 # =============================================================================
-# Istio Configuration - mTLS Only
+# Istio Configuration - mTLS Only (Service Mesh Security)
 # =============================================================================
-# Kong handles ingress routing, Istio handles:
-# - mTLS between services (peer-authentication, destination-rule)
-# - JWT validation at sidecar level (request-authentication)
-# - Authorization policies (authorization-policy)
-# - JWT forwarding to services (envoyfilter-jwt-forward)
+# ARCHITECTURE:
+#   Kong (API Gateway) → handles ALL ingress:
+#     - Path-based routing (/api/product → ms-product, etc.)
+#     - Path stripping (strip_path: true)
+#     - CORS configuration
+#     - Rate limiting
+#     - JWT aud/iss claim checking (pre-function plugin, no signature verify)
+#
+#   Istio (Service Mesh) → handles ONLY inter-service security:
+#     - mTLS between services (peer-authentication, destination-rule)
+#     - JWT signature validation at sidecar level (request-authentication)
+#     - Authorization policies to enforce valid JWT (authorization-policy)
+#     - JWT header forwarding to services (envoyfilter-jwt-forward)
+#
+# REMOVED (Kong handles these):
+#   - gateway.yaml (Istio IngressGateway not needed)
+#   - virtualservice.yaml (Kong does routing)
+#   - virtualservice-production.yaml (Kong does routing)
 # =============================================================================
 
 resources:
@@ -19,8 +32,3 @@ resources:
   - authorization-policy.yaml
   - envoyfilter-jwt-forward.yaml
   - kiali.yaml
-
-# Removed:
-# - gateway.yaml (Kong handles ingress)
-# - virtualservice.yaml (Kong handles routing)
-# - virtualservice-production.yaml (Kong handles routing)
