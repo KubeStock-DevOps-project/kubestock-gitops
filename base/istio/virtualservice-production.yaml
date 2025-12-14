@@ -26,9 +26,7 @@ spec:
         - uri:
             prefix: /api/product
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/product(/.*)?$"
-          rewrite: "\\1"
+        uri: /
       route:
         - destination:
             host: ms-product.kubestock-production.svc.cluster.local
@@ -57,9 +55,7 @@ spec:
         - uri:
             prefix: /api/inventory
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/inventory(/.*)?$"
-          rewrite: "\\1"
+        uri: /
       route:
         - destination:
             host: ms-inventory.kubestock-production.svc.cluster.local
@@ -88,9 +84,7 @@ spec:
         - uri:
             prefix: /api/supplier
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/supplier(/.*)?$"
-          rewrite: "\\1"
+        uri: /
       route:
         - destination:
             host: ms-supplier.kubestock-production.svc.cluster.local
@@ -119,9 +113,7 @@ spec:
         - uri:
             prefix: /api/order
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/order(/.*)?$"
-          rewrite: "\\1"
+        uri: /
       route:
         - destination:
             host: ms-order-management.kubestock-production.svc.cluster.local
@@ -150,9 +142,7 @@ spec:
         - uri:
             prefix: /api/identity
       rewrite:
-        uriRegexRewrite:
-          match: "^/api/identity(/.*)?$"
-          rewrite: "\\1"
+        uri: /
       route:
         - destination:
             host: ms-identity.kubestock-production.svc.cluster.local
