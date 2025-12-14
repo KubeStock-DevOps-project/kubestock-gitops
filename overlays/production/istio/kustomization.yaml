@@ -4,30 +4,10 @@ kind: Kustomization
 resources:
   - ../../base/istio
 
-patches:
-  - target:
-      kind: VirtualService
-      name: kubestock-routes
-    patch: |-
-      - op: replace
-        path: /spec/http/0/route/0/destination/host
-        value: ms-product.kubestock-production.svc.cluster.local
-      - op: replace
-        path: /spec/http/1/route/0/destination/host
-        value: ms-inventory.kubestock-production.svc.cluster.local
-      - op: replace
-        path: /spec/http/2/route/0/destination/host
-        value: ms-supplier.kubestock-production.svc.cluster.local
-      - op: replace
-        path: /spec/http/3/route/0/destination/host
-        value: ms-order-management.kubestock-production.svc.cluster.local
-      - op: replace
-        path: /spec/http/4/route/0/destination/host
-        value: ms-identity.kubestock-production.svc.cluster.local
-      - op: replace
-        path: /spec/http/6/route/0/destination/host
-        value: frontend.kubestock-production.svc.cluster.local
+patchesStrategicMerge:
+  - virtualservice.yaml
 
+patches:
   - target:
       kind: PeerAuthentication
       name: default-mtls

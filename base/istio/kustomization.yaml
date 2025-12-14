@@ -6,6 +6,7 @@ resources:
   - gateway.yaml
   - virtualservice.yaml
   - peer-authentication.yaml
+  - destination-rule.yaml
   - request-authentication.yaml
   - authorization-policy.yaml
   - envoyfilter-jwt-forward.yaml

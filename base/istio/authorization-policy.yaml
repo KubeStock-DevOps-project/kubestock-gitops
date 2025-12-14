@@ -1,80 +1,72 @@
 # Authorization policies for API endpoints
-# Deny requests without valid JWT for protected routes
+# Require valid JWT for protected services (applied at workload sidecar level)
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: deny-invalid-jwt-staging
-  namespace: kubestock-staging
-spec:
-  action: DENY
-  rules:
-    - from:
-        - source:
-            notRequestPrincipals: ["*"]
-      to:
-        - operation:
-            paths:
-              - "/api/product/*"
-              - "/api/inventory/*"
-              - "/api/supplier/*"
-              - "/api/order/*"
-            notMethods: ["OPTIONS"]
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: deny-invalid-jwt-production
-  namespace: kubestock-production
-spec:
-  action: DENY
-  rules:
-    - from:
-        - source:
-            notRequestPrincipals: ["*"]
-      to:
-        - operation:
-            paths:
-              - "/api/product/*"
-              - "/api/inventory/*"
-              - "/api/supplier/*"
-              - "/api/order/*"
-            notMethods: ["OPTIONS"]
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: allow-identity-public
+  name: require-jwt-staging
   namespace: kubestock-staging
 spec:
   action: ALLOW
   rules:
+    - from:
+        - source:
+            requestPrincipals: ["*"]
     - to:
         - operation:
-            paths: ["/api/identity/*"]
+            methods: ["OPTIONS"]
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: allow-identity-public-production
+  name: require-jwt-production
   namespace: kubestock-production
 spec:
   action: ALLOW
   rules:
+    - from:
+        - source:
+            requestPrincipals: ["*"]
     - to:
         - operation:
-            paths: ["/api/identity/*"]
+            methods: ["OPTIONS"]
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: allow-frontend
+  name: allow-identity-staging
   namespace: kubestock-staging
 spec:
+  selector:
+    matchLabels:
+      app: ms-identity
   action: ALLOW
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-identity-production
+  namespace: kubestock-production
+spec:
+  selector:
+    matchLabels:
+      app: ms-identity
+  action: ALLOW
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-frontend-staging
+  namespace: kubestock-staging
+spec:
   selector:
     matchLabels:
       app: frontend
+  action: ALLOW
   rules:
     - {}
 ---
@@ -84,9 +76,9 @@ metadata:
   name: allow-frontend-production
   namespace: kubestock-production
 spec:
-  action: ALLOW
   selector:
     matchLabels:
       app: frontend
+  action: ALLOW
   rules:
     - {}
