@@ -1,0 +1,22 @@
+# DestinationRule for mTLS enforcement on inter-service communication
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mtls-staging
+  namespace: kubestock-staging
+spec:
+  host: "*.kubestock-staging.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mtls-production
+  namespace: kubestock-production
+spec:
+  host: "*.kubestock-production.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

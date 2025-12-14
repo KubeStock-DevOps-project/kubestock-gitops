@@ -6,3 +6,4 @@ metadata:
   labels:
     environment: staging
     app.kubernetes.io/part-of: kubestock
+    istio-injection: enabled

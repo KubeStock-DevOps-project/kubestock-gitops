@@ -1,13 +1,7 @@
-# =============================================================================
-# ArgoCD Application - Kong API Gateway (Production)
-# =============================================================================
-# Deploys Kong gateway in kong namespace for production traffic
-# Exposed to ALB on NodePort 30080
-# =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kong-production
+  name: istio-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -16,10 +10,10 @@ spec:
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
     targetRevision: main
-    path: overlays/production/kong
+    path: overlays/production/istio
   destination:
     server: https://kubernetes.default.svc
-    namespace: kong
+    namespace: istio-system
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
