@@ -6,3 +6,4 @@ metadata:
   labels:
     environment: production
     app.kubernetes.io/part-of: kubestock
+    istio-injection: enabled

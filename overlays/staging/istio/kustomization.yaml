@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base/istio
+
+patches:
+  - target:
+      kind: VirtualService
+      name: kubestock-routes
+    patch: |-
+      - op: replace
+        path: /spec/http/0/route/0/destination/host
+        value: ms-product.kubestock-staging.svc.cluster.local
+      - op: replace
+        path: /spec/http/1/route/0/destination/host
+        value: ms-inventory.kubestock-staging.svc.cluster.local
+      - op: replace
+        path: /spec/http/2/route/0/destination/host
+        value: ms-supplier.kubestock-staging.svc.cluster.local
+      - op: replace
+        path: /spec/http/3/route/0/destination/host
+        value: ms-order-management.kubestock-staging.svc.cluster.local
+      - op: replace
+        path: /spec/http/4/route/0/destination/host
+        value: ms-identity.kubestock-staging.svc.cluster.local
+      - op: replace
+        path: /spec/http/6/route/0/destination/host
+        value: frontend.kubestock-staging.svc.cluster.local
+
+  - target:
+      kind: PeerAuthentication
+      name: default-mtls
+    patch: |-
+      - op: replace
+        path: /spec/mtls/mode
+        value: PERMISSIVE
