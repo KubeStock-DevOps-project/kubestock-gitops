@@ -9,11 +9,23 @@ spec:
   gateways:
     - kubestock-gateway
   http:
+    # Health endpoint for ALB (must be before service routes)
+    - match:
+        - uri:
+            exact: /api/gateway/health
+      directResponse:
+        status: 200
+        body:
+          string: '{"status":"healthy","gateway":"istio"}'
+
+    # Product Service
     - match:
         - uri:
             prefix: /api/product
       rewrite:
-        uri: /
+        uriRegexRewrite:
+          match: ^/api/product(/.*)?$
+          rewrite: \1
       route:
         - destination:
             host: ms-product.kubestock-production.svc.cluster.local
@@ -37,11 +49,14 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # Inventory Service
     - match:
         - uri:
             prefix: /api/inventory
       rewrite:
-        uri: /
+        uriRegexRewrite:
+          match: ^/api/inventory(/.*)?$
+          rewrite: \1
       route:
         - destination:
             host: ms-inventory.kubestock-production.svc.cluster.local
@@ -65,11 +80,14 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # Supplier Service
     - match:
         - uri:
             prefix: /api/supplier
       rewrite:
-        uri: /
+        uriRegexRewrite:
+          match: ^/api/supplier(/.*)?$
+          rewrite: \1
       route:
         - destination:
             host: ms-supplier.kubestock-production.svc.cluster.local
@@ -93,11 +111,14 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # Order Management Service
     - match:
         - uri:
             prefix: /api/order
       rewrite:
-        uri: /
+        uriRegexRewrite:
+          match: ^/api/order(/.*)?$
+          rewrite: \1
       route:
         - destination:
             host: ms-order-management.kubestock-production.svc.cluster.local
@@ -121,11 +142,14 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # Identity Service
     - match:
         - uri:
             prefix: /api/identity
       rewrite:
-        uri: /
+        uriRegexRewrite:
+          match: ^/api/identity(/.*)?$
+          rewrite: \1
       route:
         - destination:
             host: ms-identity.kubestock-production.svc.cluster.local
@@ -149,14 +173,7 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
-    - match:
-        - uri:
-            exact: /api/gateway/health
-      directResponse:
-        status: 200
-        body:
-          string: '{"status":"healthy","gateway":"istio"}'
-
+    # Frontend (catch-all)
     - match:
         - uri:
             prefix: /
