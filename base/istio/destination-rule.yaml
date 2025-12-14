@@ -6,7 +6,7 @@ metadata:
   name: mtls-kubestock-staging
   namespace: istio-system
 spec:
-  host: "*.kubestock-staging.svc.kubestock"
+  host: "*.kubestock-staging.svc.cluster.local"
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -17,7 +17,7 @@ metadata:
   name: mtls-kubestock-production
   namespace: istio-system
 spec:
-  host: "*.kubestock-production.svc.kubestock"
+  host: "*.kubestock-production.svc.cluster.local"
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -29,7 +29,7 @@ metadata:
   name: mtls-staging
   namespace: kubestock-staging
 spec:
-  host: "*.kubestock-staging.svc.kubestock"
+  host: "*.kubestock-staging.svc.cluster.local"
   exportTo:
     - "."
   trafficPolicy:
@@ -43,7 +43,7 @@ metadata:
   name: mtls-production
   namespace: kubestock-production
 spec:
-  host: "*.kubestock-production.svc.kubestock"
+  host: "*.kubestock-production.svc.cluster.local"
   exportTo:
     - "."
   trafficPolicy:

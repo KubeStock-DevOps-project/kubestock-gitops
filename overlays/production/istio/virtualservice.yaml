@@ -28,7 +28,7 @@ spec:
           rewrite: \1
       route:
         - destination:
-            host: ms-product.kubestock-production.svc.kubestock
+            host: ms-product.kubestock-production.svc.cluster.local
             port:
               number: 3002
       corsPolicy:
@@ -59,7 +59,7 @@ spec:
           rewrite: \1
       route:
         - destination:
-            host: ms-inventory.kubestock-production.svc.kubestock
+            host: ms-inventory.kubestock-production.svc.cluster.local
             port:
               number: 3003
       corsPolicy:
@@ -90,7 +90,7 @@ spec:
           rewrite: \1
       route:
         - destination:
-            host: ms-supplier.kubestock-production.svc.kubestock
+            host: ms-supplier.kubestock-production.svc.cluster.local
             port:
               number: 3004
       corsPolicy:
@@ -121,7 +121,7 @@ spec:
           rewrite: \1
       route:
         - destination:
-            host: ms-order-management.kubestock-production.svc.kubestock
+            host: ms-order-management.kubestock-production.svc.cluster.local
             port:
               number: 3005
       corsPolicy:
@@ -152,7 +152,7 @@ spec:
           rewrite: \1
       route:
         - destination:
-            host: ms-identity.kubestock-production.svc.kubestock
+            host: ms-identity.kubestock-production.svc.cluster.local
             port:
               number: 3006
       corsPolicy:
@@ -179,6 +179,6 @@ spec:
             prefix: /
       route:
         - destination:
-            host: frontend.kubestock-production.svc.kubestock
+            host: frontend.kubestock-production.svc.cluster.local
             port:
               number: 80
