@@ -11,6 +11,7 @@ namespace: kong
 resources:
   - ../../../base/kong/
   - rbac-binding.yaml
+  - peer-authentication.yaml
 
 patches:
   # Replace the Kong ConfigMap with production configuration
