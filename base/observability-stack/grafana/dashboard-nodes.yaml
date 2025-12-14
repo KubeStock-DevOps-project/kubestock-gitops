@@ -731,7 +731,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"$node\"}[5m])))",
+              "expr": "(100 * (1 - avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\",job=\"node-exporter\",instance=~\"$node\"}[5m])))) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}}",
               "refId": "A"
             }
@@ -775,7 +775,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 * container_memory_working_set_bytes{id=\"/\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"} * 3040016 / 3928848)",
+              "expr": "(100 * container_memory_working_set_bytes{id=\"/\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"} * 3040016 / 3928848)) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}}",
               "refId": "A"
             }
@@ -819,12 +819,12 @@ data:
           },
           "targets": [
             {
-              "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\",device!~\"lo|veth.*|docker.*|virbr.*|cali.*|cni.*|flannel.*\",instance=~\"$node\"}[5m])",
+              "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\",device!~\"lo|veth.*|docker.*|virbr.*|cali.*|cni.*|flannel.*\",instance=~\"$node\"}[5m]) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}} RX",
               "refId": "A"
             },
             {
-              "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\",device!~\"lo|veth.*|docker.*|virbr.*|cali.*|cni.*|flannel.*\",instance=~\"$node\"}[5m])",
+              "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\",device!~\"lo|veth.*|docker.*|virbr.*|cali.*|cni.*|flannel.*\",instance=~\"$node\"}[5m]) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}} TX",
               "refId": "B"
             }
@@ -868,12 +868,12 @@ data:
           },
           "targets": [
             {
-              "expr": "rate(node_disk_reads_completed_total{job=\"node-exporter\",device!~\"dm-.*\",instance=~\"$node\"}[5m])",
+              "expr": "rate(node_disk_reads_completed_total{job=\"node-exporter\",device!~\"dm-.*\",instance=~\"$node\"}[5m]) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}} reads",
               "refId": "A"
             },
             {
-              "expr": "rate(node_disk_writes_completed_total{job=\"node-exporter\",device!~\"dm-.*\",instance=~\"$node\"}[5m])",
+              "expr": "rate(node_disk_writes_completed_total{job=\"node-exporter\",device!~\"dm-.*\",instance=~\"$node\"}[5m]) and on(instance) up{job=\"node-exporter\"} == 1",
               "legendFormat": "{{instance}} writes",
               "refId": "B"
             }
@@ -959,15 +959,15 @@ data:
           {
             "current": {"selected": true, "text": "All", "value": "$__all"},
             "datasource": "Prometheus",
-            "definition": "label_values(node_uname_info{job=\"node-exporter\"}, instance)",
+            "definition": "label_values(up{job=\"node-exporter\"} == 1, instance)",
             "hide": 0,
             "includeAll": true,
             "allValue": ".*",
             "multi": true,
             "name": "node",
             "options": [],
-            "query": {"query": "label_values(node_uname_info{job=\"node-exporter\"}, instance)", "refId": "StandardVariableQuery"},
-            "refresh": 1,
+            "query": {"query": "label_values(up{job=\"node-exporter\"} == 1, instance)", "refId": "StandardVariableQuery"},
+            "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
             "sort": 1,
