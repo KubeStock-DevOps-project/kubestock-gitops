@@ -1,0 +1,13 @@
+# =============================================================================
+# Stakater Reloader - Namespace
+# =============================================================================
+# Reloader watches ConfigMaps and Secrets, and triggers rolling updates
+# on Deployments/StatefulSets when they change
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reloader
+  labels:
+    app.kubernetes.io/name: reloader
+    app.kubernetes.io/part-of: kubestock-infrastructure

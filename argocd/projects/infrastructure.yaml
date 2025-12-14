@@ -7,6 +7,7 @@
 # - External-Secrets Operator
 # - Observability Stack
 # - Cluster Autoscaler
+# - Reloader (auto-restart on ConfigMap changes)
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
@@ -37,6 +38,8 @@ spec:
     - namespace: 'test-runner'
       server: https://kubernetes.default.svc
     - namespace: 'cluster-autoscaler'
+      server: https://kubernetes.default.svc
+    - namespace: 'reloader'
       server: https://kubernetes.default.svc
 
   # Cluster-scoped resources allowed (infrastructure needs more permissions)

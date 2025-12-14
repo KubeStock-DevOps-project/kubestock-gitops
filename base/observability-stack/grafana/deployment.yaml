@@ -1,12 +1,19 @@
 # =============================================================================
 # Grafana - Deployment
 # =============================================================================
+# Auto-reload: Uses Stakater Reloader to automatically restart when ConfigMaps
+# change. If Reloader is not installed, manually restart with:
+#   kubectl rollout restart deployment/grafana -n <namespace>
+# =============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
   labels:
     app: grafana
+  annotations:
+    # Stakater Reloader: auto-restart when any mounted ConfigMap changes
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:
