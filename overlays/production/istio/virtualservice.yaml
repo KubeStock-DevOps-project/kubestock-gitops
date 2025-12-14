@@ -9,7 +9,9 @@ spec:
   gateways:
     - kubestock-gateway
   http:
+    # ---------------------------------------------------------
     # Health endpoint for ALB (must be before service routes)
+    # ---------------------------------------------------------
     - match:
         - uri:
             exact: /api/gateway/health
@@ -18,13 +20,16 @@ spec:
         body:
           string: '{"status":"healthy","gateway":"istio"}'
 
+    # ---------------------------------------------------------
     # Product Service
+    # ---------------------------------------------------------
     - match:
         - uri:
             prefix: /api/product
       rewrite:
         uriRegexRewrite:
-          match: ^/api/product/?(.*)$
+          # Matches "/api/product" or "/api/product/..." but NOT "/api/production"
+          match: ^/api/product(?:/|$)(.*)
           rewrite: /$1
       route:
         - destination:
@@ -49,13 +54,15 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # ---------------------------------------------------------
     # Inventory Service
+    # ---------------------------------------------------------
     - match:
         - uri:
             prefix: /api/inventory
       rewrite:
         uriRegexRewrite:
-          match: ^/api/inventory/?(.*)$
+          match: ^/api/inventory(?:/|$)(.*)
           rewrite: /$1
       route:
         - destination:
@@ -80,13 +87,15 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # ---------------------------------------------------------
     # Supplier Service
+    # ---------------------------------------------------------
     - match:
         - uri:
             prefix: /api/supplier
       rewrite:
         uriRegexRewrite:
-          match: ^/api/supplier/?(.*)$
+          match: ^/api/supplier(?:/|$)(.*)
           rewrite: /$1
       route:
         - destination:
@@ -111,13 +120,15 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # ---------------------------------------------------------
     # Order Management Service
+    # ---------------------------------------------------------
     - match:
         - uri:
             prefix: /api/order
       rewrite:
         uriRegexRewrite:
-          match: ^/api/order/?(.*)$
+          match: ^/api/order(?:/|$)(.*)
           rewrite: /$1
       route:
         - destination:
@@ -142,13 +153,15 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # ---------------------------------------------------------
     # Identity Service
+    # ---------------------------------------------------------
     - match:
         - uri:
             prefix: /api/identity
       rewrite:
         uriRegexRewrite:
-          match: ^/api/identity/?(.*)$
+          match: ^/api/identity(?:/|$)(.*)
           rewrite: /$1
       route:
         - destination:
@@ -173,7 +186,9 @@ spec:
         allowCredentials: true
         maxAge: "3600s"
 
+    # ---------------------------------------------------------
     # Frontend (catch-all)
+    # ---------------------------------------------------------
     - match:
         - uri:
             prefix: /
