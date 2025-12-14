@@ -62,16 +62,30 @@ data:
                   return false
                 end
                 
-                local cjson = require("cjson.safe")
-                local payload, err = cjson.decode(payload_json)
-                if not payload then
-                  kong.response.exit(401, { message = "Invalid token payload" })
-                  return false
+                -- Parse JSON using kong.log.inspect or string matching
+                -- cjson is not available in sandbox, so we parse manually
+                local function extract_claim(json_str, claim_name)
+                  local pattern = '"' .. claim_name .. '"%s*:%s*"([^"]*)"'
+                  return json_str:match(pattern)
+                end
+                
+                local function extract_array_claim(json_str, claim_name)
+                  local pattern = '"' .. claim_name .. '"%s*:%s*%[([^%]]*)%]'
+                  local array_content = json_str:match(pattern)
+                  if array_content then
+                    local values = {}
+                    for value in array_content:gmatch('"([^"]*)"') do
+                      table.insert(values, value)
+                    end
+                    return values
+                  end
+                  return nil
                 end
                 
                 -- Check issuer
                 local expected_iss = "https://api.asgardeo.io/t/kubestock/oauth2/token"
-                if payload.iss ~= expected_iss then
+                local iss = extract_claim(payload_json, "iss")
+                if iss ~= expected_iss then
                   kong.response.exit(401, { message = "Invalid token issuer" })
                   return false
                 end
@@ -82,16 +96,21 @@ data:
                   ["6e6DeVI9oNaoYV6SSi7cWjIckMQa"] = true   -- Test Runner Application
                 }
                 
-                local aud = payload.aud
+                -- Try string audience first
+                local aud = extract_claim(payload_json, "aud")
                 local aud_valid = false
                 
-                if type(aud) == "string" then
+                if aud then
                   aud_valid = valid_audiences[aud]
-                elseif type(aud) == "table" then
-                  for _, a in ipairs(aud) do
-                    if valid_audiences[a] then
-                      aud_valid = true
-                      break
+                else
+                  -- Try array audience
+                  local aud_array = extract_array_claim(payload_json, "aud")
+                  if aud_array then
+                    for _, a in ipairs(aud_array) do
+                      if valid_audiences[a] then
+                        aud_valid = true
+                        break
+                      end
                     end
                   end
                 end
