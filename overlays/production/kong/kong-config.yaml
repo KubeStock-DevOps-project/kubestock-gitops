@@ -62,11 +62,17 @@ data:
                   return false
                 end
                 
-                -- Parse JSON using kong.log.inspect or string matching
-                -- cjson is not available in sandbox, so we parse manually
+                -- Parse JSON using string matching
+                -- Note: JSON may have escaped forward slashes (\/)
+                local function unescape_json(str)
+                  if not str then return nil end
+                  return str:gsub("\\/", "/")
+                end
+                
                 local function extract_claim(json_str, claim_name)
                   local pattern = '"' .. claim_name .. '"%s*:%s*"([^"]*)"'
-                  return json_str:match(pattern)
+                  local value = json_str:match(pattern)
+                  return unescape_json(value)
                 end
                 
                 local function extract_array_claim(json_str, claim_name)
@@ -75,7 +81,7 @@ data:
                   if array_content then
                     local values = {}
                     for value in array_content:gmatch('"([^"]*)"') do
-                      table.insert(values, value)
+                      table.insert(values, unescape_json(value))
                     end
                     return values
                   end
