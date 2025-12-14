@@ -127,7 +127,7 @@ data:
             "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
             "textMode": "auto"
           },
-          "targets": [{"expr": "100 * (1 - sum(node_memory_MemAvailable_bytes{job=\"node-exporter\"}) / sum(node_memory_MemTotal_bytes{job=\"node-exporter\"}))", "refId": "A"}],
+          "targets": [{"expr": "100 * sum(container_memory_working_set_bytes{id=\"/\"}) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",unit=\"byte\"})", "refId": "A"}],
           "title": "Cluster Memory Usage",
           "type": "stat"
         },
@@ -247,7 +247,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"node-exporter\",instance=~\"$node\"} / node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"})",
+              "expr": "100 * container_memory_working_set_bytes{id=\"/\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"} * 3040016 / 3928848)",
               "legendFormat": "{{instance}}",
               "refId": "A"
             }
@@ -409,7 +409,7 @@ data:
           },
           "targets": [
             {
-              "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"node-exporter\",instance=~\"$node\"} / node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"})",
+              "expr": "100 * container_memory_working_set_bytes{id=\"/\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"} * 3040016 / 3928848)",
               "legendFormat": "{{instance}}",
               "refId": "A"
             }
@@ -555,7 +555,7 @@ data:
               "refId": "CPU"
             },
             {
-              "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"node-exporter\",instance=~\"$node\"} / node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"})",
+              "expr": "100 * container_memory_working_set_bytes{id=\"/\"} / on(instance) group_left() (node_memory_MemTotal_bytes{job=\"node-exporter\",instance=~\"$node\"} * 3040016 / 3928848)",
               "format": "table",
               "instant": true,
               "legendFormat": "",
