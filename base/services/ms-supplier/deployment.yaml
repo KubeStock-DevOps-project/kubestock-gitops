@@ -61,6 +61,10 @@ spec:
                 secretKeyRef:
                   name: db-secret
                   key: DB_PASSWORD
+            - name: PRODUCT_CATALOG_SERVICE_URL
+              value: http://ms-product:3002
+            - name: INVENTORY_SERVICE_URL
+              value: http://ms-inventory:3003
           resources:
             requests:
               memory: "128Mi"
