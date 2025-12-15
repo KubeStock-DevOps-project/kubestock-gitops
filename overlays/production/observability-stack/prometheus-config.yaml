@@ -53,7 +53,7 @@ data:
             action: keep
             regex: default;kubernetes;https
 
-      # Kubernetes nodes
+      # Kubernetes nodes - via API server proxy (avoids kubelet TLS issues)
       - job_name: 'kubernetes-nodes'
         kubernetes_sd_configs:
           - role: node
@@ -65,6 +65,12 @@ data:
         relabel_configs:
           - action: labelmap
             regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics
 
       # Kubernetes pods with prometheus.io annotations
       - job_name: 'kubernetes-pods'
@@ -93,22 +99,32 @@ data:
             target_label: pod
 
       # KubeStock Microservices - PRODUCTION namespace
+      # Uses endpoints role to get pod IPs, filters out Istio sidecar ports
       - job_name: 'kubestock-services'
         kubernetes_sd_configs:
-          - role: service
+          - role: endpoints
             namespaces:
               names:
                 - kubestock-production
         relabel_configs:
+          # Keep only our microservices
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
-            regex: ms-.+|web
+            regex: ms-.+|web|frontend
+          # Drop Istio sidecar ports (15xxx)
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            action: drop
+            regex: .*-envoy-prom|tcp-.*
+          - source_labels: [__meta_kubernetes_endpoint_port_number]
+            action: drop
+            regex: "15090|15020|15021"
+          # Labels
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
-          - source_labels: [__meta_kubernetes_service_name]
-            target_label: job
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
         metrics_path: '/metrics'
 
       # Kong Gateway - Production
