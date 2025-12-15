@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - rendered.yaml
   - clustersecretstore-aws.yaml
-  - ecr-cluster-generator.yaml
+  - ecr-generator-central.yaml
+  - ecr-credentials-rbac.yaml
