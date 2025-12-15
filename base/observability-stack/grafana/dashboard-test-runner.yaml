@@ -145,7 +145,196 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 8},
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 8},
+          "id": 10,
+          "options": {
+            "showHeader": true,
+            "sortBy": [{"displayName": "Service", "desc": false}]
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Service:\" |= \"PASSED\" | regexp \"(?P<status>✅|❌) (?P<service>\\\\w+) Service: (?P<http_status>\\\\d+) - (?P<result>PASSED|FAILED)\" | line_format \"{{.service}} | Status: {{.http_status}} | {{.result}}\"",
+              "refId": "A",
+              "legendFormat": "{{service}}"
+            }
+          ],
+          "title": "Microservices Health Status (Last Test)",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Time": "Last Checked",
+                  "Line": "Service Status"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 4, "x": 0, "y": 18},
+          "id": 11,
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway Service:\" | regexp \"Gateway Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Gateway",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 4, "x": 4, "y": 18},
+          "id": 12,
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" | regexp \"Product Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Product Service",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 4, "x": 8, "y": 18},
+          "id": 13,
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" | regexp \"Inventory Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Inventory Service",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 4, "x": 12, "y": 18},
+          "id": 14,
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" | regexp \"Supplier Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Supplier Service",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 4, "x": 16, "y": 18},
+          "id": 15,
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" | regexp \"Order Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Order Service",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 6, "w": 4, "x": 20, "y": 18},
+          "id": 16,
+          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" | regexp \"Identity Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Identity Service",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 24},
           "id": 8,
           "options": {
             "showHeader": true,
@@ -177,7 +366,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 20},
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 36},
           "id": 9,
           "options": {
             "dedupStrategy": "none",
@@ -201,7 +390,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 30},
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 46},
           "id": 4,
           "options": {
             "dedupStrategy": "none",
@@ -225,7 +414,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 42},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 58},
           "id": 5,
           "options": {
             "dedupStrategy": "none",
@@ -249,7 +438,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 42},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 58},
           "id": 6,
           "options": {
             "dedupStrategy": "none",
