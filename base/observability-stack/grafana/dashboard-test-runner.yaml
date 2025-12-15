@@ -8,7 +8,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-dashboard-test-runner
-  namespace: observability
+  namespace: observability-production
   labels:
     app: grafana
     grafana_dashboard: "1"
@@ -44,13 +44,13 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code 0\" [1h]))",
+              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code 0\" [1h]))",
               "legendFormat": "Passed",
               "refId": "A"
             },
             {
               "datasource": "Loki",
-              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code\" |!= \"code 0\" [1h]))",
+              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code\" != \"code 0\" [1h]))",
               "legendFormat": "Failed",
               "refId": "B"
             }
@@ -83,13 +83,13 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
+              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
               "legendFormat": "Passed",
               "refId": "A"
             },
             {
               "datasource": "Loki",
-              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code\" |!= \"code 0\" [24h]))",
+              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code\" != \"code 0\" [24h]))",
               "legendFormat": "Failed",
               "refId": "B"
             }
@@ -113,7 +113,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
+              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
               "refId": "A"
             }
           ],
@@ -136,7 +136,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "sum(count_over_time({app=\"test-runner\"} |= \"completed with code\" |!= \"code 0\" [24h]))",
+              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code\" != \"code 0\" [24h]))",
               "refId": "A"
             }
           ],
@@ -146,6 +146,62 @@ data:
         {
           "datasource": "Loki",
           "gridPos": {"h": 12, "w": 24, "x": 0, "y": 8},
+          "id": 8,
+          "options": {
+            "showHeader": true,
+            "sortBy": [{"displayName": "Time", "desc": true}]
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test\" |= \"completed\" | regexp \"Test (?P<test_id>\\\\d+) completed with code (?P<exit_code>\\\\d+)\" | line_format \"{{.test_id}} | Exit Code: {{.exit_code}} | Status: {{ if eq .exit_code \\\"0\\\" }}✅ PASSED{{ else }}❌ FAILED{{ end }}\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Test Execution History",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Time": "Execution Time",
+                  "Line": "Result"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 20},
+          "id": 9,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Starting Test:\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Test Start Events (Full Details)",
+          "type": "logs"
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 30},
           "id": 4,
           "options": {
             "dedupStrategy": "none",
@@ -160,16 +216,16 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{app=\"test-runner\"}",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"}",
               "refId": "A"
             }
           ],
-          "title": "Test Runner Logs",
+          "title": "All Test Runner Logs",
           "type": "logs"
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 42},
           "id": 5,
           "options": {
             "dedupStrategy": "none",
@@ -184,16 +240,16 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{app=\"test-runner\"} |= \"Test\" |= \"completed\"",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test\" |= \"completed\"",
               "refId": "A"
             }
           ],
-          "title": "Completed Tests",
+          "title": "Completed Tests (Summary)",
           "type": "logs"
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 42},
           "id": 6,
           "options": {
             "dedupStrategy": "none",
@@ -208,7 +264,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{app=\"test-runner\"} |= \"Access Token\"",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Requesting user access token\"",
               "refId": "A"
             }
           ],
