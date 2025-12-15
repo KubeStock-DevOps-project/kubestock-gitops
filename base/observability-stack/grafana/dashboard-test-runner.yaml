@@ -1,8 +1,8 @@
 # =============================================================================
-# Grafana Dashboard - k6 Test Results & Metrics
+# Grafana Dashboard - k6 Test Results & Microservice Health Monitoring
 # =============================================================================
-# Monitors test-runner k6 test executions via Loki logs and Prometheus metrics
-# Shows test execution history, response times, success rates, and virtual users
+# Simplified, efficient dashboard showing real-time service status and test history
+# Optimized queries to prevent "too many outstanding requests" errors
 # =============================================================================
 apiVersion: v1
 kind: ConfigMap
@@ -15,9 +15,7 @@ metadata:
 data:
   test-runner.json: |
     {
-      "annotations": {
-        "list": []
-      },
+      "annotations": {"list": []},
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
@@ -26,165 +24,14 @@ data:
       "panels": [
         {
           "datasource": "Loki",
-          "fieldConfig": {
-            "defaults": {
-              "color": {"mode": "palette-classic"},
-              "custom": {"axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 50, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "auto", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}},
-              "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
-            },
-            "overrides": [
-              {"matcher": {"id": "byName", "options": "Passed"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]},
-              {"matcher": {"id": "byName", "options": "Failed"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]}
-            ]
-          },
-          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
-          "id": 1,
-          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code 0\" [1h]))",
-              "legendFormat": "Passed",
-              "refId": "A"
-            },
-            {
-              "datasource": "Loki",
-              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code\" != \"code 0\" [1h]))",
-              "legendFormat": "Failed",
-              "refId": "B"
-            }
-          ],
-          "title": "Test Results (Last Hour)",
-          "type": "timeseries"
-        },
-        {
-          "datasource": "Loki",
-          "fieldConfig": {
-            "defaults": {
-              "color": {"mode": "palette-classic"},
-              "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
-            },
-            "overrides": [
-              {"matcher": {"id": "byName", "options": "Passed"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]},
-              {"matcher": {"id": "byName", "options": "Failed"}, "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]}
-            ]
-          },
-          "gridPos": {"h": 8, "w": 4, "x": 8, "y": 0},
-          "id": 7,
+          "gridPos": {"h": 3, "w": 24, "x": 0, "y": 0},
+          "id": 20,
           "options": {
-            "displayLabels": ["name", "percent"],
-            "legend": {"displayMode": "list", "placement": "bottom", "values": []},
-            "pieType": "pie",
-            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
-            "tooltip": {"mode": "single"}
+            "content": "# KubeStock Microservices Health Dashboard\n\n**Real-time monitoring** of all 6 microservices via k6 smoke tests. Each card shows the latest status from the most recent test run.",
+            "mode": "markdown"
           },
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
-              "legendFormat": "Passed",
-              "refId": "A"
-            },
-            {
-              "datasource": "Loki",
-              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code\" != \"code 0\" [24h]))",
-              "legendFormat": "Failed",
-              "refId": "B"
-            }
-          ],
-          "title": "Pass/Fail Ratio",
-          "type": "piechart"
-        },
-        {
-          "datasource": "Loki",
-          "fieldConfig": {
-            "defaults": {
-              "color": {"mode": "thresholds"},
-              "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
-          "id": 2,
-          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code 0\" [24h]))",
-              "refId": "A"
-            }
-          ],
-          "title": "Passed Tests (24h)",
-          "type": "stat"
-        },
-        {
-          "datasource": "Loki",
-          "fieldConfig": {
-            "defaults": {
-              "color": {"mode": "thresholds"},
-              "mappings": [],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
-          "id": 3,
-          "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "sum(count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code\" != \"code 0\" [24h]))",
-              "refId": "A"
-            }
-          ],
-          "title": "Failed Tests (24h)",
-          "type": "stat"
-        },
-        {
-          "datasource": "Loki",
-          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 8},
-          "id": 10,
-          "options": {
-            "showHeader": true,
-            "sortBy": [{"displayName": "Test Time", "desc": true}]
-          },
-          "pluginVersion": "9.0.0",
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Service:\" |~ \"(Gateway|Product Service|Inventory Service|Supplier Service|Order Service|Identity Service): \\\\d+ - (PASSED|FAILED)\"",
-              "refId": "A"
-            }
-          ],
-          "title": "Microservices Health Status (All Tests)",
-          "type": "table",
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "id": true,
-                  "labels": true,
-                  "tsNs": true,
-                  "emoji": true,
-                  "service": true,
-                  "http_status": true,
-                  "result": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Line": 1
-                },
-                "renameByName": {
-                  "Time": "Test Time",
-                  "Line": "Service Status"
-                }
-              }
-            }
-          ]
+          "type": "text",
+          "transparent": true
         },
         {
           "datasource": "Loki",
@@ -192,23 +39,24 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
-                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
+                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
+                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 6, "w": 4, "x": 0, "y": 18},
-          "id": 11,
-          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway: \" |~ \"Gateway: \\\\d+ - (?P<status>PASSED|FAILED)\"",
-              "refId": "A"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
-          ],
+          },
+          "gridPos": {"h": 5, "w": 4, "x": 0, "y": 3},
+          "id": 11,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
+            "textMode": "value"
+          },
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
           "title": "Gateway",
           "type": "stat"
         },
@@ -218,23 +66,24 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
-                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
+                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
+                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 6, "w": 4, "x": 4, "y": 18},
-          "id": 12,
-          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service: \" |~ \"Product Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
-              "refId": "A"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
-          ],
+          },
+          "gridPos": {"h": 5, "w": 4, "x": 4, "y": 3},
+          "id": 12,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
+            "textMode": "value"
+          },
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
           "title": "Product Service",
           "type": "stat"
         },
@@ -244,23 +93,24 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
-                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
+                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
+                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 6, "w": 4, "x": 8, "y": 18},
-          "id": 13,
-          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service: \" |~ \"Inventory Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
-              "refId": "A"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
-          ],
+          },
+          "gridPos": {"h": 5, "w": 4, "x": 8, "y": 3},
+          "id": 13,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
+            "textMode": "value"
+          },
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
           "title": "Inventory Service",
           "type": "stat"
         },
@@ -270,23 +120,24 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
-                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
+                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
+                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 6, "w": 4, "x": 12, "y": 18},
-          "id": 14,
-          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service: \" |~ \"Supplier Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
-              "refId": "A"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
-          ],
+          },
+          "gridPos": {"h": 5, "w": 4, "x": 12, "y": 3},
+          "id": 14,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
+            "textMode": "value"
+          },
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
           "title": "Supplier Service",
           "type": "stat"
         },
@@ -296,23 +147,24 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
-                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
+                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
+                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 6, "w": 4, "x": 16, "y": 18},
-          "id": 15,
-          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service: \" |~ \"Order Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
-              "refId": "A"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
-          ],
+          },
+          "gridPos": {"h": 5, "w": 4, "x": 16, "y": 3},
+          "id": 15,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
+            "textMode": "value"
+          },
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
           "title": "Order Service",
           "type": "stat"
         },
@@ -322,35 +174,119 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"PASSED": {"color": "green", "index": 0, "text": "✅ UP"}}, "type": "value"},
-                {"options": {"FAILED": {"color": "red", "index": 1, "text": "❌ DOWN"}}, "type": "value"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
+                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
+                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
               ],
-              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}
-            },
-            "overrides": []
-          },
-          "gridPos": {"h": 6, "w": 4, "x": 20, "y": 18},
-          "id": 16,
-          "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service: \" |~ \"Identity Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
-              "refId": "A"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
-          ],
+          },
+          "gridPos": {"h": 5, "w": 4, "x": 20, "y": 3},
+          "id": 16,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
+            "textMode": "value"
+          },
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
           "title": "Identity Service",
           "type": "stat"
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 24},
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 8},
+          "id": 10,
+          "options": {
+            "showHeader": true,
+            "sortBy": [{"displayName": "Time", "desc": true}]
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Service:\" |= \" - \"",
+              "refId": "A"
+            }
+          ],
+          "title": "Service Status Logs (Latest Results)",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {"id": true, "labels": true, "tsNs": true},
+                "indexByName": {"Time": 0, "Line": 1},
+                "renameByName": {"Time": "Timestamp", "Line": "Status"}
+              }
+            }
+          ]
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 20},
           "id": 8,
           "options": {
             "showHeader": true,
             "sortBy": [{"displayName": "Time", "desc": true}]
           },
-          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test Summary:\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Test Execution History (Summary)",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {"id": true, "labels": true, "tsNs": true},
+                "indexByName": {"Time": 0, "Line": 1},
+                "renameByName": {"Time": "Test Time", "Line": "Result"}
+              }
+            }
+          ]
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 10, "w": 12, "x": 0, "y": 30},
+          "id": 21,
+          "options": {
+            "showHeader": true,
+            "sortBy": [{"displayName": "Time", "desc": true}]
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Starting Test:\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Test Executions (Triggered)",
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {"id": true, "labels": true, "tsNs": true},
+                "indexByName": {"Time": 0, "Line": 1},
+                "renameByName": {"Time": "Start Time", "Line": "Test Details"}
+              }
+            }
+          ]
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 10, "w": 12, "x": 12, "y": 30},
+          "id": 22,
+          "options": {
+            "showHeader": true,
+            "sortBy": [{"displayName": "Time", "desc": true}]
+          },
           "targets": [
             {
               "datasource": "Loki",
@@ -358,33 +294,23 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Test Execution History",
+          "title": "Test Completions (Exit Codes)",
           "type": "table",
           "transformations": [
             {
               "id": "organize",
               "options": {
-                "excludeByName": {
-                  "id": true,
-                  "labels": true,
-                  "tsNs": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Line": 1
-                },
-                "renameByName": {
-                  "Time": "Execution Time",
-                  "Line": "Result"
-                }
+                "excludeByName": {"id": true, "labels": true, "tsNs": true},
+                "indexByName": {"Time": 0, "Line": 1},
+                "renameByName": {"Time": "End Time", "Line": "Exit Status"}
               }
             }
           ]
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 36},
-          "id": 9,
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 40},
+          "id": 4,
           "options": {
             "dedupStrategy": "none",
             "enableLogDetails": true,
@@ -398,95 +324,23 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Starting Test:\"",
-              "refId": "A"
-            }
-          ],
-          "title": "Test Start Events (Full Details)",
-          "type": "logs"
-        },
-        {
-          "datasource": "Loki",
-          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 46},
-          "id": 4,
-          "options": {
-            "dedupStrategy": "none",
-            "enableLogDetails": true,
-            "prettifyLogMessage": false,
-            "showCommonLabels": false,
-            "showLabels": false,
-            "showTime": true,
-            "sortOrder": "Descending",
-            "wrapLogMessage": false
-          },
-          "targets": [
-            {
-              "datasource": "Loki",
               "expr": "{namespace=\"test-runner\", app=\"test-runner\"}",
               "refId": "A"
             }
           ],
-          "title": "All Test Runner Logs",
-          "type": "logs"
-        },
-        {
-          "datasource": "Loki",
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 58},
-          "id": 5,
-          "options": {
-            "dedupStrategy": "none",
-            "enableLogDetails": true,
-            "prettifyLogMessage": false,
-            "showCommonLabels": false,
-            "showLabels": false,
-            "showTime": true,
-            "sortOrder": "Descending",
-            "wrapLogMessage": false
-          },
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test\" |= \"completed\"",
-              "refId": "A"
-            }
-          ],
-          "title": "Completed Tests (Summary)",
-          "type": "logs"
-        },
-        {
-          "datasource": "Loki",
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 58},
-          "id": 6,
-          "options": {
-            "dedupStrategy": "none",
-            "enableLogDetails": true,
-            "prettifyLogMessage": false,
-            "showCommonLabels": false,
-            "showLabels": false,
-            "showTime": true,
-            "sortOrder": "Descending",
-            "wrapLogMessage": false
-          },
-          "targets": [
-            {
-              "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Requesting user access token\"",
-              "refId": "A"
-            }
-          ],
-          "title": "Authentication Events",
+          "title": "All Test Runner Logs (Full Details)",
           "type": "logs"
         }
       ],
-      "refresh": "30s",
+      "refresh": "10s",
       "schemaVersion": 30,
       "style": "dark",
-      "tags": ["test-runner", "k6", "smoke-tests"],
+      "tags": ["test-runner", "k6", "microservices", "health"],
       "templating": {"list": []},
       "time": {"from": "now-6h", "to": "now"},
       "timepicker": {},
       "timezone": "browser",
       "title": "5 - Tests",
       "uid": "test-runner-k6",
-      "version": 1
+      "version": 2
     }
