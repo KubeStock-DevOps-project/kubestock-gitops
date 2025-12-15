@@ -155,7 +155,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Service:\" | regexp `(Gateway|Product Service|Inventory Service|Supplier Service|Order Service|Identity Service): (\\\\d+) - (PASSED|FAILED)` | line_format \"{{ regexReplaceAll \\\".*msg=\\\\\\\"([^\\\\\\\"]+)\\\\\\\".*\\\" . \\\"$1\\\" }}\"",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Service:\" |~ \"(Gateway|Product Service|Inventory Service|Supplier Service|Order Service|Identity Service): \\\\d+ - (PASSED|FAILED)\"",
               "refId": "A"
             }
           ],
@@ -354,7 +354,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test\" |= \"completed\" | regexp \"Test (?P<test_id>\\\\d+) completed with code (?P<exit_code>\\\\d+)\" | line_format \"{{.test_id}} | Exit Code: {{.exit_code}} | Status: {{ if eq .exit_code \\\"0\\\" }}✅ PASSED{{ else }}❌ FAILED{{ end }}\"",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"completed with code\"",
               "refId": "A"
             }
           ],
@@ -364,8 +364,15 @@ data:
             {
               "id": "organize",
               "options": {
-                "excludeByName": {},
-                "indexByName": {},
+                "excludeByName": {
+                  "id": true,
+                  "labels": true,
+                  "tsNs": true
+                },
+                "indexByName": {
+                  "Time": 0,
+                  "Line": 1
+                },
                 "renameByName": {
                   "Time": "Execution Time",
                   "Line": "Result"
