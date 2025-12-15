@@ -102,10 +102,10 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: ms-.+|web
-          # Only scrape service ports, not Istio sidecar ports
+          # Drop Istio sidecar port 15090
           - source_labels: [__meta_kubernetes_endpoint_port_number]
-            action: keep
-            regex: (3002|3003|3004|3005|3006|3001|8080)
+            action: drop
+            regex: "15090"
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
