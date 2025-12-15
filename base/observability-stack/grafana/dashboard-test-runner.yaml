@@ -155,7 +155,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Service:\" | regexp `msg=\"(?P<emoji>✅|❌) (?P<service>Gateway|Product Service|Inventory Service|Supplier Service|Order Service|Identity Service): (?P<http_status>\\\\d+) - (?P<result>PASSED|FAILED)\"` | line_format \"{{.service}} | HTTP {{.http_status}} | {{.result}} {{.emoji}}\"",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Service:\" | regexp `(Gateway|Product Service|Inventory Service|Supplier Service|Order Service|Identity Service): (\\\\d+) - (PASSED|FAILED)` | line_format \"{{ regexReplaceAll \\\".*msg=\\\\\\\"([^\\\\\\\"]+)\\\\\\\".*\\\" . \\\"$1\\\" }}\"",
               "refId": "A"
             }
           ],
@@ -205,7 +205,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" | regexp `msg=\"[✅❌] Gateway: \\\\d+ - (?P<status>PASSED|FAILED)\"`",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway: \" |~ \"Gateway: \\\\d+ - (?P<status>PASSED|FAILED)\"",
               "refId": "A"
             }
           ],
@@ -231,7 +231,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" | regexp `msg=\"[✅❌] Product Service: \\\\d+ - (?P<status>PASSED|FAILED)\"`",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service: \" |~ \"Product Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
               "refId": "A"
             }
           ],
@@ -257,7 +257,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" | regexp `msg=\"[✅❌] Inventory Service: \\\\d+ - (?P<status>PASSED|FAILED)\"`",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service: \" |~ \"Inventory Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
               "refId": "A"
             }
           ],
@@ -283,7 +283,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" | regexp `msg=\"[✅❌] Supplier Service: \\\\d+ - (?P<status>PASSED|FAILED)\"`",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service: \" |~ \"Supplier Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
               "refId": "A"
             }
           ],
@@ -309,7 +309,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" | regexp `msg=\"[✅❌] Order Service: \\\\d+ - (?P<status>PASSED|FAILED)\"`",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service: \" |~ \"Order Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
               "refId": "A"
             }
           ],
@@ -335,7 +335,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" | regexp `msg=\"[✅❌] Identity Service: \\\\d+ - (?P<status>PASSED|FAILED)\"`",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service: \" |~ \"Identity Service: \\\\d+ - (?P<status>PASSED|FAILED)\"",
               "refId": "A"
             }
           ],
