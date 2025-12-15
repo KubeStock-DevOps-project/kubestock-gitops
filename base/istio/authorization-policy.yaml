@@ -48,7 +48,6 @@ spec:
             principals: ["cluster.local/ns/kong/sa/*"]
 ---
 # Deny requests without valid JWT from external sources - Staging
-# NOTE: This rule only applies to traffic NOT coming from within the mesh
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -62,9 +61,9 @@ spec:
   rules:
     - from:
         - source:
-            # Deny if no JWT principal AND traffic is not from trusted namespaces
+            # Deny if no JWT principal AND no mTLS principal (external traffic)
             notRequestPrincipals: ["*"]
-            notNamespaces: ["kubestock-staging", "kong", "istio-system"]
+            notPrincipals: ["cluster.local/ns/kubestock-staging/sa/*", "cluster.local/ns/kong/sa/*"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
@@ -84,9 +83,9 @@ spec:
   rules:
     - from:
         - source:
-            # Deny if no JWT principal AND traffic is not from trusted namespaces
+            # Deny if no JWT principal AND no mTLS principal (external traffic)
             notRequestPrincipals: ["*"]
-            notNamespaces: ["kubestock-production", "kong", "istio-system"]
+            notPrincipals: ["cluster.local/ns/kubestock-production/sa/*", "cluster.local/ns/kong/sa/*"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
