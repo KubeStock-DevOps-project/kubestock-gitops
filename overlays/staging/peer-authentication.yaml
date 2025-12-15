@@ -31,3 +31,19 @@ spec:
     # ms-identity
     "3006":
       mode: PERMISSIVE
+---
+# Allow Prometheus to scrape ms-identity (doesn't have require-jwt label)
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: allow-metrics-identity
+  namespace: kubestock-staging
+spec:
+  selector:
+    matchLabels:
+      app: ms-identity
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "3006":
+      mode: PERMISSIVE
