@@ -56,7 +56,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", level=\"info\"} |= \"Gateway:\" | regexp \"Gateway: \\\\d+ - (?P<status>PASSED|FAILED)\"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Gateway:\" |= \"PASSED\" | line_format \"PASSED\"", "refId": "A"}, {"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Gateway:\" |= \"FAILED\" | line_format \"FAILED\"", "refId": "B"}],
           "title": "Gateway",
           "type": "stat"
         },
@@ -83,7 +83,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", level=\"info\"} |= \"Product Service:\" | regexp \"Product Service: \\\\d+ - (?P<status>PASSED|FAILED)\"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Product Service:\" |= \"PASSED\" | line_format \"PASSED\"", "refId": "A"}, {"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Product Service:\" |= \"FAILED\" | line_format \"FAILED\"", "refId": "B"}],
           "title": "Product Service",
           "type": "stat"
         },
@@ -110,7 +110,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", level=\"info\"} |= \"Inventory Service:\" | regexp \"Inventory Service: \\\\d+ - (?P<status>PASSED|FAILED)\"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Inventory Service:\" |= \"PASSED\" | line_format \"PASSED\"", "refId": "A"}, {"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Inventory Service:\" |= \"FAILED\" | line_format \"FAILED\"", "refId": "B"}],
           "title": "Inventory Service",
           "type": "stat"
         },
@@ -137,7 +137,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", level=\"info\"} |= \"Supplier Service:\" | regexp \"Supplier Service: \\\\d+ - (?P<status>PASSED|FAILED)\"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Supplier Service:\" |= \"PASSED\" | line_format \"PASSED\"", "refId": "A"}, {"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Supplier Service:\" |= \"FAILED\" | line_format \"FAILED\"", "refId": "B"}],
           "title": "Supplier Service",
           "type": "stat"
         },
@@ -164,7 +164,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", level=\"info\"} |= \"Order Service:\" | regexp \"Order Service: \\\\d+ - (?P<status>PASSED|FAILED)\"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Order Service:\" |= \"PASSED\" | line_format \"PASSED\"", "refId": "A"}, {"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Order Service:\" |= \"FAILED\" | line_format \"FAILED\"", "refId": "B"}],
           "title": "Order Service",
           "type": "stat"
         },
@@ -191,7 +191,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", level=\"info\"} |= \"Identity Service:\" | regexp \"Identity Service: \\\\d+ - (?P<status>PASSED|FAILED)\"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Identity Service:\" |= \"PASSED\" | line_format \"PASSED\"", "refId": "A"}, {"datasource": "Loki", "expr": "{namespace=\"test-runner\"} |= \"Identity Service:\" |= \"FAILED\" | line_format \"FAILED\"", "refId": "B"}],
           "title": "Identity Service",
           "type": "stat"
         },
@@ -218,7 +218,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "count_over_time({namespace=\"test-runner\", level=\"info\"} |= \"PASSED\" [5m])",
+              "expr": "count_over_time({namespace=\"test-runner\"} |= \"PASSED\" [5m])",
               "refId": "A"
             }
           ],
@@ -248,7 +248,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "count_over_time({namespace=\"test-runner\", level=\"info\"} |= \"FAILED\" [5m])",
+              "expr": "count_over_time({namespace=\"test-runner\"} |= \"FAILED\" [5m])",
               "refId": "A"
             }
           ],
@@ -280,7 +280,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "count_over_time({namespace=\"test-runner\", level=\"info\"} |= \"Test Summary:\" [1h])",
+              "expr": "count_over_time({namespace=\"test-runner\"} |= \"Test Summary:\" [1h])",
               "refId": "A"
             }
           ],
@@ -313,9 +313,13 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", level=\"info\"} |= \"Test Summary:\" | regexp \"Test Summary: .* (?P<result>ALL PASSED|SOME FAILED)\"",
-              "refId": "A",
-              "maxLines": 1
+              "expr": "{namespace=\"test-runner\"} |= \"Test Summary:\" |= \"ALL PASSED\" | line_format \"ALL PASSED\"",
+              "refId": "A"
+            },
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\"} |= \"Test Summary:\" |= \"SOME FAILED\" | line_format \"SOME FAILED\"",
+              "refId": "B"
             }
           ],
           "title": "Latest Test Result",
