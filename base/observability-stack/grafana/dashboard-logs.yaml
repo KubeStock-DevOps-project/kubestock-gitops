@@ -123,7 +123,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "sum(count_over_time({namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"} |~ \"$search\" [$__interval])) by (level)",
+              "expr": "sum(count_over_time({namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"} |~ \"$search\" !~ \"GET /health\" !~ \"GET /metrics\" !~ \"kube-probe\" !~ \"Prometheus/\" [$__interval])) by (level)",
               "refId": "A"
             }
           ],
@@ -152,7 +152,7 @@ data:
           "pluginVersion": "10.2.3",
           "targets": [
             {
-              "expr": "{namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"} |~ \"$search\"",
+              "expr": "{namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"} |~ \"$search\" !~ \"GET /health\" !~ \"GET /metrics\" !~ \"kube-probe\" !~ \"Prometheus/\"",
               "refId": "A"
             }
           ],
