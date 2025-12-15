@@ -110,10 +110,10 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: ms-.+|web|frontend
-          # Keep only specific application ports (3002-3006)
-          - source_labels: [__meta_kubernetes_endpoint_port_number]
+          # Keep only specific application ports (3002-3006) using port name
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
             action: keep
-            regex: "300[2-6]"
+            regex: http
           # Labels
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
