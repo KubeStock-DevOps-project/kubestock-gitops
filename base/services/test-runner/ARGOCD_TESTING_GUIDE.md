@@ -21,9 +21,7 @@ After ArgoCD syncs an application, it automatically triggers:
 - **Smoke Tests**: Quick health checks through Kong Gateway
 - **Load Tests**: Performance testing hitting services directly
 
-#### Production Environment
-- **Smoke Tests**: Conservative health checks
-- **Load Tests**: Reduced load profile for safety
+**Note:** Production environment does not use automated PostSync testing to avoid potential disruption.
 
 ### Hook Configuration
 Hooks are deployed as Kubernetes Jobs with annotations:
