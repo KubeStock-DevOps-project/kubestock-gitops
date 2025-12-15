@@ -1,7 +1,8 @@
 # =============================================================================
-# ArgoCD PostSync Hook - Staging Smoke Tests
+# ArgoCD PostSync Hook - Smoke Tests
 # =============================================================================
 # Automatically runs smoke tests after ArgoCD syncs staging environment
+# Production testing removed - only staging environment uses automated tests
 # =============================================================================
 apiVersion: batch/v1
 kind: Job
