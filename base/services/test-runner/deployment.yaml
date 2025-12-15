@@ -30,7 +30,7 @@ spec:
         - name: ecr-cred
       containers:
         - name: test-runner
-          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/test-runner:415bf52
+          image: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/test-runner:f607ab6
           imagePullPolicy: Always
           ports:
             - containerPort: 3007
