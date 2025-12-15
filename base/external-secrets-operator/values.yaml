@@ -1,0 +1,68 @@
+# =============================================================================
+# External Secrets Operator - Helm Values
+# =============================================================================
+# These values are used by the ArgoCD Application to configure the Helm chart.
+# Chart: external-secrets/external-secrets
+# Repo: https://charts.external-secrets.io
+# =============================================================================
+
+# Install CRDs with the chart
+installCRDs: true
+
+# Replicas for high availability
+replicaCount: 1
+
+# Resource limits
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Webhook configuration
+webhook:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
+# Cert controller configuration
+certController:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
+# Service account - no IRSA annotations needed as we use static credentials
+serviceAccount:
+  create: true
+  name: external-secrets
+
+# Metrics for Prometheus
+metrics:
+  service:
+    enabled: true
+    port: 8080
+
+# Pod security
+podSecurityContext:
+  runAsNonRoot: true
+
+# Node selector (optional)
+# nodeSelector: {}
+
+# Tolerations (optional)
+# tolerations: []
+
+# Affinity (optional)
+# affinity: {}

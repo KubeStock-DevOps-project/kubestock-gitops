@@ -1,0 +1,21 @@
+# =============================================================================
+# External Secrets Operator - Helm Chart (Kustomization wrapper)
+# =============================================================================
+# This directory contains documentation and templates for External Secrets.
+# The actual Helm chart is deployed via ArgoCD Application with Helm source.
+#
+# NOTE: The AWS credentials secret is created by bootstrap.sh during cluster
+# initialization. It is NOT managed by this kustomization to avoid storing
+# credentials in git.
+#
+# See: aws-credentials-secret.yaml (template/documentation only)
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: external-secrets
+
+resources:
+  - namespace.yaml
+  # NOTE: aws-credentials-secret.yaml is a TEMPLATE only
+  # The actual secret is created by bootstrap.sh

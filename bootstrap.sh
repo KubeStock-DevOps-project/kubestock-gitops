@@ -52,8 +52,20 @@ kubectl create secret generic aws-external-secrets-creds \
   --namespace=external-secrets
 echo "✓ Bootstrap secret created"
 
-# Step 3: Apply ArgoCD Apps
+# Step 3: Apply ArgoCD Apps (in dependency order)
 echo -e "\n[3/4] Applying ArgoCD applications..."
+
+# First: External Secrets Operator (Helm) - installs CRDs and operator
+echo "  → Applying External Secrets Operator..."
+kubectl apply -f "$SCRIPT_DIR/apps/external-secrets-operator.yaml"
+
+# Wait for operator to be ready before applying config that uses CRDs
+echo "  → Waiting for External Secrets CRDs..."
+sleep 15
+kubectl wait --for=condition=Established crd/clustersecretstores.external-secrets.io --timeout=120s 2>/dev/null || echo "  (CRDs may still be syncing...)"
+
+# Second: External Secrets Config (ClusterSecretStore, ECR generators)
+echo "  → Applying External Secrets Config..."
 kubectl apply -f "$SCRIPT_DIR/apps/external-secrets.yaml"
 kubectl apply -f "$SCRIPT_DIR/apps/shared-rbac.yaml"
 sleep 5
