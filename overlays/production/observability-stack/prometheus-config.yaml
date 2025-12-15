@@ -106,10 +106,10 @@ data:
               names:
                 - kubestock-production
         relabel_configs:
-          # Keep only our microservices
+          # Keep only our microservices (exclude frontend - no metrics endpoint)
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
-            regex: ms-.+|web|frontend
+            regex: ms-.+
           # Keep only specific application ports (3002-3006) using port name
           - source_labels: [__meta_kubernetes_endpoint_port_name]
             action: keep
