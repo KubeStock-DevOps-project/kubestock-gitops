@@ -102,15 +102,13 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: ms-.+|web
-          - source_labels: [__meta_kubernetes_endpoint_port_name]
-            action: keep
-            regex: http
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
+        metrics_path: '/metrics'
 
       # Kong Gateway - Production
       - job_name: 'kong-gateway'
@@ -172,7 +170,7 @@ data:
     groups:
       - name: kubestock-alerts
         rules:
-          # Service Availability
+          # Service metrics endpoint down - PRIMARY ALERT for demo
           - alert: ServiceDown
             expr: up{job="kubestock-services"} == 0
             for: 1m
@@ -183,14 +181,14 @@ data:
               description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been down for more than 1 minute. Pod: {{ $labels.pod }}"
           
           # Deployment has no ready replicas
-          - alert: DeploymentNoReplicas
+          - alert: DeploymentDown
             expr: kube_deployment_status_replicas_available{namespace="kubestock-production"} == 0 and kube_deployment_spec_replicas{namespace="kubestock-production"} > 0
-            for: 3m
+            for: 1m
             labels:
-              severity: warning
+              severity: critical
             annotations:
-              summary: "Deployment {{ $labels.deployment }} has no available replicas"
-              description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has no available replicas but expects {{ $value }} replicas."
+              summary: "Deployment {{ $labels.deployment }} has no replicas"
+              description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has no available replicas."
 
           - alert: HighErrorRate
             expr: |
