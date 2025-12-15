@@ -102,16 +102,16 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: ms-.+|web
-          # Drop Istio sidecar port 15090
-          - source_labels: [__meta_kubernetes_endpoint_port_number]
-            action: drop
-            regex: "15090"
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
+          # Drop Istio sidecar port - must be LAST
+          - source_labels: [__address__]
+            action: drop
+            regex: '.*:15090'
         metrics_path: '/metrics'
 
       # Kong Gateway - Production
