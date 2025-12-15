@@ -36,7 +36,7 @@ images:
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-order-management
   newTag: 6b29066
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-product
-  newTag: 18503ab
+  newTag: 5666b17
 - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-supplier
   newTag: 18503ab
 
