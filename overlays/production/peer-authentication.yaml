@@ -17,17 +17,17 @@ spec:
     mode: STRICT
   portLevelMtls:
     # ms-product
-    3002:
+    "3002":
       mode: PERMISSIVE
     # ms-inventory
-    3003:
+    "3003":
       mode: PERMISSIVE
     # ms-supplier
-    3004:
+    "3004":
       mode: PERMISSIVE
     # ms-order-management
-    3005:
+    "3005":
       mode: PERMISSIVE
     # ms-identity
-    3006:
+    "3006":
       mode: PERMISSIVE
