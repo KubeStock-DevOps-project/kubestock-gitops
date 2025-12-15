@@ -94,7 +94,7 @@ data:
       # KubeStock Microservices - PRODUCTION namespace
       - job_name: 'kubestock-services'
         kubernetes_sd_configs:
-          - role: service
+          - role: endpoints
             namespaces:
               names:
                 - kubestock-production
@@ -102,12 +102,16 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: ms-.+|web
+          # Drop Istio sidecar port 15090
+          - source_labels: [__meta_kubernetes_endpoint_port_number]
+            action: drop
+            regex: "15090"
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
-          - source_labels: [__meta_kubernetes_service_name]
-            target_label: job
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
         metrics_path: '/metrics'
 
       # Kong Gateway - Production
