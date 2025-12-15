@@ -12,8 +12,8 @@ metadata:
 data:
   # Repository configuration
   repositories: |
-    - url: https://github.com/KubeStock-DevOps-project/kubestock-core.git
-      name: kubestock-core
+    - url: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
+      name: kubestock-gitops
       type: git
 
   # Resource customizations for health checks
