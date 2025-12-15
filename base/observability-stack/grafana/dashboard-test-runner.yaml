@@ -149,7 +149,7 @@ data:
           "id": 10,
           "options": {
             "showHeader": true,
-            "sortBy": [{"displayName": "Time", "desc": true}]
+            "sortBy": [{"displayName": "Test Time", "desc": true}]
           },
           "pluginVersion": "9.0.0",
           "targets": [
@@ -165,8 +165,19 @@ data:
             {
               "id": "organize",
               "options": {
-                "excludeByName": {},
-                "indexByName": {},
+                "excludeByName": {
+                  "id": true,
+                  "labels": true,
+                  "tsNs": true,
+                  "emoji": true,
+                  "service": true,
+                  "http_status": true,
+                  "result": true
+                },
+                "indexByName": {
+                  "Time": 0,
+                  "Line": 1
+                },
                 "renameByName": {
                   "Time": "Test Time",
                   "Line": "Service Status"
