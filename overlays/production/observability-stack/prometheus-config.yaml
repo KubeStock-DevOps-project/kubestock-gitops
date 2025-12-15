@@ -126,7 +126,7 @@ data:
       # KubeStock Services - Static targets for alerting demo
       # Uses service DNS so targets persist even when scaled to 0
       # This allows DOWN alerts to fire when services are unavailable
-      - job_name: 'kubestock-product-service'
+      - job_name: 'kubestock-static-services'
         static_configs:
           - targets: 
               - 'ms-product.kubestock-production.svc:3002'
@@ -143,9 +143,11 @@ data:
           # Set namespace
           - target_label: namespace
             replacement: 'kubestock-production'
-          # Set job label to match ServiceDown alert
-          - target_label: job
-            replacement: 'kubestock-services'
+          # Set instance to service name for clarity
+          - source_labels: [__address__]
+            target_label: instance
+            regex: '([^.]+)\\..*'
+            replacement: '$1'
         metrics_path: '/metrics'
 
       # Kong Gateway - Production
@@ -209,14 +211,15 @@ data:
       - name: kubestock-alerts
         rules:
           # Service metrics endpoint down - PRIMARY ALERT for demo
+          # Triggers when any monitored service becomes unavailable
           - alert: ServiceDown
-            expr: up{job="kubestock-services"} == 0
-            for: 1m
+            expr: up{job="kubestock-static-services"} == 0
+            for: 30s
             labels:
               severity: critical
             annotations:
               summary: "Service {{ $labels.service }} is down"
-              description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been down for more than 1 minute. Pod: {{ $labels.pod }}"
+              description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been unreachable for more than 30 seconds."
           
           # Deployment has no ready replicas
           - alert: DeploymentDown
