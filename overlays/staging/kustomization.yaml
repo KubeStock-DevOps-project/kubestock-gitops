@@ -20,6 +20,7 @@ resources:
 - ../../base/services/frontend/
 - namespace.yaml
 - external-secrets.yaml
+- peer-authentication.yaml
 
 labels:
 - pairs:
