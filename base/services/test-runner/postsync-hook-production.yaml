@@ -1,0 +1,164 @@
+# =============================================================================
+# ArgoCD PostSync Hook - Production Smoke Tests
+# =============================================================================
+# Automatically runs smoke tests after ArgoCD syncs production environment
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: production-smoke-test
+  namespace: test-runner
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 3
+  template:
+    metadata:
+      name: production-smoke-test
+      labels:
+        app: test-runner
+        test-type: smoke
+        environment: production
+    spec:
+      serviceAccountName: test-runner
+      restartPolicy: Never
+      containers:
+        - name: k6-smoke-test
+          image: grafana/k6:0.48.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "🚀 Running Production Smoke Tests..."
+              echo "Gateway URL: $GATEWAY_URL"
+              echo "Test Type: Smoke Test"
+              echo "Environment: Production"
+              echo "Started at: $(date)"
+              k6 run \
+                --out prometheus=namespace=production \
+                --tag environment=production \
+                --tag test_type=smoke \
+                /scripts/smoke.js
+              EXIT_CODE=$?
+              echo "Finished at: $(date)"
+              echo "Exit Code: $EXIT_CODE"
+              exit $EXIT_CODE
+          env:
+            - name: GATEWAY_URL
+              value: "http://kong-proxy.kong.svc.kubestock"
+            - name: KONG_CONSUMER_HEADER
+              valueFrom:
+                configMapKeyRef:
+                  name: test-runner-config
+                  key: KONG_CONSUMER_HEADER
+            - name: PRODUCT_URL
+              value: "http://kong-proxy.kong.svc.kubestock/api/product"
+            - name: INVENTORY_URL
+              value: "http://kong-proxy.kong.svc.kubestock/api/inventory"
+            - name: SUPPLIER_URL
+              value: "http://kong-proxy.kong.svc.kubestock/api/supplier"
+            - name: ORDER_URL
+              value: "http://kong-proxy.kong.svc.kubestock/api/order"
+            - name: IDENTITY_URL
+              value: "http://kong-proxy.kong.svc.kubestock/api/identity/health"
+            - name: K6_PROMETHEUS_RW_SERVER_URL
+              value: "http://prometheus.observability.svc.kubestock:9090/api/v1/write"
+          volumeMounts:
+            - name: k6-scripts
+              mountPath: /scripts
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+      volumes:
+        - name: k6-scripts
+          configMap:
+            name: k6-scripts
+---
+# =============================================================================
+# ArgoCD PostSync Hook - Production Load Tests
+# =============================================================================
+# Runs conservative load tests after smoke tests pass
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: production-load-test
+  namespace: test-runner
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 1
+  template:
+    metadata:
+      name: production-load-test
+      labels:
+        app: test-runner
+        test-type: load
+        environment: production
+    spec:
+      serviceAccountName: test-runner
+      restartPolicy: Never
+      containers:
+        - name: k6-load-test
+          image: grafana/k6:0.48.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "⚡ Running Production Load Tests..."
+              echo "Test Type: Load Test"
+              echo "Environment: Production"
+              echo "Started at: $(date)"
+              k6 run \
+                --out prometheus=namespace=production \
+                --tag environment=production \
+                --tag test_type=load \
+                /scripts/load.js
+              EXIT_CODE=$?
+              echo "Finished at: $(date)"
+              echo "Exit Code: $EXIT_CODE"
+              exit $EXIT_CODE
+          env:
+            - name: KONG_CONSUMER_HEADER
+              valueFrom:
+                configMapKeyRef:
+                  name: test-runner-config
+                  key: KONG_CONSUMER_HEADER
+            # Direct service URLs (bypass Kong for load tests)
+            - name: PRODUCT_URL
+              value: "http://ms-product.kubestock-production.svc.kubestock:3002/products"
+            - name: INVENTORY_URL
+              value: "http://ms-inventory.kubestock-production.svc.kubestock:3003/inventory"
+            - name: SUPPLIER_URL
+              value: "http://ms-supplier.kubestock-production.svc.kubestock:3004/suppliers"
+            - name: ORDER_URL
+              value: "http://ms-order-management.kubestock-production.svc.kubestock:3005/orders"
+            - name: IDENTITY_URL
+              value: "http://ms-identity.kubestock-production.svc.kubestock:3006/health"
+            # Conservative load test stages for production
+            - name: STAGES
+              value: '[{"duration":"20s","target":5},{"duration":"40s","target":10},{"duration":"20s","target":0}]'
+            - name: K6_PROMETHEUS_RW_SERVER_URL
+              value: "http://prometheus.observability.svc.kubestock:9090/api/v1/write"
+          volumeMounts:
+            - name: k6-scripts
+              mountPath: /scripts
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+      volumes:
+        - name: k6-scripts
+          configMap:
+            name: k6-scripts

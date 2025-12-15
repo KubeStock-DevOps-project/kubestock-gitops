@@ -12,6 +12,7 @@ resources:
   - dashboard-pods.yaml
   - dashboard-logs.yaml
   - dashboard-test-runner.yaml
+  - dashboard-k6-metrics.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml

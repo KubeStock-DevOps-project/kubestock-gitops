@@ -1,0 +1,331 @@
+# =============================================================================
+# Grafana Dashboard - K6 Performance Metrics
+# =============================================================================
+# Enhanced dashboard for k6 test metrics from Prometheus
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-k6-metrics
+  namespace: observability
+  labels:
+    app: grafana
+    grafana_dashboard: "1"
+data:
+  k6-metrics.json: |
+    {
+      "title": "KubeStock - K6 Test Metrics",
+      "uid": "k6-performance-metrics",
+      "tags": ["k6", "testing", "performance"],
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "version": 1,
+      "refresh": "10s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "templating": {
+        "list": [
+          {
+            "name": "environment",
+            "label": "Environment",
+            "type": "custom",
+            "query": "staging,production",
+            "current": {"text": "staging", "value": "staging"},
+            "options": [
+              {"text": "staging", "value": "staging", "selected": true},
+              {"text": "production", "value": "production"}
+            ]
+          },
+          {
+            "name": "test_type",
+            "label": "Test Type",
+            "type": "custom",
+            "query": "smoke,load",
+            "current": {"text": "All", "value": "$__all"},
+            "options": [
+              {"text": "All", "value": "$__all", "selected": true},
+              {"text": "smoke", "value": "smoke"},
+              {"text": "load", "value": "load"}
+            ],
+            "includeAll": true
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Test Execution Timeline",
+          "type": "logs",
+          "datasource": "Loki",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+          "targets": [
+            {
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |~ \"Running (Staging|Production) (Smoke|Load) Tests|Finished at|Exit Code\"",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "showTime": true,
+            "showLabels": false,
+            "showCommonLabels": false,
+            "wrapLogMessage": false,
+            "prettifyLogMessage": false,
+            "enableLogDetails": true,
+            "sortOrder": "Descending"
+          }
+        },
+        {
+          "id": 2,
+          "title": "Test Success Rate",
+          "type": "gauge",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 8},
+          "targets": [
+            {
+              "expr": "sum(k6_checks{environment=\"$environment\", test_type=~\"$test_type\", check=~\".*status is 200\"}) / sum(k6_checks{environment=\"$environment\", test_type=~\"$test_type\"}) * 100",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"value": 0, "color": "red"},
+                  {"value": 95, "color": "yellow"},
+                  {"value": 99, "color": "green"}
+                ]
+              }
+            }
+          },
+          "options": {
+            "showThresholdLabels": true,
+            "showThresholdMarkers": true
+          }
+        },
+        {
+          "id": 3,
+          "title": "HTTP Request Rate (req/s)",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 9, "x": 6, "y": 8},
+          "targets": [
+            {
+              "expr": "sum(rate(k6_http_reqs{environment=\"$environment\", test_type=~\"$test_type\"}[1m])) by (name)",
+              "legendFormat": "{{name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never"
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "title": "Virtual Users",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 9, "x": 15, "y": 8},
+          "targets": [
+            {
+              "expr": "k6_vus{environment=\"$environment\", test_type=~\"$test_type\"}",
+              "legendFormat": "VUs - {{test_type}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "drawStyle": "bars",
+                "fillOpacity": 80,
+                "showPoints": "never"
+              }
+            }
+          }
+        },
+        {
+          "id": 5,
+          "title": "Response Time Percentiles (ms)",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(k6_http_req_duration_bucket{environment=\"$environment\", test_type=~\"$test_type\"}[1m])) by (le, name))",
+              "legendFormat": "p95 - {{name}}",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(k6_http_req_duration_bucket{environment=\"$environment\", test_type=~\"$test_type\"}[1m])) by (le, name))",
+              "legendFormat": "p50 - {{name}}",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(k6_http_req_duration_bucket{environment=\"$environment\", test_type=~\"$test_type\"}[1m])) by (le, name))",
+              "legendFormat": "p99 - {{name}}",
+              "refId": "C"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"value": 0, "color": "green"},
+                  {"value": 500, "color": "yellow"},
+                  {"value": 1000, "color": "red"}
+                ]
+              }
+            }
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": ["mean", "max", "lastNotNull"]
+            }
+          }
+        },
+        {
+          "id": 6,
+          "title": "HTTP Failure Rate",
+          "type": "timeseries",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+          "targets": [
+            {
+              "expr": "sum(rate(k6_http_req_failed{environment=\"$environment\", test_type=~\"$test_type\"}[1m])) by (name) * 100",
+              "legendFormat": "{{name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 20
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"value": 0, "color": "green"},
+                  {"value": 1, "color": "yellow"},
+                  {"value": 5, "color": "red"}
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 7,
+          "title": "Test Checks Status",
+          "type": "table",
+          "datasource": "Prometheus",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
+          "targets": [
+            {
+              "expr": "k6_checks{environment=\"$environment\", test_type=~\"$test_type\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "__name__": true,
+                  "instance": true,
+                  "job": true
+                },
+                "indexByName": {
+                  "Time": 0,
+                  "environment": 1,
+                  "test_type": 2,
+                  "check": 3,
+                  "Value": 4
+                },
+                "renameByName": {
+                  "Time": "Timestamp",
+                  "environment": "Environment",
+                  "test_type": "Test Type",
+                  "check": "Check Name",
+                  "Value": "Result"
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "overrides": [
+              {
+                "matcher": {"id": "byName", "options": "Result"},
+                "properties": [
+                  {
+                    "id": "custom.displayMode",
+                    "value": "color-background"
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {"value": 0, "color": "red"},
+                        {"value": 1, "color": "green"}
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 8,
+          "title": "Recent Test Executions",
+          "type": "table",
+          "datasource": "Loki",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+          "targets": [
+            {
+              "expr": "{namespace=\"test-runner\"} |~ \"(Running|Finished at|Exit Code)\" | json | line_format \"{{.timestamp}} | {{.environment}} | {{.test_type}} | {{.message}}\"",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "showHeader": true
+          },
+          "transformations": [
+            {
+              "id": "extractFields",
+              "options": {
+                "format": "auto",
+                "source": "Line"
+              }
+            }
+          ]
+        }
+      ]
+    }

@@ -49,6 +49,12 @@ spec:
             # Default gateway URL (staging)
             - name: GATEWAY_URL
               value: "http://kong-proxy.kong-staging.svc.kubestock"
+            # Kong Consumer Header for rate limit exemption
+            - name: KONG_CONSUMER_HEADER
+              valueFrom:
+                configMapKeyRef:
+                  name: test-runner-config
+                  key: KONG_CONSUMER_HEADER
             # Asgardeo Configuration - Token endpoint
             - name: ASGARDEO_TOKEN_URL
               valueFrom:
