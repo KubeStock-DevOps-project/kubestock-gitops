@@ -180,7 +180,17 @@ data:
               severity: critical
             annotations:
               summary: "Service {{ $labels.service }} is down"
-              description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been down for more than 1 minute."
+              description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been down for more than 1 minute. Pod: {{ $labels.pod }}"
+          
+          # Deployment has no ready replicas
+          - alert: DeploymentNoReplicas
+            expr: kube_deployment_status_replicas_available{namespace="kubestock-production"} == 0 and kube_deployment_spec_replicas{namespace="kubestock-production"} > 0
+            for: 3m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Deployment {{ $labels.deployment }} has no available replicas"
+              description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has no available replicas but expects {{ $value }} replicas."
 
           - alert: HighErrorRate
             expr: |
