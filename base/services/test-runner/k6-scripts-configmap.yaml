@@ -1,0 +1,180 @@
+# =============================================================================
+# k6 Test Scripts ConfigMap
+# =============================================================================
+# Contains smoke and load test scripts for k6
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-scripts
+  namespace: test-runner
+data:
+  smoke.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+
+    export const options = {
+        vus: 1,
+        duration: '5s',
+    };
+
+    const GATEWAY_URL = __ENV.GATEWAY_URL || 'http://localhost:5173';
+    const ACCESS_TOKEN = __ENV.ACCESS_TOKEN;
+    const KONG_CONSUMER_HEADER = __ENV.KONG_CONSUMER_HEADER || 'test-runner';
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Consumer-Username': KONG_CONSUMER_HEADER,
+    };
+    if (ACCESS_TOKEN) {
+        headers['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
+    }
+
+    const params = {
+        headers: headers,
+    };
+
+    export default function () {
+        console.log(`🔍 Running smoke tests through gateway: ${GATEWAY_URL}`);
+
+        // 1. Check Gateway Health
+        const gatewayHealthUrl = `${GATEWAY_URL}/api/gateway/health`;
+        const resGateway = http.get(gatewayHealthUrl, params);
+        check(resGateway, {
+            '✅ Gateway Health Check': (r) => r.status === 200,
+        });
+        if (resGateway.status !== 200) {
+            console.error(`❌ Gateway Health failed: ${resGateway.status} ${resGateway.body}`);
+        }
+
+        // 2. Check Product Service through Gateway
+        const productUrl = __ENV.PRODUCT_URL || `${GATEWAY_URL}/api/product`;
+        const resProduct = http.get(productUrl, params);
+        check(resProduct, {
+            '✅ Product Service UP (via Gateway)': (r) => r.status === 200,
+        });
+        if (resProduct.status !== 200) {
+            console.error(`❌ Product Service failed: ${resProduct.status} ${resProduct.body}`);
+        }
+
+        // 3. Check Inventory Service through Gateway
+        const inventoryUrl = __ENV.INVENTORY_URL || `${GATEWAY_URL}/api/inventory`;
+        const resInventory = http.get(inventoryUrl, params);
+        check(resInventory, {
+            '✅ Inventory Service UP (via Gateway)': (r) => r.status === 200,
+        });
+        if (resInventory.status !== 200) {
+            console.error(`❌ Inventory Service failed: ${resInventory.status} ${resInventory.body}`);
+        }
+
+        // 4. Check Supplier Service through Gateway
+        const supplierUrl = __ENV.SUPPLIER_URL || `${GATEWAY_URL}/api/supplier`;
+        const resSupplier = http.get(supplierUrl, params);
+        check(resSupplier, {
+            '✅ Supplier Service UP (via Gateway)': (r) => r.status === 200,
+        });
+        if (resSupplier.status !== 200) {
+            console.error(`❌ Supplier Service failed: ${resSupplier.status} ${resSupplier.body}`);
+        }
+
+        // 5. Check Order Management Service through Gateway
+        const orderUrl = __ENV.ORDER_URL || `${GATEWAY_URL}/api/order`;
+        const resOrder = http.get(orderUrl, params);
+        check(resOrder, {
+            '✅ Order Service UP (via Gateway)': (r) => r.status === 200,
+        });
+        if (resOrder.status !== 200) {
+            console.error(`❌ Order Service failed: ${resOrder.status} ${resOrder.body}`);
+        }
+
+        // 6. Check Identity Service through Gateway
+        const identityUrl = __ENV.IDENTITY_URL || `${GATEWAY_URL}/api/identity/health`;
+        const resIdentity = http.get(identityUrl, params);
+        check(resIdentity, {
+            '✅ Identity Service UP (via Gateway)': (r) => r.status === 200 || r.status === 401,
+        });
+        if (resIdentity.status !== 200 && resIdentity.status !== 401) {
+            console.error(`❌ Identity Service failed: ${resIdentity.status} ${resIdentity.body}`);
+        }
+
+        sleep(1);
+    }
+
+  load.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+
+    let stages = [
+        { duration: '10s', target: 20 },
+        { duration: '30s', target: 20 },
+        { duration: '10s', target: 0 },
+    ];
+
+    if (__ENV.STAGES) {
+        try {
+            stages = JSON.parse(__ENV.STAGES);
+            console.log('Using custom stages:', stages);
+        } catch (e) {
+            console.error('Failed to parse STAGES, using defaults');
+        }
+    }
+
+    export const options = {
+        stages: stages,
+    };
+
+    const ACCESS_TOKEN = __ENV.ACCESS_TOKEN;
+    const KONG_CONSUMER_HEADER = __ENV.KONG_CONSUMER_HEADER || 'test-runner';
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Consumer-Username': KONG_CONSUMER_HEADER,
+    };
+    if (ACCESS_TOKEN) {
+        headers['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
+    }
+
+    const params = {
+        headers: headers,
+    };
+
+    const targets = [];
+
+    if (__ENV.PRODUCT_URL) {
+        targets.push({ name: 'Product Service', url: __ENV.PRODUCT_URL });
+    }
+    if (__ENV.INVENTORY_URL) {
+        targets.push({ name: 'Inventory Service', url: __ENV.INVENTORY_URL });
+    }
+    if (__ENV.SUPPLIER_URL) {
+        targets.push({ name: 'Supplier Service', url: __ENV.SUPPLIER_URL });
+    }
+    if (__ENV.ORDER_URL) {
+        targets.push({ name: 'Order Service', url: __ENV.ORDER_URL });
+    }
+    if (__ENV.IDENTITY_URL) {
+        targets.push({ name: 'Identity Service', url: __ENV.IDENTITY_URL });
+    }
+
+    if (targets.length === 0) {
+        throw new Error('❌ No service URLs provided for load testing. Please provide at least one service URL.');
+    }
+
+    console.log(`📊 Load testing ${targets.length} service(s) directly:`);
+    targets.forEach(t => console.log(`   - ${t.name}: ${t.url}`));
+
+    export default function () {
+        const target = targets[Math.floor(Math.random() * targets.length)];
+        const res = http.get(target.url, params);
+
+        check(res, {
+            [`${target.name} status is 200`]: (r) => r.status === 200,
+            [`${target.name} response time < 500ms`]: (r) => r.timings.duration < 500,
+        });
+
+        if (res.status !== 200) {
+            console.error(`❌ ${target.name} failed: ${res.status} ${res.body}`);
+        }
+
+        sleep(1);
+    }

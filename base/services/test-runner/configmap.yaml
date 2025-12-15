@@ -1,0 +1,13 @@
+# =============================================================================
+# Test Runner ConfigMap
+# =============================================================================
+# Provides Kong consumer identification for rate limit exemption
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-runner-config
+  namespace: test-runner
+data:
+  # Kong consumer header for rate limit exemption
+  KONG_CONSUMER_HEADER: "test-runner"

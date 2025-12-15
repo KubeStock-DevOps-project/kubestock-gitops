@@ -5,7 +5,12 @@ namespace: test-runner
 
 resources:
   - namespace.yaml
+  - serviceaccount.yaml
   - deployment.yaml
   - service.yaml
+  - configmap.yaml
+  - k6-scripts-configmap.yaml
   - externalsecret.yaml
   - ecr-secret.yaml
+  - postsync-hook-staging.yaml
+  - postsync-hook-production.yaml

@@ -14,6 +14,13 @@ data:
     _format_version: "3.0"
 
     # ==========================================================================
+    # Consumers - API Clients
+    # ==========================================================================
+    consumers:
+      - username: test-runner
+        custom_id: test-runner-service
+
+    # ==========================================================================
     # Services - Backend Microservices
     # ==========================================================================
     # Routing pattern: /api/{service}/* → service (prefix stripped)

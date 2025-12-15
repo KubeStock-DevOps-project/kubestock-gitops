@@ -1,12 +1,14 @@
 # =============================================================================
-# Grafana Dashboard - k6 Test Results
+# Grafana Dashboard - k6 Test Results & Metrics
 # =============================================================================
-# Monitors test-runner k6 test executions via Loki logs
+# Monitors test-runner k6 test executions via Loki logs and Prometheus metrics
+# Shows test execution history, response times, success rates, and virtual users
 # =============================================================================
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-dashboard-test-runner
+  namespace: observability
   labels:
     app: grafana
     grafana_dashboard: "1"
