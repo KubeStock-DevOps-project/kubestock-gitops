@@ -48,6 +48,7 @@ spec:
             principals: ["cluster.local/ns/kong/sa/*"]
 ---
 # Deny requests without valid JWT from external sources - Staging
+# NOTE: This rule only applies to traffic NOT coming from trusted namespaces
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -61,15 +62,16 @@ spec:
   rules:
     - from:
         - source:
-            # Deny if no JWT principal AND no mTLS principal (external traffic)
+            # Deny if no JWT principal AND traffic is not from trusted namespaces
             notRequestPrincipals: ["*"]
-            notPrincipals: ["cluster.local/ns/kubestock-staging/sa/*", "cluster.local/ns/kong/sa/*"]
+            notNamespaces: ["kubestock-staging", "kong", "istio-system"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
             notPaths: ["/health", "/health/*", "/metrics"]
 ---
 # Deny requests without valid JWT from external sources - Production
+# NOTE: This rule only applies to traffic NOT coming from trusted namespaces
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -83,9 +85,9 @@ spec:
   rules:
     - from:
         - source:
-            # Deny if no JWT principal AND no mTLS principal (external traffic)
+            # Deny if no JWT principal AND traffic is not from trusted namespaces
             notRequestPrincipals: ["*"]
-            notPrincipals: ["cluster.local/ns/kubestock-production/sa/*", "cluster.local/ns/kong/sa/*"]
+            notNamespaces: ["kubestock-production", "kong", "istio-system"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
