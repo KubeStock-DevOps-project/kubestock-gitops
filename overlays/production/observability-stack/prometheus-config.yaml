@@ -123,6 +123,31 @@ data:
             target_label: pod
         metrics_path: '/metrics'
 
+      # KubeStock Services - Static targets for alerting demo
+      # Uses service DNS so targets persist even when scaled to 0
+      # This allows DOWN alerts to fire when services are unavailable
+      - job_name: 'kubestock-product-service'
+        static_configs:
+          - targets: 
+              - 'ms-product.kubestock-production.svc:3002'
+              - 'ms-inventory.kubestock-production.svc:3003'
+              - 'ms-supplier.kubestock-production.svc:3004'
+              - 'ms-order-management.kubestock-production.svc:3005'
+              - 'ms-identity.kubestock-production.svc:3006'
+        relabel_configs:
+          # Extract service name from address
+          - source_labels: [__address__]
+            target_label: service
+            regex: '([^.]+)\\..*'
+            replacement: '$1'
+          # Set namespace
+          - target_label: namespace
+            replacement: 'kubestock-production'
+          # Set job label to match ServiceDown alert
+          - target_label: job
+            replacement: 'kubestock-services'
+        metrics_path: '/metrics'
+
       # Kong Gateway - Production
       - job_name: 'kong-gateway'
         kubernetes_sd_configs:
