@@ -56,7 +56,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" | logfmt | line_format \"{{.msg}}\" | regexp \"(?P<status>PASSED|FAILED)\"", "refId": "A", "maxLines": 1}],
           "title": "Gateway",
           "type": "stat"
         },
@@ -83,7 +83,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" | logfmt | line_format \"{{.msg}}\" | regexp \"(?P<status>PASSED|FAILED)\"", "refId": "A", "maxLines": 1}],
           "title": "Product Service",
           "type": "stat"
         },
@@ -110,7 +110,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" | logfmt | line_format \"{{.msg}}\" | regexp \"(?P<status>PASSED|FAILED)\"", "refId": "A", "maxLines": 1}],
           "title": "Inventory Service",
           "type": "stat"
         },
@@ -137,7 +137,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" | logfmt | line_format \"{{.msg}}\" | regexp \"(?P<status>PASSED|FAILED)\"", "refId": "A", "maxLines": 1}],
           "title": "Supplier Service",
           "type": "stat"
         },
@@ -164,7 +164,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" | logfmt | line_format \"{{.msg}}\" | regexp \"(?P<status>PASSED|FAILED)\"", "refId": "A", "maxLines": 1}],
           "title": "Order Service",
           "type": "stat"
         },
@@ -191,7 +191,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" | logfmt | line_format \"{{.msg}}\" | regexp \"(?P<status>PASSED|FAILED)\"", "refId": "A", "maxLines": 1}],
           "title": "Identity Service",
           "type": "stat"
         },
@@ -313,7 +313,7 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test Summary:\" | regexp \"(?P<result>(ALL PASSED|SOME FAILED))\"",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test Summary:\" | logfmt | line_format \"{{.msg}}\" | regexp \"(?P<result>ALL PASSED|SOME FAILED)\"",
               "refId": "A",
               "maxLines": 1
             }
