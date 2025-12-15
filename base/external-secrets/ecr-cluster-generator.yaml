@@ -1,0 +1,39 @@
+# =============================================================================
+# ECR Authorization Token - Cluster Generator
+# =============================================================================
+# Centralized ECR token generator in external-secrets namespace.
+# Uses the kubestock-external-secrets IAM user credentials which already
+# have ecr:GetAuthorizationToken permissions.
+#
+# Benefits:
+# - Single source of truth for ECR authentication
+# - No need to replicate AWS credentials to application namespaces
+# - Better security posture
+#
+# Usage: Reference from ExternalSecret in any namespace:
+#   dataFrom:
+#     - sourceRef:
+#         generatorRef:
+#           apiVersion: generators.external-secrets.io/v1alpha1
+#           kind: ClusterECRAuthorizationToken
+#           name: ecr-token-generator
+# =============================================================================
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: ClusterECRAuthorizationToken
+metadata:
+  name: ecr-token-generator
+  labels:
+    app.kubernetes.io/name: external-secrets
+    app.kubernetes.io/component: ecr-generator
+spec:
+  region: ap-south-1
+  auth:
+    secretRef:
+      accessKeyIDSecretRef:
+        name: aws-external-secrets-creds
+        key: access-key-id
+        namespace: external-secrets
+      secretAccessKeySecretRef:
+        name: aws-external-secrets-creds
+        key: secret-access-key
+        namespace: external-secrets
