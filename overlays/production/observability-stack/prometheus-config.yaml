@@ -98,7 +98,7 @@ data:
             target_label: pod
 
       # KubeStock Microservices - PRODUCTION namespace
-      # Uses endpoints role to get pod IPs, filters out Istio sidecar ports
+      # Uses endpoints role to get pod IPs, filters to only application ports
       - job_name: 'kubestock-services'
         kubernetes_sd_configs:
           - role: endpoints
@@ -110,13 +110,10 @@ data:
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
             regex: ms-.+|web|frontend
-          # Drop Istio sidecar ports (15xxx)
-          - source_labels: [__meta_kubernetes_endpoint_port_name]
-            action: drop
-            regex: .*-envoy-prom|tcp-.*
+          # Keep only specific application ports (3002-3006)
           - source_labels: [__meta_kubernetes_endpoint_port_number]
-            action: drop
-            regex: "15090|15020|15021"
+            action: keep
+            regex: "300[2-6]"
           # Labels
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
