@@ -56,7 +56,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" |= \" - \"", "refId": "A"}],
           "title": "Gateway",
           "type": "stat"
         },
@@ -83,7 +83,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" |= \" - \"", "refId": "A"}],
           "title": "Product Service",
           "type": "stat"
         },
@@ -110,7 +110,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" |= \" - \"", "refId": "A"}],
           "title": "Inventory Service",
           "type": "stat"
         },
@@ -137,7 +137,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" |= \" - \"", "refId": "A"}],
           "title": "Supplier Service",
           "type": "stat"
         },
@@ -164,7 +164,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" |= \" - \"", "refId": "A"}],
           "title": "Order Service",
           "type": "stat"
         },
@@ -191,13 +191,138 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" |= \" - \" | line_format \"{{.}}\"", "refId": "A", "maxLines": 1}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" |= \" - \"", "refId": "A"}],
           "title": "Identity Service",
           "type": "stat"
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 8},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            }
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 8},
+          "id": 23,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"PASSED\" [5m])",
+              "refId": "A"
+            }
+          ],
+          "title": "Services Passed (Last 5m)",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}]},
+              "unit": "short"
+            }
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 8},
+          "id": 24,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"FAILED\" [5m])",
+              "refId": "A"
+            }
+          ],
+          "title": "Services Failed (Last 5m)",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"match": "null", "result": {"text": "0"}}, "type": "special"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]},
+              "unit": "short"
+            }
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8},
+          "id": 25,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "count_over_time({namespace=\"test-runner\", app=\"test-runner\"} |= \"Test Summary:\" [1h])",
+              "refId": "A"
+            }
+          ],
+          "title": "Total Test Runs (Last 1h)",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "mappings": [
+                {"options": {"match": "null", "result": {"text": "No data"}}, "type": "special"},
+                {"options": {"pattern": ".*ALL PASSED.*", "result": {"text": "ALL PASSED", "color": "green"}}, "type": "regex"},
+                {"options": {"pattern": ".*SOME FAILED.*", "result": {"text": "SOME FAILED", "color": "red"}}, "type": "regex"}
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "text", "value": null}]}
+            }
+          },
+          "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8},
+          "id": 26,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
+            "textMode": "value"
+          },
+          "targets": [
+            {
+              "datasource": "Loki",
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test Summary:\"",
+              "refId": "A"
+            }
+          ],
+          "title": "Latest Test Result",
+          "type": "stat"
+        },
+        {
+          "datasource": "Loki",
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 12},
           "id": 10,
           "options": {
             "showHeader": true,
@@ -225,7 +350,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 20},
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 24},
           "id": 8,
           "options": {
             "showHeader": true,
@@ -253,7 +378,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 10, "w": 12, "x": 0, "y": 30},
+          "gridPos": {"h": 10, "w": 12, "x": 0, "y": 34},
           "id": 21,
           "options": {
             "showHeader": true,
@@ -281,7 +406,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 10, "w": 12, "x": 12, "y": 30},
+          "gridPos": {"h": 10, "w": 12, "x": 12, "y": 34},
           "id": 22,
           "options": {
             "showHeader": true,
@@ -309,7 +434,7 @@ data:
         },
         {
           "datasource": "Loki",
-          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 40},
+          "gridPos": {"h": 12, "w": 24, "x": 0, "y": 44},
           "id": 4,
           "options": {
             "dedupStrategy": "none",
