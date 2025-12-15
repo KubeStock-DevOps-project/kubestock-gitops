@@ -2,10 +2,52 @@
 # Authorization Policies for KubeStock Services
 # =============================================================================
 # JWT validation happens at sidecar level via RequestAuthentication.
-# These DENY policies reject requests without valid JWT for protected services.
+# These policies:
+# 1. ALLOW inter-service communication within the mesh (mTLS principals)
+# 2. DENY external requests without valid JWT for protected services
 # =============================================================================
 ---
-# Deny requests without valid JWT - Staging
+# Allow inter-service communication within staging namespace (mTLS)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-mesh-internal-staging
+  namespace: kubestock-staging
+spec:
+  selector:
+    matchLabels:
+      require-jwt: "true"
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            # Allow traffic from services in the same namespace (mTLS authenticated)
+            principals: ["cluster.local/ns/kubestock-staging/sa/*"]
+        - source:
+            # Allow traffic from Kong gateway
+            principals: ["cluster.local/ns/kong/sa/*"]
+---
+# Allow inter-service communication within production namespace (mTLS)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-mesh-internal-production
+  namespace: kubestock-production
+spec:
+  selector:
+    matchLabels:
+      require-jwt: "true"
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            # Allow traffic from services in the same namespace (mTLS authenticated)
+            principals: ["cluster.local/ns/kubestock-production/sa/*"]
+        - source:
+            # Allow traffic from Kong gateway
+            principals: ["cluster.local/ns/kong/sa/*"]
+---
+# Deny requests without valid JWT from external sources - Staging
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -19,13 +61,15 @@ spec:
   rules:
     - from:
         - source:
+            # Deny if no JWT principal AND no mTLS principal (external traffic)
             notRequestPrincipals: ["*"]
+            notPrincipals: ["cluster.local/ns/kubestock-staging/sa/*", "cluster.local/ns/kong/sa/*"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
             notPaths: ["/health", "/health/*", "/metrics"]
 ---
-# Deny requests without valid JWT - Production
+# Deny requests without valid JWT from external sources - Production
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -39,7 +83,9 @@ spec:
   rules:
     - from:
         - source:
+            # Deny if no JWT principal AND no mTLS principal (external traffic)
             notRequestPrincipals: ["*"]
+            notPrincipals: ["cluster.local/ns/kubestock-production/sa/*", "cluster.local/ns/kong/sa/*"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
