@@ -185,7 +185,7 @@ data:
         rules:
           # Service metrics endpoint down - PRIMARY ALERT for demo
           - alert: ServiceDown
-            expr: up{job="kubestock-services"} == 0
+            expr: up{job="kubestock-services", service=~"ms-.+"} == 0
             for: 1m
             labels:
               severity: critical
