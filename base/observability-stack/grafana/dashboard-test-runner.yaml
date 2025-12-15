@@ -39,9 +39,9 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
-                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
-                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "Waiting"}}, "type": "special"},
+                {"options": {"PASSED": {"color": "green", "text": "HEALTHY"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "text": "FAILED"}}, "type": "value"}
               ],
               "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
@@ -56,7 +56,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" |= \" - \"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Gateway:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
           "title": "Gateway",
           "type": "stat"
         },
@@ -66,9 +66,9 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
-                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
-                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "Waiting"}}, "type": "special"},
+                {"options": {"PASSED": {"color": "green", "text": "HEALTHY"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "text": "FAILED"}}, "type": "value"}
               ],
               "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
@@ -83,7 +83,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" |= \" - \"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Product Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
           "title": "Product Service",
           "type": "stat"
         },
@@ -93,9 +93,9 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
-                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
-                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "Waiting"}}, "type": "special"},
+                {"options": {"PASSED": {"color": "green", "text": "HEALTHY"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "text": "FAILED"}}, "type": "value"}
               ],
               "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
@@ -110,7 +110,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" |= \" - \"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Inventory Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
           "title": "Inventory Service",
           "type": "stat"
         },
@@ -120,9 +120,9 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
-                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
-                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "Waiting"}}, "type": "special"},
+                {"options": {"PASSED": {"color": "green", "text": "HEALTHY"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "text": "FAILED"}}, "type": "value"}
               ],
               "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
@@ -137,7 +137,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" |= \" - \"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Supplier Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
           "title": "Supplier Service",
           "type": "stat"
         },
@@ -147,9 +147,9 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
-                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
-                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "Waiting"}}, "type": "special"},
+                {"options": {"PASSED": {"color": "green", "text": "HEALTHY"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "text": "FAILED"}}, "type": "value"}
               ],
               "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
@@ -164,7 +164,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" |= \" - \"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Order Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
           "title": "Order Service",
           "type": "stat"
         },
@@ -174,9 +174,9 @@ data:
             "defaults": {
               "color": {"mode": "thresholds"},
               "mappings": [
-                {"options": {"match": "null", "result": {"color": "text", "text": "⏳ Waiting"}}, "type": "special"},
-                {"options": {"pattern": ".*PASSED.*", "result": {"color": "green", "text": "✅ HEALTHY"}}, "type": "regex"},
-                {"options": {"pattern": ".*FAILED.*", "result": {"color": "red", "text": "❌ FAILED"}}, "type": "regex"}
+                {"options": {"match": "null", "result": {"color": "text", "text": "Waiting"}}, "type": "special"},
+                {"options": {"PASSED": {"color": "green", "text": "HEALTHY"}}, "type": "value"},
+                {"options": {"FAILED": {"color": "red", "text": "FAILED"}}, "type": "value"}
               ],
               "thresholds": {"mode": "absolute", "steps": [{"color": "gray", "value": null}]}
             }
@@ -191,7 +191,7 @@ data:
             "reduceOptions": {"calcs": ["last"], "fields": "", "values": false},
             "textMode": "value"
           },
-          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" |= \" - \"", "refId": "A"}],
+          "targets": [{"datasource": "Loki", "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Identity Service:\" | regexp \"(?P<status>(PASSED|FAILED))\"", "refId": "A", "maxLines": 1}],
           "title": "Identity Service",
           "type": "stat"
         },
@@ -294,8 +294,8 @@ data:
               "color": {"mode": "thresholds"},
               "mappings": [
                 {"options": {"match": "null", "result": {"text": "No data"}}, "type": "special"},
-                {"options": {"pattern": ".*ALL PASSED.*", "result": {"text": "ALL PASSED", "color": "green"}}, "type": "regex"},
-                {"options": {"pattern": ".*SOME FAILED.*", "result": {"text": "SOME FAILED", "color": "red"}}, "type": "regex"}
+                {"options": {"ALL PASSED": {"text": "ALL PASSED", "color": "green"}}, "type": "value"},
+                {"options": {"SOME FAILED": {"text": "SOME FAILED", "color": "red"}}, "type": "value"}
               ],
               "thresholds": {"mode": "absolute", "steps": [{"color": "text", "value": null}]}
             }
@@ -313,8 +313,9 @@ data:
           "targets": [
             {
               "datasource": "Loki",
-              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test Summary:\"",
-              "refId": "A"
+              "expr": "{namespace=\"test-runner\", app=\"test-runner\"} |= \"Test Summary:\" | regexp \"(?P<result>(ALL PASSED|SOME FAILED))\"",
+              "refId": "A",
+              "maxLines": 1
             }
           ],
           "title": "Latest Test Result",
