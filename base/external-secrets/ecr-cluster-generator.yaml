@@ -1,0 +1,30 @@
+# =============================================================================
+# ECR Authorization Token Generator - Centralized in external-secrets namespace
+# =============================================================================
+# Generates ECR authorization tokens using kubestock-external-secrets IAM user.
+# Other namespaces reference this generator from external-secrets namespace.
+#
+# Note: This is a regular ECRAuthorizationToken (not Cluster-scoped).
+# Namespace-scoped generators in other namespaces will reference the
+# aws-external-secrets-creds secret from this namespace.
+# =============================================================================
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: ECRAuthorizationToken
+metadata:
+  name: ecr-token-generator
+  namespace: external-secrets
+  labels:
+    app.kubernetes.io/name: external-secrets
+    app.kubernetes.io/component: ecr-generator
+spec:
+  region: ap-south-1
+  auth:
+    secretRef:
+      accessKeyIDSecretRef:
+        name: aws-external-secrets-creds
+        key: access-key-id
+        namespace: external-secrets
+      secretAccessKeySecretRef:
+        name: aws-external-secrets-creds
+        key: secret-access-key
+        namespace: external-secrets

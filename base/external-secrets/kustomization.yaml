@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - rendered.yaml
   - clustersecretstore-aws.yaml
+  - ecr-cluster-generator.yaml
