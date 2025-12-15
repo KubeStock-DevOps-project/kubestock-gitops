@@ -1,13 +1,18 @@
 # =============================================================================
-# ECR Authorization Token Generator - Centralized in external-secrets namespace
+# Centralized ECR Token Generation System
 # =============================================================================
-# Generates ECR authorization tokens using kubestock-external-secrets IAM user.
-# Other namespaces reference this generator from external-secrets namespace.
+# Architecture:
+# 1. ECRAuthorizationToken generator uses aws-external-secrets-creds (same namespace)
+# 2. ExternalSecret generates ecr-cred-source in external-secrets namespace
+# 3. PushSecret copies ecr-cred to all application namespaces
 #
-# Note: This is a regular ECRAuthorizationToken (not Cluster-scoped).
-# Namespace-scoped generators in other namespaces will reference the
-# aws-external-secrets-creds secret from this namespace.
+# Security Benefits:
+# - AWS credentials ONLY in external-secrets namespace
+# - Only generated ECR tokens (12h expiry) pushed to app namespaces
+# - No AWS credential replication
 # =============================================================================
+
+# Generator for ECR authorization tokens
 apiVersion: generators.external-secrets.io/v1alpha1
 kind: ECRAuthorizationToken
 metadata:
@@ -23,8 +28,177 @@ spec:
       accessKeyIDSecretRef:
         name: aws-external-secrets-creds
         key: access-key-id
-        namespace: external-secrets
       secretAccessKeySecretRef:
         name: aws-external-secrets-creds
         key: secret-access-key
-        namespace: external-secrets
+---
+# ExternalSecret that generates the ECR token in external-secrets namespace
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: ecr-cred-source
+  namespace: external-secrets
+  labels:
+    app.kubernetes.io/name: external-secrets
+    app.kubernetes.io/component: ecr-source
+spec:
+  refreshInterval: 6h  # Refresh before 12h expiry
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  target:
+    name: ecr-cred-source
+    creationPolicy: Owner
+    template:
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        annotations:
+          expiresAt: "{{ .expires_at }}"
+        labels:
+          app.kubernetes.io/component: ecr-credentials
+      data:
+        .dockerconfigjson: |
+          {
+            "auths": {
+              "{{ .proxy_endpoint | replace "https://" "" }}": {
+                "username": "{{ .username }}",
+                "password": "{{ .password }}",
+                "auth": "{{ printf "%s:%s" .username .password | b64enc }}"
+              }
+            }
+          }
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ECRAuthorizationToken
+          name: ecr-token-generator
+---
+# PushSecret to copy ECR token to kubestock-staging
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: ecr-cred-push-staging
+  namespace: external-secrets
+  labels:
+    app.kubernetes.io/name: external-secrets
+    app.kubernetes.io/component: ecr-push
+spec:
+  refreshInterval: 6h
+  secretStoreRefs:
+    - name: kubernetes-staging
+      kind: SecretStore
+  selector:
+    secret:
+      name: ecr-cred-source
+  data:
+    - match:
+        secretKey: .dockerconfigjson
+        remoteRef:
+          remoteKey: ecr-cred
+          property: .dockerconfigjson
+---
+# PushSecret to copy ECR token to kubestock-production
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: ecr-cred-push-production
+  namespace: external-secrets
+  labels:
+    app.kubernetes.io/name: external-secrets
+    app.kubernetes.io/component: ecr-push
+spec:
+  refreshInterval: 6h
+  secretStoreRefs:
+    - name: kubernetes-production
+      kind: SecretStore
+  selector:
+    secret:
+      name: ecr-cred-source
+  data:
+    - match:
+        secretKey: .dockerconfigjson
+        remoteRef:
+          remoteKey: ecr-cred
+          property: .dockerconfigjson
+---
+# PushSecret to copy ECR token to test-runner
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: ecr-cred-push-test-runner
+  namespace: external-secrets
+  labels:
+    app.kubernetes.io/name: external-secrets
+    app.kubernetes.io/component: ecr-push
+spec:
+  refreshInterval: 6h
+  secretStoreRefs:
+    - name: kubernetes-test-runner
+      kind: SecretStore
+  selector:
+    secret:
+      name: ecr-cred-source
+  data:
+    - match:
+        secretKey: .dockerconfigjson
+        remoteRef:
+          remoteKey: ecr-cred
+          property: .dockerconfigjson
+---
+# SecretStore for pushing to kubestock-staging namespace
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: kubernetes-staging
+  namespace: external-secrets
+spec:
+  provider:
+    kubernetes:
+      remoteNamespace: kubestock-staging
+      server:
+        caProvider:
+          type: ConfigMap
+          name: kube-root-ca.crt
+          key: ca.crt
+      auth:
+        serviceAccount:
+          name: external-secrets
+---
+# SecretStore for pushing to kubestock-production namespace
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: kubernetes-production
+  namespace: external-secrets
+spec:
+  provider:
+    kubernetes:
+      remoteNamespace: kubestock-production
+      server:
+        caProvider:
+          type: ConfigMap
+          name: kube-root-ca.crt
+          key: ca.crt
+      auth:
+        serviceAccount:
+          name: external-secrets
+---
+# SecretStore for pushing to test-runner namespace
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: kubernetes-test-runner
+  namespace: external-secrets
+spec:
+  provider:
+    kubernetes:
+      remoteNamespace: test-runner
+      server:
+        caProvider:
+          type: ConfigMap
+          name: kube-root-ca.crt
+          key: ca.crt
+      auth:
+        serviceAccount:
+          name: external-secrets
