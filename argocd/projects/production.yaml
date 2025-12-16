@@ -82,13 +82,16 @@ spec:
       kind: RequestAuthentication
 
   # Orphaned resources warning (don't auto-delete)
-  # Ignore aws-external-secrets-creds as it's a manually created prerequisite
+  # Ignore secrets that are managed externally
   orphanedResources:
     warn: true
     ignore:
       - group: ""
         kind: Secret
         name: aws-external-secrets-creds
+      - group: ""
+        kind: Secret
+        name: ecr-cred
 
   # Roles for RBAC
   roles:
