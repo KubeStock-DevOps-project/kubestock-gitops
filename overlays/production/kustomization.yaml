@@ -40,7 +40,7 @@ patches:
 # Image tags - managed by CI/CD pipeline
 images:
   - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/web
-    newTag: 18503ab
+    newTag: ec41830
   - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-identity
     newTag: 18503ab
   - name: 478468757808.dkr.ecr.ap-south-1.amazonaws.com/kubestock/ms-inventory
