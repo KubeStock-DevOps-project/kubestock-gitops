@@ -1,3 +1,14 @@
+# =============================================================================
+# External Secrets Configuration
+# =============================================================================
+# This kustomization contains the External Secrets CONFIGURATION resources:
+# - ClusterSecretStore (connects to AWS Secrets Manager)
+# - ECR token generator and distribution (PushSecrets)
+# - RBAC for cross-namespace secret pushing
+#
+# NOTE: The External Secrets OPERATOR is deployed separately via Helm.
+# See: apps/external-secrets-operator.yaml
+# =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 

@@ -53,7 +53,7 @@ data:
             action: keep
             regex: default;kubernetes;https
 
-      # Kubernetes nodes
+      # Kubernetes nodes - via API server proxy (avoids kubelet TLS issues)
       - job_name: 'kubernetes-nodes'
         kubernetes_sd_configs:
           - role: node
@@ -64,6 +64,12 @@ data:
         relabel_configs:
           - action: labelmap
             regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics
 
       # Kubernetes pods with prometheus.io annotations
       - job_name: 'kubernetes-pods'
@@ -92,6 +98,7 @@ data:
             target_label: pod
 
       # KubeStock Microservices - PRODUCTION namespace
+      # Uses endpoints role to get pod IPs, filters to only application ports
       - job_name: 'kubestock-services'
         kubernetes_sd_configs:
           - role: endpoints
@@ -99,15 +106,48 @@ data:
               names:
                 - kubestock-production
         relabel_configs:
+          # Keep only our microservices (exclude frontend - no metrics endpoint)
           - source_labels: [__meta_kubernetes_service_name]
             action: keep
-            regex: ms-.+|web
+            regex: ms-.+
+          # Keep only specific application ports (3002-3006) using port name
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: http
+          # Labels
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
           - source_labels: [__meta_kubernetes_service_name]
             target_label: service
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
+        metrics_path: '/metrics'
+
+      # KubeStock Services - Static targets for alerting demo
+      # Uses service DNS so targets persist even when scaled to 0
+      # This allows DOWN alerts to fire when services are unavailable
+      - job_name: 'kubestock-static-services'
+        static_configs:
+          - targets: 
+              - 'ms-product.kubestock-production.svc:3002'
+              - 'ms-inventory.kubestock-production.svc:3003'
+              - 'ms-supplier.kubestock-production.svc:3004'
+              - 'ms-order-management.kubestock-production.svc:3005'
+              - 'ms-identity.kubestock-production.svc:3006'
+        relabel_configs:
+          # Extract service name from address
+          - source_labels: [__address__]
+            target_label: service
+            regex: '([^.]+)\\..*'
+            replacement: '$1'
+          # Set namespace
+          - target_label: namespace
+            replacement: 'kubestock-production'
+          # Set instance to service name for clarity
+          - source_labels: [__address__]
+            target_label: instance
+            regex: '([^.]+)\\..*'
+            replacement: '$1'
         metrics_path: '/metrics'
 
       # Kong Gateway - Production
@@ -171,14 +211,15 @@ data:
       - name: kubestock-alerts
         rules:
           # Service metrics endpoint down - PRIMARY ALERT for demo
+          # Triggers when any monitored service becomes unavailable
           - alert: ServiceDown
-            expr: up{job="kubestock-services"} == 0
-            for: 1m
+            expr: up{job="kubestock-static-services"} == 0
+            for: 30s
             labels:
               severity: critical
             annotations:
               summary: "Service {{ $labels.service }} is down"
-              description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been down for more than 1 minute. Pod: {{ $labels.pod }}"
+              description: "Service {{ $labels.service }} in namespace {{ $labels.namespace }} has been unreachable for more than 30 seconds."
           
           # Deployment has no ready replicas
           - alert: DeploymentDown

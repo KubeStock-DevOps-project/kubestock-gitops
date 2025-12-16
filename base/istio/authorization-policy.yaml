@@ -64,7 +64,7 @@ spec:
         - source:
             # Deny if no JWT principal AND traffic is not from trusted namespaces
             notRequestPrincipals: ["*"]
-            notNamespaces: ["kubestock-staging", "kong", "istio-system"]
+            notNamespaces: ["kubestock-staging", "kong", "istio-system", "observability-staging", "observability-production"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
@@ -87,7 +87,7 @@ spec:
         - source:
             # Deny if no JWT principal AND traffic is not from trusted namespaces
             notRequestPrincipals: ["*"]
-            notNamespaces: ["kubestock-production", "kong", "istio-system"]
+            notNamespaces: ["kubestock-production", "kong", "istio-system", "observability-staging", "observability-production"]
       to:
         - operation:
             notMethods: ["OPTIONS"]
