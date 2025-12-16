@@ -16,7 +16,7 @@ spec:
   project: kubestock-production
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: overlays/production
   destination:
     server: https://kubernetes.default.svc

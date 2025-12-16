@@ -57,7 +57,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: overlays/production/kong
   destination:
     server: https://kubernetes.default.svc
@@ -84,7 +84,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: overlays/staging/kong
   destination:
     server: https://kubernetes.default.svc

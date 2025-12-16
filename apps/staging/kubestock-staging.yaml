@@ -17,7 +17,7 @@ spec:
   project: kubestock-staging
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: overlays/staging
   destination:
     server: https://kubernetes.default.svc

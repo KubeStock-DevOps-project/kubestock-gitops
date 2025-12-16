@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: overlays/production/istio
   destination:
     server: https://kubernetes.default.svc

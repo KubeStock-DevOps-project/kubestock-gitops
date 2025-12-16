@@ -16,7 +16,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: base/shared-rbac
   destination:
     server: https://kubernetes.default.svc

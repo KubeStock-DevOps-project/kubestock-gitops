@@ -22,7 +22,7 @@ spec:
   project: kubestock-infrastructure
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: base/metrics-server
   destination:
     server: https://kubernetes.default.svc

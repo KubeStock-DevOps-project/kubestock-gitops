@@ -16,7 +16,7 @@ spec:
   
   source:
     repoURL: https://github.com/KubeStock-DevOps-project/kubestock-gitops.git
-    targetRevision: main
+    targetRevision: demo
     path: base/ebs-csi-driver
   
   destination:
